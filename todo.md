@@ -231,9 +231,18 @@
 - [x] Histórico de consultas com paginação
 - [x] Controle de limites por plano
 
+## Correção Crítica - Space API (27/10/2025 - Sessão 4)
+- [x] Identificado problema: Space API retorna números com ponto como separador de milhar
+- [x] Corrigido parseNumber() para interpretar "114.996" = 114.996 (não 114,996)
+- [x] Corrigido parseNumber() para interpretar "5.970" = 5.970 (não 5,97)
+- [x] Implementado uso de axios em vez de fetch para requisições HTTP
+- [x] Desabilitado cache em desenvolvimento para testar dados reais
+- [x] Formatação de habitantes: 114.996 (sem casas decimais, sem compact)
+- [x] Formatação de renda: R$ 5.970,00 (com 2 casas decimais)
+- [x] Validado com dados reais da Av. Paulista, 1000, São Paulo (raio 1500m)
+
 ## Próximas Ações
-- [ ] Validar dados mockados comparando com Space Data real
-- [ ] Configurar credenciais reais da Space API (se disponível)
+- [ ] Testar com outras localizações para validar parsing
 - [ ] Testar exportação CSV
 - [ ] Testar geração de estudos
 - [ ] Implementar PDF export (opcional)
