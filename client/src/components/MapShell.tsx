@@ -46,6 +46,13 @@ export default function MapShell({ tenantId, loading = false }: MapShellProps) {
   const [addressSuggestions, setAddressSuggestions] = useState<any[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
 
+  // Estado do estilo do mapa
+  const [mapStyle, setMapStyle] = useState<'topo' | 'light'>('topo');
+  
+  const mapStyleUrl = mapStyle === 'topo' 
+    ? 'https://basemaps.arcgisonline.com/arcgis/rest/services/World_Topo_Map/VectorTileServer/resources/styles/root.json'
+    : 'https://basemaps.arcgisonline.com/arcgis/rest/services/Canvas/World_Light_Gray_Base/VectorTileServer/resources/styles/root.json';
+
   // Estado das camadas
   const [layers, setLayers] = useState({
     demografia: true,
@@ -303,6 +310,33 @@ export default function MapShell({ tenantId, loading = false }: MapShellProps) {
           </CardContent>
         </Card>
 
+        {/* Estilo do Mapa */}
+        <Card className="border-0 shadow-sm">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base font-semibold">Estilo do Mapa</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <div className="flex gap-2">
+              <Button
+                variant={mapStyle === 'topo' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setMapStyle('topo')}
+                className="flex-1"
+              >
+                Topográfico
+              </Button>
+              <Button
+                variant={mapStyle === 'light' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setMapStyle('light')}
+                className="flex-1"
+              >
+                Claro
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Camadas de Dados */}
         <Card className="border-0 shadow-sm">
           <CardHeader className="pb-3">
@@ -354,7 +388,7 @@ export default function MapShell({ tenantId, loading = false }: MapShellProps) {
           ref={mapRef}
           initialViewState={viewport}
           style={{ width: "100%", height: "100%" }}
-          mapStyle="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
+          mapStyle={mapStyleUrl}
           onMove={(evt) => setViewport(evt.viewState)}
           onClick={(e) => {
             const { lng, lat } = e.lngLat;
