@@ -17,6 +17,20 @@ export interface CompetitorResult {
   userRatingsTotal?: number;
   placeId: string;
   types?: string[];
+  openNow?: boolean;
+}
+
+export interface SearchCompetitorsParams {
+  lat: number;
+  lng: number;
+  radius: number;
+  types: string[];
+  pageToken?: string;
+}
+
+export interface SearchCompetitorsResponse {
+  results: CompetitorResult[];
+  nextPageToken?: string;
 }
 
 /**
@@ -60,43 +74,80 @@ export async function searchAddress(query: string): Promise<PlaceSearchResult | 
 /**
  * Busca concorrentes próximos usando Google Places Nearby Search
  */
-export async function searchCompetitors(
-  lat: number,
-  lng: number,
-  radius: number,
-  businessType: string
-): Promise<CompetitorResult[]> {
+export async function searchCompetitors({
+  lat,
+  lng,
+  radius,
+  types,
+  pageToken,
+}: SearchCompetitorsParams): Promise<SearchCompetitorsResponse> {
+  const keyword = types[0] ?? "Negócio";
+
   if (!ENV.googlePlacesApiKey) {
     console.warn("[Google Places] API key não configurada, retornando dados mockados");
-    return generateMockCompetitors(businessType);
+    return { results: generateMockCompetitors(keyword) };
   }
 
   try {
-    // Usar Places API Nearby Search
-    const response = await fetch(
-      `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lng}&radius=${radius}&keyword=${encodeURIComponent(businessType)}&key=${ENV.googlePlacesApiKey}`
-    );
+    const url = new URL("https://maps.googleapis.com/maps/api/place/nearbysearch/json");
+    url.searchParams.set("key", ENV.googlePlacesApiKey);
+    url.searchParams.set("language", "pt-BR");
 
-    const data = await response.json();
+    if (pageToken) {
+      url.searchParams.set("pagetoken", pageToken);
+    } else {
+      url.searchParams.set("location", `${lat},${lng}`);
+      url.searchParams.set("radius", String(radius));
 
-    if (data.status !== "OK" || !data.results) {
-      console.warn("[Google Places] Nenhum concorrente encontrado");
-      return generateMockCompetitors(businessType);
+      if (types.length) {
+        url.searchParams.set("type", types[0]);
+        if (types.length > 1) {
+          url.searchParams.set("keyword", types.slice(1).join(" "));
+        }
+      }
     }
 
-    return data.results.slice(0, 20).map((place: any) => ({
-      name: place.name,
-      address: place.vicinity || place.formatted_address || "Endereço não disponível",
-      lat: place.geometry.location.lat,
-      lng: place.geometry.location.lng,
-      rating: place.rating,
-      userRatingsTotal: place.user_ratings_total,
-      placeId: place.place_id,
-      types: place.types,
-    }));
+    const fetchWithRetry = async (attempt = 0): Promise<SearchCompetitorsResponse> => {
+      const response = await fetch(url.toString());
+      if (!response.ok) {
+        throw new Error(`Nearby search failed with status ${response.status}`);
+      }
+
+      const data = await response.json();
+      const status: string = data.status;
+
+      if (status === "INVALID_REQUEST" && pageToken && attempt < 3) {
+        // Next page token may require a short delay before becoming valid.
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        return fetchWithRetry(attempt + 1);
+      }
+
+      if (status !== "OK" && status !== "ZERO_RESULTS") {
+        throw new Error(`Nearby search returned status ${status}`);
+      }
+
+      const results = (data.results ?? []).map((place: any) => ({
+        name: place.name,
+        address: place.vicinity || place.formatted_address || "Endereço não disponível",
+        lat: place.geometry?.location?.lat ?? 0,
+        lng: place.geometry?.location?.lng ?? 0,
+        rating: typeof place.rating === "number" ? place.rating : undefined,
+        userRatingsTotal: place.user_ratings_total,
+        placeId: place.place_id,
+        types: place.types,
+        openNow: place.opening_hours?.open_now,
+      }));
+
+      return {
+        results,
+        nextPageToken: data.next_page_token,
+      };
+    };
+
+    return await fetchWithRetry();
   } catch (error) {
     console.error("[Google Places] Erro ao buscar concorrentes:", error);
-    return generateMockCompetitors(businessType);
+    return { results: generateMockCompetitors(keyword) };
   }
 }
 
@@ -121,6 +172,7 @@ function generateMockCompetitors(businessType: string): CompetitorResult[] {
     userRatingsTotal: Math.floor(Math.random() * 500) + 50,
     placeId: `mock_place_${index}`,
     types: ["establishment", "point_of_interest"],
+    openNow: Math.random() > 0.5,
   }));
 }
 
