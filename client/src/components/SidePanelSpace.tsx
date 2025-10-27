@@ -244,6 +244,41 @@ export default function SidePanelSpace({ data, onSaveArea, onGenerateStudy, onBa
           </CardContent>
         </Card>
 
+        {/* Seção de Concorrentes */}
+        {competitors && competitors.length > 0 && (
+          <Card className="border-blue-200 bg-blue-50">
+            <CardContent className="p-4">
+              <h3 className="font-semibold text-blue-900 mb-3 flex items-center gap-2">
+                <Briefcase className="w-5 h-5" />
+                Concorrentes Próximos ({competitors.length})
+              </h3>
+              <div className="space-y-2 max-h-64 overflow-y-auto">
+                {competitors.map((competitor, idx) => (
+                  <div key={idx} className="bg-white rounded-lg p-3 border border-blue-100 hover:border-blue-300 transition-colors">
+                    <div className="flex items-start justify-between mb-1">
+                      <div className="flex-1">
+                        <p className="font-medium text-sm text-gray-900">{competitor.name}</p>
+                        <p className="text-xs text-gray-600 flex items-center gap-1 mt-1">
+                          <MapPin className="w-3 h-3" />
+                          {competitor.address}
+                        </p>
+                      </div>
+                      {competitor.rating && (
+                        <div className="flex items-center gap-1 bg-yellow-100 px-2 py-1 rounded-full">
+                          <span className="text-xs font-semibold text-yellow-800">★ {competitor.rating.toFixed(1)}</span>
+                        </div>
+                      )}
+                    </div>
+                    {competitor.userRatingsTotal && (
+                      <p className="text-xs text-gray-500">({competitor.userRatingsTotal} avaliações)</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Botões de ação */}
         <div className="flex gap-2 sticky bottom-0 bg-background pt-2 pb-2">
           <Button
@@ -259,7 +294,7 @@ export default function SidePanelSpace({ data, onSaveArea, onGenerateStudy, onBa
             className="flex-1"
             disabled={loading}
           >
-            📊 Gerar Estudo
+            📋 Gerar Estudo
           </Button>
         </div>
       </div>

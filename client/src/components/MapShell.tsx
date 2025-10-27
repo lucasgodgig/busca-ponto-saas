@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Loader2, MapPin, Search, ArrowLeft } from "lucide-react";
+import { Loader2, MapPin, Search, ArrowLeft, Zap } from "lucide-react";
 import { toast } from "sonner";
 import { trpc } from "@/lib/trpc";
 import SidePanelSpace from "@/components/SidePanelSpace";
@@ -175,12 +175,12 @@ export default function MapShell({ tenantId, loading = false }: MapShellProps) {
     }
 
     return (
-      <div className="space-y-4 overflow-y-auto">
+      <div className="space-y-4 overflow-y-auto h-full pb-4">
         {/* Buscar Localização */}
-        <Card>
+        <Card className="border-0 shadow-sm">
           <CardHeader className="pb-3">
-            <CardTitle className="text-lg">Buscar Localização</CardTitle>
-            <CardDescription>Digite um endereço ou CEP</CardDescription>
+            <CardTitle className="text-base font-semibold">Buscar Localização</CardTitle>
+            <CardDescription className="text-xs">Digite um endereço ou CEP</CardDescription>
           </CardHeader>
           <CardContent className="space-y-2">
             <div className="relative">
@@ -190,24 +190,24 @@ export default function MapShell({ tenantId, loading = false }: MapShellProps) {
                 value={searchAddress}
                 onChange={(e) => handleSearchAddressChange(e.target.value)}
                 onFocus={() => addressSuggestions.length > 0 && setShowSuggestions(true)}
-                className="pr-10"
+                className="pr-10 border-green-200 focus:border-green-500 focus:ring-green-500"
               />
               <Button
                 size="sm"
                 variant="ghost"
-                className="absolute right-1 top-1/2 -translate-y-1/2"
+                className="absolute right-1 top-1/2 -translate-y-1/2 text-green-600 hover:text-green-700"
                 onClick={() => handleSelectAddress({ lat: marker?.lat, lng: marker?.lng })}
               >
                 <Search className="w-4 h-4" />
               </Button>
               
               {showSuggestions && addressSuggestions.length > 0 && (
-                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg z-10 max-h-48 overflow-y-auto">
+                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 max-h-48 overflow-y-auto">
                   {addressSuggestions.map((suggestion, idx) => (
                     <div
                       key={idx}
                       onClick={() => handleSelectAddress(suggestion)}
-                      className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm border-b last:border-b-0"
+                      className="px-4 py-2 hover:bg-green-50 cursor-pointer text-sm border-b last:border-b-0"
                     >
                       {suggestion.formatted_address || suggestion.name}
                     </div>
@@ -220,10 +220,10 @@ export default function MapShell({ tenantId, loading = false }: MapShellProps) {
         </Card>
 
         {/* Raio de Análise */}
-        <Card>
+        <Card className="border-0 shadow-sm">
           <CardHeader className="pb-3">
-            <CardTitle className="text-lg">Raio de Análise</CardTitle>
-            <CardDescription>{radius[0]}m ({(radius[0] / 1000).toFixed(2)}km)</CardDescription>
+            <CardTitle className="text-base font-semibold">Raio de Análise</CardTitle>
+            <CardDescription className="text-xs">{radius[0]}m ({(radius[0] / 1000).toFixed(2)}km)</CardDescription>
           </CardHeader>
           <CardContent className="space-y-2">
             <Slider
@@ -242,10 +242,10 @@ export default function MapShell({ tenantId, loading = false }: MapShellProps) {
         </Card>
 
         {/* Segmento do Negócio */}
-        <Card>
+        <Card className="border-0 shadow-sm">
           <CardHeader className="pb-3">
-            <CardTitle className="text-lg">Segmento do Negócio</CardTitle>
-            <CardDescription>Digite o tipo de negócio para buscar concorrentes</CardDescription>
+            <CardTitle className="text-base font-semibold">Segmento do Negócio</CardTitle>
+            <CardDescription className="text-xs">Digite o tipo de negócio para buscar concorrentes</CardDescription>
           </CardHeader>
           <CardContent className="space-y-2">
             <Input
@@ -253,21 +253,22 @@ export default function MapShell({ tenantId, loading = false }: MapShellProps) {
               placeholder="Ex: padaria, farmácia, restaurante"
               value={businessSegment}
               onChange={(e) => setBusinessSegment(e.target.value)}
+              className="border-purple-200 focus:border-purple-500 focus:ring-purple-500"
             />
             <p className="text-xs text-yellow-600">⚠️ Será usado para buscar concorrentes próximos</p>
           </CardContent>
         </Card>
 
         {/* Camadas de Dados */}
-        <Card>
+        <Card className="border-0 shadow-sm">
           <CardHeader className="pb-3">
-            <CardTitle className="text-lg">Camadas de Dados</CardTitle>
-            <CardDescription>Selecione as informações a visualizar</CardDescription>
+            <CardTitle className="text-base font-semibold">Camadas de Dados</CardTitle>
+            <CardDescription className="text-xs">Selecione as informações a visualizar</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             {Object.entries(layers).map(([key, value]) => (
               <div key={key} className="flex items-center justify-between">
-                <Label className="capitalize cursor-pointer">{key.replace("_", " ")}</Label>
+                <Label className="capitalize cursor-pointer text-sm">{key.replace("_", " ")}</Label>
                 <Switch
                   checked={value}
                   onCheckedChange={(checked) =>
@@ -283,7 +284,7 @@ export default function MapShell({ tenantId, loading = false }: MapShellProps) {
         <Button
           onClick={handleQuickQuery}
           disabled={searching || !marker}
-          className="w-full h-10 text-base font-semibold"
+          className="w-full h-11 text-base font-semibold bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-lg shadow-md"
         >
           {searching ? (
             <>
@@ -292,7 +293,7 @@ export default function MapShell({ tenantId, loading = false }: MapShellProps) {
             </>
           ) : (
             <>
-              <MapPin className="w-4 h-4 mr-2" />
+              <Zap className="w-4 h-4 mr-2" />
               Executar Consulta Rápida
             </>
           )}
@@ -302,7 +303,7 @@ export default function MapShell({ tenantId, loading = false }: MapShellProps) {
   };
 
   return (
-    <div className="flex h-full gap-4">
+    <div className="flex h-full gap-4 bg-gray-50">
       {/* Mapa */}
       <div className="flex-1 rounded-lg overflow-hidden shadow-lg">
         <Map
@@ -323,8 +324,8 @@ export default function MapShell({ tenantId, loading = false }: MapShellProps) {
               latitude={marker.lat}
               anchor="bottom"
             >
-              <div className="w-8 h-8 bg-blue-500 rounded-full border-2 border-white shadow-lg flex items-center justify-center cursor-move">
-                <MapPin className="w-4 h-4 text-white" />
+              <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-green-600 rounded-full border-3 border-white shadow-lg flex items-center justify-center cursor-move transform hover:scale-110 transition-transform">
+                <MapPin className="w-5 h-5 text-white" />
               </div>
             </Marker>
           )}
@@ -332,25 +333,27 @@ export default function MapShell({ tenantId, loading = false }: MapShellProps) {
       </div>
 
       {/* Painel Lateral */}
-      <div className="w-96 bg-white rounded-lg shadow-lg p-4 overflow-hidden flex flex-col">
-        <div className="flex items-center justify-between mb-4">
+      <div className="w-96 bg-white rounded-lg shadow-lg overflow-hidden flex flex-col">
+        <div className="bg-gradient-to-r from-green-50 to-blue-50 border-b border-gray-200 p-4 flex items-center justify-between">
           {queryResult && (
             <Button
               variant="ghost"
               size="sm"
               onClick={handleBack}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 text-green-600 hover:text-green-700"
             >
               <ArrowLeft className="w-4 h-4" />
               Voltar
             </Button>
           )}
-          <h2 className="text-lg font-semibold">
+          <h2 className="text-lg font-bold text-gray-800">
             {queryResult ? "Resultados da Análise" : "Análise de Localização"}
           </h2>
         </div>
         
-        {renderSidePanel()}
+        <div className="flex-1 overflow-y-auto p-4">
+          {renderSidePanel()}
+        </div>
       </div>
     </div>
   );
