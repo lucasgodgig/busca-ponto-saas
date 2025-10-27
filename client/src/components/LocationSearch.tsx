@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Loader2, MapPin, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -37,12 +37,11 @@ export function LocationSearch({
 }: LocationSearchProps) {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const autocompleteRef = useRef<AutocompleteInstance>(null);
+  const boundsRef = useRef<GoogleBoundsLiteral | null>(null);
   const addressControllerRef = useRef<AbortController | null>(null);
   const [isResolving, setIsResolving] = useState(false);
   const [pendingTextLookup, setPendingTextLookup] = useState<string | null>(null);
   const debounceTimer = useRef<number | null>(null);
-
-  const currentBounds = useMemo(() => bounds, [bounds]);
 
   const cleanupAutocomplete = useCallback(() => {
     if (autocompleteRef.current && window.google?.maps?.event) {
@@ -64,9 +63,10 @@ export function LocationSearch({
         strictBounds: false,
       });
 
-      if (currentBounds) {
-        const sw = new google.maps.LatLng(currentBounds.south, currentBounds.west);
-        const ne = new google.maps.LatLng(currentBounds.north, currentBounds.east);
+      const initialBounds = boundsRef.current;
+      if (initialBounds) {
+        const sw = new google.maps.LatLng(initialBounds.south, initialBounds.west);
+        const ne = new google.maps.LatLng(initialBounds.north, initialBounds.east);
         autocomplete.setBounds(new google.maps.LatLngBounds(sw, ne));
       }
 
@@ -100,7 +100,7 @@ export function LocationSearch({
       console.error("Erro ao inicializar Autocomplete do Google", error);
       toast.error("Não foi possível carregar a busca do Google Maps");
     }
-  }, [cleanupAutocomplete, currentBounds, onChange, onSelect]);
+  }, [cleanupAutocomplete, onChange, onSelect]);
 
   useEffect(() => {
     attachAutocomplete();
@@ -115,6 +115,7 @@ export function LocationSearch({
   }, [attachAutocomplete, cleanupAutocomplete]);
 
   useEffect(() => {
+    boundsRef.current = bounds ?? null;
     if (!autocompleteRef.current || !bounds || !window.google?.maps) return;
     const google = window.google;
     const sw = new google.maps.LatLng(bounds.south, bounds.west);

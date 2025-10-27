@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
-import { AlertCircle, ArrowUpDown, Download, MapPin, Star } from "lucide-react";
+import { AlertCircle, ArrowUpDown, Download, MapPin, RefreshCcw, Star } from "lucide-react";
 import {
   computeDistanceMeters,
   exportNearbyToCsv,
@@ -131,6 +131,8 @@ export default function CompetitorsPanel({ center, radius, segment }: Competitor
   const initialLoading = competitorsQuery.isLoading && !competitorsQuery.data;
   const isFetchingMore = competitorsQuery.isFetchingNextPage;
   const hasResults = sortedPlaces.length > 0;
+  const hasError = Boolean(competitorsQuery.error);
+  const errorMessage = competitorsQuery.error?.message;
 
   return (
     <Card className="border-blue-200 bg-blue-50">
@@ -159,6 +161,27 @@ export default function CompetitorsPanel({ center, radius, segment }: Competitor
             {Array.from({ length: 4 }).map((_, index) => (
               <Skeleton key={index} className="h-16 w-full rounded-xl" />
             ))}
+          </div>
+        ) : null}
+
+        {hasError ? (
+          <div className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs text-rose-700 space-y-2">
+            <div className="flex items-center gap-2 font-semibold">
+              <AlertCircle className="w-4 h-4" />
+              Não foi possível carregar os concorrentes agora.
+            </div>
+            {errorMessage ? <p className="leading-relaxed text-rose-600">{errorMessage}</p> : null}
+            <div>
+              <Button
+                type="button"
+                size="sm"
+                variant="secondary"
+                className="h-8 px-2 text-rose-700 hover:text-rose-800"
+                onClick={() => competitorsQuery.refetch()}
+              >
+                <RefreshCcw className="w-3.5 h-3.5 mr-1" /> Tentar novamente
+              </Button>
+            </div>
           </div>
         ) : null}
 
@@ -216,7 +239,7 @@ export default function CompetitorsPanel({ center, radius, segment }: Competitor
             className="w-full"
             size="sm"
             onClick={() => competitorsQuery.fetchNextPage()}
-            disabled={isFetchingMore}
+            disabled={isFetchingMore || hasError}
           >
             <ArrowUpDown className="w-4 h-4 mr-2" />
             {isFetchingMore ? "Carregando..." : "Carregar mais"}
