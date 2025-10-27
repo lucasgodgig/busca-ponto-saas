@@ -162,8 +162,6 @@ export default function Dashboard() {
       {selectedTenant && (
         <MapShell
           tenantId={selectedTenant}
-          onQuickQuery={handleQuickQuery}
-          loading={queryLoading}
         />
       )}
     </div>

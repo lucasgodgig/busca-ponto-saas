@@ -11,11 +11,12 @@ interface SidePanelSpaceProps {
   onSaveArea?: () => void;
   onGenerateStudy?: () => void;
   onBack?: () => void;
+  onExportCSV?: () => void;
   competitors?: any[];
   loading?: boolean;
 }
 
-export default function SidePanelSpace({ data, onSaveArea, onGenerateStudy, onBack, competitors, loading }: SidePanelSpaceProps) {
+export default function SidePanelSpace({ data, onSaveArea, onGenerateStudy, onBack, onExportCSV, competitors, loading }: SidePanelSpaceProps) {
   if (!data) {
     return (
       <div className="h-full flex items-center justify-center p-8">

@@ -1,8 +1,9 @@
 "use client";
 
-import { useRef, useState, useCallback, useEffect } from "react";
-import Map, { MapRef, Marker } from "react-map-gl/maplibre";
+import { useRef, useState, useCallback, useEffect, useMemo } from "react";
+import Map, { MapRef, Marker, Source, Layer } from "react-map-gl/maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
+import { circle } from "@turf/turf";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
@@ -10,7 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Loader2, MapPin, Search, ArrowLeft, Zap } from "lucide-react";
+import { Loader2, MapPin, Search, ArrowLeft, Zap, Download } from "lucide-react";
 import { toast } from "sonner";
 import { trpc } from "@/lib/trpc";
 import SidePanelSpace from "@/components/SidePanelSpace";
@@ -18,7 +19,6 @@ import SidePanelSpace from "@/components/SidePanelSpace";
 interface MapShellProps {
   tenantId: number;
   loading?: boolean;
-  onQuickQuery?: (lat: number, lng: number, radius: number) => Promise<any>;
 }
 
 export default function MapShell({ tenantId, loading = false }: MapShellProps) {
@@ -37,6 +37,7 @@ export default function MapShell({ tenantId, loading = false }: MapShellProps) {
     lng: -46.633308,
   });
   const [radius, setRadius] = useState([1500]); // em metros
+  const [addressLabel, setAddressLabel] = useState("São Paulo, SP");
 
   // Estado de busca
   const [searchAddress, setSearchAddress] = useState("");
@@ -56,6 +57,18 @@ export default function MapShell({ tenantId, loading = false }: MapShellProps) {
   // Estado dos resultados
   const [queryResult, setQueryResult] = useState<any>(null);
   const [competitors, setCompetitors] = useState<any[]>([]);
+
+  // Gerar círculo geodésico
+  const circleData = useMemo(() => {
+    if (!marker) return null;
+    try {
+      const circleFeature = circle([marker.lng, marker.lat], radius[0] / 1000, { units: "kilometers" });
+      return circleFeature;
+    } catch (error) {
+      console.error("Erro ao gerar círculo:", error);
+      return null;
+    }
+  }, [marker, radius]);
 
   const handleSearchAddressChange = useCallback((value: string) => {
     setSearchAddress(value);
@@ -83,8 +96,10 @@ export default function MapShell({ tenantId, loading = false }: MapShellProps) {
   const handleSelectAddress = useCallback((address: any) => {
     const lat = address.geometry?.location?.lat || address.lat;
     const lng = address.geometry?.location?.lng || address.lng;
+    const formattedAddress = address.formatted_address || address.name || "";
     
-    setSearchAddress(address.formatted_address || address.name || "");
+    setSearchAddress("");
+    setAddressLabel(formattedAddress);
     setMarker({ lat, lng });
     setViewport({
       latitude: lat,
@@ -131,8 +146,6 @@ export default function MapShell({ tenantId, loading = false }: MapShellProps) {
         radius: radius[0],
       });
 
-      // Buscar concorrentes será feito via useQuery em um useEffect separado
-      // Por enquanto, apenas deixar vazio
       setCompetitors([]);
     } finally {
       setSearching(false);
@@ -162,6 +175,36 @@ export default function MapShell({ tenantId, loading = false }: MapShellProps) {
     setCompetitors([]);
   }, []);
 
+  // Exportar CSV
+  const handleExportCSV = useCallback(() => {
+    if (!competitors || competitors.length === 0) {
+      toast.error("Nenhum concorrente para exportar");
+      return;
+    }
+
+    const csv = [
+      ["Nome", "Endereço", "Rating", "Avaliações", "Latitude", "Longitude"],
+      ...competitors.map(c => [
+        c.name,
+        c.address,
+        c.rating || "N/A",
+        c.userRatingsTotal || "N/A",
+        c.lat,
+        c.lng,
+      ])
+    ].map(row => row.map(cell => `"${cell}"`).join(",")).join("\n");
+
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `concorrentes-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+
+    toast.success("CSV exportado com sucesso!");
+  }, [competitors]);
+
   // Renderizar painel lateral
   const renderSidePanel = () => {
     if (queryResult) {
@@ -170,6 +213,7 @@ export default function MapShell({ tenantId, loading = false }: MapShellProps) {
           data={queryResult?.data} 
           competitors={competitors}
           onBack={handleBack}
+          onExportCSV={handleExportCSV}
         />
       );
     }
@@ -315,9 +359,33 @@ export default function MapShell({ tenantId, loading = false }: MapShellProps) {
           onClick={(e) => {
             const { lng, lat } = e.lngLat;
             setMarker({ lat, lng });
+            setAddressLabel(`${lat.toFixed(4)}, ${lng.toFixed(4)}`);
             setSearchAddress("");
           }}
         >
+          {/* Círculo Geodésico */}
+          {circleData && (
+            <Source id="circle-source" type="geojson" data={circleData}>
+              <Layer
+                id="circle-fill"
+                type="fill"
+                paint={{
+                  "fill-color": "#4ade80",
+                  "fill-opacity": 0.1,
+                }}
+              />
+              <Layer
+                id="circle-stroke"
+                type="line"
+                paint={{
+                  "line-color": "#22c55e",
+                  "line-width": 2,
+                }}
+              />
+            </Source>
+          )}
+
+          {/* Marcador */}
           {marker && (
             <Marker
               longitude={marker.lng}
@@ -329,6 +397,20 @@ export default function MapShell({ tenantId, loading = false }: MapShellProps) {
               </div>
             </Marker>
           )}
+
+          {/* Marcadores de Concorrentes */}
+          {competitors.map((competitor, idx) => (
+            <Marker
+              key={idx}
+              longitude={competitor.lng}
+              latitude={competitor.lat}
+              anchor="bottom"
+            >
+              <div className="w-8 h-8 bg-blue-500 rounded-full border-2 border-white shadow-lg flex items-center justify-center text-white text-xs font-bold hover:scale-125 transition-transform">
+                {idx + 1}
+              </div>
+            </Marker>
+          ))}
         </Map>
       </div>
 
@@ -349,6 +431,17 @@ export default function MapShell({ tenantId, loading = false }: MapShellProps) {
           <h2 className="text-lg font-bold text-gray-800">
             {queryResult ? "Resultados da Análise" : "Análise de Localização"}
           </h2>
+          {competitors.length > 0 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleExportCSV}
+              className="flex items-center gap-2 text-blue-600 hover:text-blue-700"
+              title="Exportar concorrentes como CSV"
+            >
+              <Download className="w-4 h-4" />
+            </Button>
+          )}
         </div>
         
         <div className="flex-1 overflow-y-auto p-4">
