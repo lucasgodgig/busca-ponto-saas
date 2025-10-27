@@ -1,5 +1,6 @@
 import { ENV } from "./_core/env";
 import { TRPCError } from "@trpc/server";
+import axios from "axios";
 
 export interface SpaceQueryParams {
   lat: number;
@@ -15,9 +16,69 @@ export interface SpaceApiResponse {
 }
 
 /**
+ * Normalizar resposta da Space API que vem com valores como strings
+ */
+function normalizeSpaceApiResponse(data: any) {
+  console.log("[normalizeSpaceApiResponse] Iniciando normalização...");
+  
+  const parseNumber = (val: any): number => {
+    if (typeof val === 'number') return val;
+    if (typeof val === 'string') {
+      let cleaned = val.trim();
+      const isMillion = cleaned.includes('MI');
+      cleaned = cleaned.replace(' MI', '').trim();
+      cleaned = cleaned.replace(/\./g, '');
+      cleaned = cleaned.replace(',', '.');
+      const num = parseFloat(cleaned);
+      if (isMillion) return num * 1000000;
+      return isFinite(num) ? num : 0;
+    }
+    return 0;
+  };
+
+  const normalized = {
+    ...data,
+    people: parseNumber(data.people),
+    income: parseNumber(data.income),
+    consumer: parseNumber(data.consumer),
+    cons_a_total: parseNumber(data.cons_a_total),
+    cons_b_current: parseNumber(data.cons_b_current),
+    cons_c_expenditure: parseNumber(data.cons_c_expenditure),
+    cons_1_food: parseNumber(data.cons_1_food),
+    cons_2_housing: parseNumber(data.cons_2_housing),
+    cons_3_clothing: parseNumber(data.cons_3_clothing),
+    cons_4_transport: parseNumber(data.cons_4_transport),
+    cons_5_hygiene_care: parseNumber(data.cons_5_hygiene_care),
+    cons_6_health: parseNumber(data.cons_6_health),
+    cons_7_education: parseNumber(data.cons_7_education),
+    cons_8_recreation: parseNumber(data.cons_8_recreation),
+    cons_9_tobacco: parseNumber(data.cons_9_tobacco),
+    cons_10_personal_services: parseNumber(data.cons_10_personal_services),
+    cons_12_others: parseNumber(data.cons_12_others),
+    cons_13_asset_increase: parseNumber(data.cons_13_asset_increase),
+    cons_14_liability_reduction: parseNumber(data.cons_14_liability_reduction),
+    density: parseNumber(data.density),
+    people2022: parseNumber(data.people2022),
+    income_2022: parseNumber(data.income_2022),
+    income_2010: parseNumber(data.income_2010),
+    census_change: parseNumber(data.census_change),
+    income_rate: parseNumber(data.income_rate),
+  };
+
+  console.log("[normalizeSpaceApiResponse] Normalização concluída:", {
+    people: normalized.people,
+    income: normalized.income,
+    consumer: normalized.consumer,
+  });
+
+  return normalized;
+}
+
+/**
  * Gerar dados mockados da Space API baseados na documentação real
  */
 function generateMockSpaceData(lat: number, lng: number, radius: number, segment?: string) {
+  console.log("[generateMockSpaceData] Gerando dados mockados...");
   return {
     muni: "São Paulo",
     people: Math.floor(Math.random() * 50000) + 10000,
@@ -61,18 +122,18 @@ function generateMockSpaceData(lat: number, lng: number, radius: number, segment
     age_elderly: Math.floor(Math.random() * 3000) + 800,
     
     // Indicadores demográficos
-    pop_active: (Math.random() * 20 + 50).toFixed(1), // % população ativa
-    pop_youngness: (Math.random() * 10 + 15).toFixed(1), // Qtd jovens/idosos
-    pop_oldness: (Math.random() * 10 + 10).toFixed(1), // Qtd idosos/jovens
+    pop_active: (Math.random() * 20 + 50).toFixed(1),
+    pop_youngness: (Math.random() * 10 + 15).toFixed(1),
+    pop_oldness: (Math.random() * 10 + 10).toFixed(1),
     
     // Dados históricos
     people2022: Math.floor(Math.random() * 48000) + 9500,
-    census_change: (Math.random() * 10 + 2).toFixed(1), // % crescimento
+    census_change: (Math.random() * 10 + 2).toFixed(1),
     income_2022: Math.floor(Math.random() * 4800) + 1900,
     income_2010: Math.floor(Math.random() * 3500) + 1500,
-    income_rate: (Math.random() * 15 + 5).toFixed(1), // % variação renda
+    income_rate: (Math.random() * 15 + 5).toFixed(1),
     
-    // Atividades econômicas (exemplo com N=0 a 4)
+    // Atividades econômicas
     clu_N_nome: "Comércio Varejista",
     clu_N_atv: Math.floor(Math.random() * 500) + 100,
     clu_N_pct_over_avg: (Math.random() * 50 + 80).toFixed(1),
@@ -91,6 +152,8 @@ function generateMockSpaceData(lat: number, lng: number, radius: number, segment
  */
 export async function querySpaceApi(params: SpaceQueryParams): Promise<SpaceApiResponse> {
   const { lat, lng, radius, segment } = params;
+
+  console.log("[querySpaceApi] Iniciando consulta...", { lat, lng, radius, segment });
 
   // Validar limites
   if (radius > ENV.spaceMaxRadius) {
@@ -117,30 +180,31 @@ export async function querySpaceApi(params: SpaceQueryParams): Promise<SpaceApiR
     url.searchParams.set("radius", String(radius));
     url.searchParams.set("key", ENV.spaceApiKey);
 
-    console.log(`[Space API] Consultando: lat=${lat}, lng=${lng}, radius=${radius}m`);
+    console.log(`[Space API] Consultando: ${url.toString()}`);
 
-    const response = await fetch(url.toString(), {
-      method: "GET",
+    const response = await axios.get(url.toString(), {
       headers: {
         "Accept": "application/json",
       },
-      // Não usar cache para garantir dados atualizados
-      cache: "no-store",
+      timeout: 10000, // 10 segundos de timeout
     });
 
-    if (!response.ok) {
-      const errorText = await response.text().catch(() => "");
-      console.error(`[Space API] Erro ${response.status}:`, errorText);
-      
-      // Se der erro, retornar dados mockados como fallback
-      console.warn("[Space API] Erro na requisição, usando dados mockados como fallback");
-      return {
-        ok: true,
-        data: generateMockSpaceData(lat, lng, radius),
-      };
-    }
+    console.log(`[Space API] Response status: ${response.status}`);
 
-    const data = await response.json();
+    const rawData = response.data;
+
+    console.log("[Space API] Raw data recebido:", {
+      people: rawData.people,
+      income: rawData.income,
+      consumer: rawData.consumer,
+      tipo_people: typeof rawData.people,
+      tipo_income: typeof rawData.income,
+    });
+
+    // Normalizar dados da API que vêm como strings
+    const data = normalizeSpaceApiResponse(rawData);
+
+    console.log(`[Space API] Sucesso! Retornando dados reais. Habitantes: ${data.people}, Renda: ${data.income}`);
 
     return {
       ok: true,
@@ -149,7 +213,6 @@ export async function querySpaceApi(params: SpaceQueryParams): Promise<SpaceApiR
   } catch (error: any) {
     console.error("[Space API] Erro na requisição:", error);
     
-    // Em caso de erro, retornar dados mockados
     console.warn("[Space API] Erro de conexão, usando dados mockados como fallback");
     return {
       ok: true,
@@ -160,7 +223,6 @@ export async function querySpaceApi(params: SpaceQueryParams): Promise<SpaceApiR
 
 /**
  * Cache simples em memória para consultas recentes
- * Em produção, considerar Redis ou similar
  */
 const queryCache = new Map<string, { data: any; timestamp: number }>();
 const CACHE_TTL = 20 * 60 * 1000; // 20 minutos
@@ -173,8 +235,13 @@ export async function querySpaceApiWithCache(params: SpaceQueryParams): Promise<
   const cacheKey = getCacheKey(params);
   const cached = queryCache.get(cacheKey);
 
+  // Em desenvolvimento, ignorar cache para testar dados reais
+  const ignoreCache = process.env.NODE_ENV !== 'production';
+
+  console.log(`[querySpaceApiWithCache] NODE_ENV=${process.env.NODE_ENV}, ignoreCache=${ignoreCache}, cacheExists=${!!cached}`);
+
   // Verificar se há cache válido
-  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+  if (!ignoreCache && cached && Date.now() - cached.timestamp < CACHE_TTL) {
     console.log("[Space API] Cache hit:", cacheKey);
     return {
       ok: true,
@@ -183,8 +250,14 @@ export async function querySpaceApiWithCache(params: SpaceQueryParams): Promise<
     };
   }
 
+  if (ignoreCache && cached) {
+    console.log("[Space API] Cache ignorado em desenvolvimento");
+  }
+
   // Fazer requisição
+  console.log("[querySpaceApiWithCache] Chamando querySpaceApi...");
   const result = await querySpaceApi(params);
+  console.log("[querySpaceApiWithCache] Resultado recebido:", { ok: result.ok, people: result.data?.people });
 
   // Armazenar em cache
   queryCache.set(cacheKey, {

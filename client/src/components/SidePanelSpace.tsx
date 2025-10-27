@@ -28,12 +28,13 @@ export default function SidePanelSpace({ data, onSaveArea, onGenerateStudy, onBa
     );
   }
 
-  // Formatar números
+  // Formatar números (para habitantes - sem casas decimais, sem compact)
   const formatNumber = (value: number) => {
+    if (!value) return '0';
     return new Intl.NumberFormat('pt-BR', {
-      notation: 'compact',
-      maximumFractionDigits: 1,
-    }).format(value || 0);
+      maximumFractionDigits: 0,
+      minimumFractionDigits: 0,
+    }).format(value);
   };
 
   const formatCurrency = (value: number) => {
@@ -41,7 +42,8 @@ export default function SidePanelSpace({ data, onSaveArea, onGenerateStudy, onBa
       style: 'currency',
       currency: 'BRL',
       notation: 'standard',
-      maximumFractionDigits: 0,
+      maximumFractionDigits: 2,
+      minimumFractionDigits: 2,
     }).format(value || 0);
   };
 

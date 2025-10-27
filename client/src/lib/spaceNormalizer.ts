@@ -103,7 +103,7 @@ export function formatCurrency(value: number, compact = true): string {
     currency: "BRL",
     notation: compact ? "compact" : "standard",
     minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
+    maximumFractionDigits: 2, // Manter até 2 casas decimais
   }).format(value);
 }
 
@@ -111,6 +111,8 @@ export function formatNumber(value: number): string {
   return new Intl.NumberFormat("pt-BR", {
     notation: "compact",
     compactDisplay: "short",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2, // Manter até 2 casas decimais
   }).format(value);
 }
 
