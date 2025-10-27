@@ -111,3 +111,18 @@
 - [x] Slider de raio funcionando
 - [ ] Loading skeletons durante consulta
 
+
+
+
+## Novas Features Solicitadas (27/10/2025)
+- [x] Integrar busca de endereço com Google Places API (substituir Nominatim)
+- [x] Adicionar botão "Voltar" após executar análise rápida
+- [ ] Implementar exportação de PDF da análise completa
+- [ ] Adicionar círculo arrastável no mapa para definir área de análise
+- [ ] Permitir ajustar raio clicando no mapa
+- [x] Adicionar campo "Segmento do negócio" nos controles
+- [x] Integrar Google Places API para buscar concorrentes próximos
+- [ ] Exibir lista de concorrentes encontrados na análise (preparado, falta UI)
+- [x] Remover categorias específicas de consumo (saúde, plano, exames) - dados mockados não incluem
+- [x] Manter apenas dados gerais de consumo no painel
+

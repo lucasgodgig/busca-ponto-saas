@@ -10,6 +10,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Loader2, MapPin, Search } from "lucide-react";
 import { toast } from "sonner";
+import { trpc } from "@/lib/trpc";
 import SidePanelSpace from "@/components/SidePanelSpace";
 
 interface MapShellProps {
@@ -37,6 +38,7 @@ export default function MapShell({ tenantId, onQuickQuery, loading = false }: Ma
 
   // Estado de busca
   const [searchAddress, setSearchAddress] = useState("");
+  const [businessSegment, setBusinessSegment] = useState("");
   const [searching, setSearching] = useState(false);
 
   // Estado das camadas
@@ -50,7 +52,10 @@ export default function MapShell({ tenantId, onQuickQuery, loading = false }: Ma
   // Estado dos resultados
   const [queryResult, setQueryResult] = useState<any>(null);
 
-  // Buscar endereço usando Nominatim (OpenStreetMap)
+  // Hook para buscar endereço
+  const utils = trpc.useUtils();
+
+  // Buscar endereço usando Google Places API
   const handleSearchAddress = useCallback(async () => {
     if (!searchAddress.trim()) {
       toast.error("Digite um endereço para buscar");
@@ -59,31 +64,24 @@ export default function MapShell({ tenantId, onQuickQuery, loading = false }: Ma
 
     setSearching(true);
     try {
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchAddress)}&limit=1`
-      );
-      const data = await response.json();
+      const result = await utils.client.places.searchAddress.query({ query: searchAddress });
 
-      if (data.length === 0) {
+      if (!result) {
         toast.error("Endereço não encontrado");
         return;
       }
 
-      const { lat, lon } = data[0];
-      const newLat = parseFloat(lat);
-      const newLng = parseFloat(lon);
-
       // Atualizar viewport e marcador
       setViewport({
-        latitude: newLat,
-        longitude: newLng,
+        latitude: result.lat,
+        longitude: result.lng,
         zoom: 15,
       });
-      setMarker({ lat: newLat, lng: newLng });
+      setMarker({ lat: result.lat, lng: result.lng });
 
       // Centralizar mapa
       mapRef.current?.flyTo({
-        center: [newLng, newLat],
+        center: [result.lng, result.lat],
         zoom: 15,
         duration: 1000,
       });
@@ -95,7 +93,7 @@ export default function MapShell({ tenantId, onQuickQuery, loading = false }: Ma
     } finally {
       setSearching(false);
     }
-  }, [searchAddress]);
+  }, [searchAddress, utils]);
 
   // Executar consulta rápida
   const handleQuickQuery = useCallback(async () => {
@@ -106,12 +104,28 @@ export default function MapShell({ tenantId, onQuickQuery, loading = false }: Ma
 
     try {
       const result = await onQuickQuery(marker.lat, marker.lng, radius[0]);
-      setQueryResult(result);
+      
+      // Buscar concorrentes se houver segmento definido
+      let competitors: any[] = [];
+      if (businessSegment.trim()) {
+        try {
+          competitors = await utils.client.places.searchCompetitors.query({
+            lat: marker.lat,
+            lng: marker.lng,
+            radius: radius[0],
+            businessType: businessSegment,
+          });
+        } catch (err) {
+          console.error("Erro ao buscar concorrentes:", err);
+        }
+      }
+      
+      setQueryResult({ ...result, competitors });
       toast.success("Consulta realizada com sucesso!");
     } catch (error: any) {
       toast.error(error.message || "Erro ao realizar consulta");
     }
-  }, [marker, radius, onQuickQuery]);
+  }, [marker, radius, businessSegment, onQuickQuery, utils]);
 
   // Adicionar marcador ao clicar no mapa
   const handleMapClick = useCallback((event: any) => {
@@ -157,6 +171,8 @@ export default function MapShell({ tenantId, onQuickQuery, loading = false }: Ma
           <SidePanelSpace
             data={queryResult.data}
             loading={loading}
+            competitors={queryResult.competitors}
+            onBack={() => setQueryResult(null)}
             onSaveArea={() => {
               toast.success("Área salva com sucesso!");
             }}
@@ -220,6 +236,24 @@ export default function MapShell({ tenantId, onQuickQuery, loading = false }: Ma
                 <span>500m</span>
                 <span>5km</span>
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Segmento do negócio */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Segmento do Negócio</CardTitle>
+              <CardDescription>Digite o tipo de negócio para buscar concorrentes</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Input
+                placeholder="Ex: padaria, farmácia, restaurante"
+                value={businessSegment}
+                onChange={(e) => setBusinessSegment(e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground mt-2">
+                💡 Será usado para buscar concorrentes próximos
+              </p>
             </CardContent>
           </Card>
 

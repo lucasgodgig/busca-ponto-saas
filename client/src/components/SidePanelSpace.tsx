@@ -10,10 +10,12 @@ interface SidePanelSpaceProps {
   data: any;
   onSaveArea?: () => void;
   onGenerateStudy?: () => void;
+  onBack?: () => void;
+  competitors?: any[];
   loading?: boolean;
 }
 
-export default function SidePanelSpace({ data, onSaveArea, onGenerateStudy, loading }: SidePanelSpaceProps) {
+export default function SidePanelSpace({ data, onSaveArea, onGenerateStudy, onBack, competitors, loading }: SidePanelSpaceProps) {
   if (!data) {
     return (
       <div className="h-full flex items-center justify-center p-8">
@@ -62,7 +64,7 @@ export default function SidePanelSpace({ data, onSaveArea, onGenerateStudy, load
     <div className="h-full overflow-y-auto bg-background">
       {/* Header */}
       <div className="sticky top-0 z-10 bg-background border-b p-4">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
             <MapPin className="w-5 h-5 text-primary" />
             <h2 className="font-semibold">{data.muni || 'Localização'}</h2>
@@ -73,6 +75,16 @@ export default function SidePanelSpace({ data, onSaveArea, onGenerateStudy, load
             </Badge>
           )}
         </div>
+        {onBack && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onBack}
+            className="w-full"
+          >
+            ← Voltar para controles
+          </Button>
+        )}
       </div>
 
       <div className="p-4 space-y-4">

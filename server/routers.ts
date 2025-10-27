@@ -7,6 +7,7 @@ import * as db from "./db";
 import { validateTenantAccess, requireTenantAdmin } from "./_core/tenantContext";
 import { TRPCError } from "@trpc/server";
 import { querySpaceApiWithCache } from "./spaceService";
+import { searchAddress, searchCompetitors } from "./googlePlacesService";
 import { ENV } from "./_core/env";
 
 export const appRouter = router({
@@ -175,6 +176,28 @@ export const appRouter = router({
           tenant,
           usage,
         };
+      }),
+  }),
+
+  // Google Places
+  places: router({
+    // Buscar endereço
+    searchAddress: publicProcedure
+      .input(z.object({ query: z.string().min(3) }))
+      .query(async ({ input }) => {
+        return await searchAddress(input.query);
+      }),
+
+    // Buscar concorrentes
+    searchCompetitors: protectedProcedure
+      .input(z.object({
+        lat: z.number(),
+        lng: z.number(),
+        radius: z.number().int().positive(),
+        businessType: z.string().min(2),
+      }))
+      .query(async ({ input }) => {
+        return await searchCompetitors(input.lat, input.lng, input.radius, input.businessType);
       }),
   }),
 
