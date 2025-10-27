@@ -13,7 +13,7 @@ import { toast } from "sonner";
 
 interface MapShellProps {
   tenantId: number;
-  onQuickQuery: (lat: number, lng: number, radius: number) => Promise<void>;
+  onQuickQuery: (lat: number, lng: number, radius: number) => Promise<any>;
   loading?: boolean;
 }
 
@@ -45,6 +45,9 @@ export default function MapShell({ tenantId, onQuickQuery, loading = false }: Ma
     fluxo: true,
     concorrencia: true,
   });
+
+  // Estado dos resultados
+  const [queryResult, setQueryResult] = useState<any>(null);
 
   // Buscar endereço usando Nominatim (OpenStreetMap)
   const handleSearchAddress = useCallback(async () => {
@@ -101,7 +104,8 @@ export default function MapShell({ tenantId, onQuickQuery, loading = false }: Ma
     }
 
     try {
-      await onQuickQuery(marker.lat, marker.lng, radius[0]);
+      const result = await onQuickQuery(marker.lat, marker.lng, radius[0]);
+      setQueryResult(result);
       toast.success("Consulta realizada com sucesso!");
     } catch (error: any) {
       toast.error(error.message || "Erro ao realizar consulta");
@@ -272,19 +276,50 @@ export default function MapShell({ tenantId, onQuickQuery, loading = false }: Ma
             )}
           </Button>
 
+          {/* Resultados da consulta */}
+          {queryResult && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Resultados da Consulta</CardTitle>
+                <CardDescription>
+                  Dados retornados pela Space API
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {queryResult.data && (
+                    <div className="bg-muted/50 p-4 rounded-lg">
+                      <pre className="text-xs overflow-x-auto max-h-96 overflow-y-auto">
+                        {JSON.stringify(queryResult.data, null, 2)}
+                      </pre>
+                    </div>
+                  )}
+                  {queryResult.cached && (
+                    <div className="text-xs text-muted-foreground flex items-center gap-2">
+                      <span className="inline-block w-2 h-2 bg-green-500 rounded-full"></span>
+                      Resultado em cache
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Informações */}
-          <Card>
-            <CardContent className="pt-6">
-              <div className="text-sm text-muted-foreground space-y-2">
-                <p>
-                  💡 <strong>Dica:</strong> Clique no mapa para definir um ponto de análise
-                </p>
-                <p>
-                  📊 As consultas são debitadas do seu plano mensal
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+          {!queryResult && (
+            <Card>
+              <CardContent className="pt-6">
+                <div className="text-sm text-muted-foreground space-y-2">
+                  <p>
+                    💡 <strong>Dica:</strong> Clique no mapa para definir um ponto de análise
+                  </p>
+                  <p>
+                    📊 As consultas são debitadas do seu plano mensal
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
     </div>

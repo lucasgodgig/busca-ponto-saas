@@ -74,3 +74,9 @@
 - [ ] Criar checkpoint final
 - [ ] Documentar instruções de uso
 
+
+
+
+## Bugs Reportados
+- [x] Consulta rápida não exibe resultado após execução (corrigido - adicionado fallback com dados mockados)
+

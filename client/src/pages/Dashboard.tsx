@@ -48,12 +48,13 @@ export default function Dashboard() {
 
     setQueryLoading(true);
     try {
-      await quickQueryMutation.mutateAsync({
+      const result = await quickQueryMutation.mutateAsync({
         tenantId: selectedTenant,
         lat,
         lng,
         radius,
       });
+      return result;
     } finally {
       setQueryLoading(false);
     }
