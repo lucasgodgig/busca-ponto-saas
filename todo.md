@@ -248,3 +248,8 @@
 - [ ] Implementar PDF export (opcional)
 - [ ] Deploy em produção
 
+
+
+## Bugs Encontrados (27/10/2025 - Sessão 4)
+- [x] Console error: sources.circle-source: unknown property "data-loc" (CORRIGIDO - circleData agora é FeatureCollection válido)
+
