@@ -150,9 +150,9 @@
 
 
 ## Melhorias Finais (Prompt Esri + Normalização) - 27/10/2025
-- [ ] Trocar mapa para Esri basemaps (World Topo Map + Light Gray Canvas)
-- [ ] Adicionar toggle para alternar entre estilos de mapa
-- [ ] Adicionar AttributionControl da Esri
+- [x] Trocar mapa para Esri basemaps (World Topo Map + Light Gray Canvas)
+- [x] Adicionar toggle para alternar entre estilos de mapa
+- [x] Adicionar AttributionControl da Esri
 - [ ] Implementar círculo geodésico com turf.circle() (raio em metros)
 - [ ] Marcador arrastável no mapa
 - [ ] Atualizar círculo ao arrastar marcador
