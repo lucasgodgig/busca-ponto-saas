@@ -3,7 +3,6 @@
 import { useRef, useState, useCallback, useEffect, useMemo } from "react";
 import Map, { MapRef, Marker, Source, Layer } from "react-map-gl/maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
-import { circle } from "@turf/turf";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
@@ -66,18 +65,38 @@ export default function MapShell({ tenantId, loading = false }: MapShellProps) {
   const [queryResult, setQueryResult] = useState<any>(null);
   const [analysisParams, setAnalysisParams] = useState<AnalysisParams | null>(null);
 
+  // Gerar círculo manualmente sem Turf para evitar propriedades extras
   const circleData = useMemo(() => {
     if (!marker) return null;
     try {
-      const circleFeature = circle([marker.lng, marker.lat], radius[0] / 1000, { units: "kilometers" });
-      const cleanFeature = {
-        type: circleFeature.type,
-        geometry: circleFeature.geometry,
-        properties: {},
-      };
+      const radiusInMeters = radius[0];
+      const points: [number, number][] = [];
+      const steps = 64;
+      const earthRadiusKm = 6371;
+      
+      for (let i = 0; i < steps; i++) {
+        const angle = (i / steps) * (Math.PI * 2);
+        const dx = (radiusInMeters / 1000 / earthRadiusKm) * Math.cos(angle);
+        const dy = (radiusInMeters / 1000 / earthRadiusKm) * Math.sin(angle);
+        
+        const lat = marker.lat + (dy * 180) / Math.PI;
+        const lng = marker.lng + (dx * 180) / (Math.PI * Math.cos((marker.lat * Math.PI) / 180));
+        points.push([lng, lat]);
+      }
+      points.push(points[0]); // Fechar o círculo
+      
       return {
         type: "FeatureCollection" as const,
-        features: [cleanFeature],
+        features: [
+          {
+            type: "Feature" as const,
+            geometry: {
+              type: "Polygon" as const,
+              coordinates: [points],
+            },
+            properties: {},
+          },
+        ],
       };
     } catch (error) {
       console.error("Erro ao gerar círculo:", error);
@@ -148,15 +167,17 @@ export default function MapShell({ tenantId, loading = false }: MapShellProps) {
       });
 
       setAnalysisParams({
-        center: { lat: marker.lat, lng: marker.lng },
+        center: marker,
         radius: radius[0],
         segment: trimmedSegment,
-        address: selectedAddress || searchAddress,
+        address: selectedAddress,
       });
+    } catch (error) {
+      console.error("Erro ao executar consulta:", error);
     } finally {
       setSearching(false);
     }
-  }, [marker, radius, tenantId, businessSegment, selectedAddress, searchAddress, spaceQueryMutation]);
+  }, [marker, radius, businessSegment, selectedAddress, tenantId, spaceQueryMutation]);
 
   const handleBack = useCallback(() => {
     setQueryResult(null);
@@ -164,43 +185,21 @@ export default function MapShell({ tenantId, loading = false }: MapShellProps) {
   }, []);
 
   const handleMapLoad = useCallback(() => {
-    const mapInstance = mapRef.current?.getMap();
-    if (!mapInstance) return;
-
-    themeCleanupRef.current?.();
-    themeCleanupRef.current = setupSpaceDataTheme(mapInstance) ?? null;
-    updateAutocompleteBounds();
-  }, [updateAutocompleteBounds]);
-
-  useEffect(() => {
-    const mapInstance = mapRef.current?.getMap();
-    if (!mapInstance) return;
-
-    themeCleanupRef.current?.();
-    themeCleanupRef.current = setupSpaceDataTheme(mapInstance) ?? null;
-
-    updateAutocompleteBounds();
-
-    return () => {
-      themeCleanupRef.current?.();
-      themeCleanupRef.current = null;
-    };
-  }, [mapStyleUrl, updateAutocompleteBounds]);
+    if (themeCleanupRef.current) {
+      themeCleanupRef.current();
+    }
+    const map = mapRef.current?.getMap();
+    if (map) {
+      themeCleanupRef.current = setupSpaceDataTheme(map);
+    }
+  }, []);
 
   const renderSidePanel = () => {
     if (queryResult) {
       return (
-        <div className="space-y-4 overflow-y-auto h-full pb-4">
+        <div className="space-y-4">
           <SidePanelSpace
-            data={queryResult?.data}
-            onBack={handleBack}
-            address={analysisParams?.address || selectedAddress || searchAddress}
-            radius={analysisParams?.radius ?? radius[0]}
-          />
-          <CompetitorsPanel
-            center={analysisParams?.center ?? null}
-            radius={analysisParams?.radius ?? radius[0]}
-            segment={analysisParams?.segment ?? ""}
+            data={queryResult}
           />
         </div>
       );
@@ -379,3 +378,4 @@ export default function MapShell({ tenantId, loading = false }: MapShellProps) {
     </div>
   );
 }
+
