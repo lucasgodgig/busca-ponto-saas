@@ -10,6 +10,7 @@ import History from "./pages/History";
 import Onboarding from "./pages/Onboarding";
 import Studies from "./pages/Studies";
 import NewStudy from "./pages/NewStudy";
+import Settings from "./pages/Settings";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -21,6 +22,7 @@ function Router() {
       <Route path={"/onboarding"} component={Onboarding} />
       <Route path={"/studies"} component={Studies} />
       <Route path={"/studies/new"} component={NewStudy} />
+      <Route path={"/settings"} component={Settings} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

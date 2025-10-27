@@ -80,3 +80,19 @@
 ## Bugs Reportados
 - [x] Consulta rápida não exibe resultado após execução (corrigido - adicionado fallback com dados mockados)
 
+
+
+## Novos Bugs Reportados
+- [ ] Consulta rápida não está exibindo resultados visualmente (ainda com problema)
+- [ ] Botão "Busca Ponto" no header dá erro 404
+
+## Novas Features Solicitadas
+- [ ] Criar painel administrativo para configurações do tenant (nome, logo, cores)
+- [ ] Melhorar visualização dos resultados da Space API com cards e gráficos
+- [ ] Implementar componente SidePanelSpace com dados formatados (habitantes, renda, classes, consumo)
+- [ ] Adicionar gráficos de barras para classes sociais (usando Recharts)
+- [ ] Adicionar gráficos de colunas para faixas etárias
+- [ ] Formatar números com Intl.NumberFormat pt-BR
+- [ ] Adicionar botão "Salvar área" para criar QuickQuery
+- [ ] Adicionar botão "Gerar Estudo" que abre formulário
+

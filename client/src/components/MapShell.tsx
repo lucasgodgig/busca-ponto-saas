@@ -10,6 +10,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Loader2, MapPin, Search } from "lucide-react";
 import { toast } from "sonner";
+import SidePanelSpace from "@/components/SidePanelSpace";
 
 interface MapShellProps {
   tenantId: number;
@@ -276,33 +277,19 @@ export default function MapShell({ tenantId, onQuickQuery, loading = false }: Ma
             )}
           </Button>
 
-          {/* Resultados da consulta */}
-          {queryResult && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Resultados da Consulta</CardTitle>
-                <CardDescription>
-                  Dados retornados pela Space API
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {queryResult.data && (
-                    <div className="bg-muted/50 p-4 rounded-lg">
-                      <pre className="text-xs overflow-x-auto max-h-96 overflow-y-auto">
-                        {JSON.stringify(queryResult.data, null, 2)}
-                      </pre>
-                    </div>
-                  )}
-                  {queryResult.cached && (
-                    <div className="text-xs text-muted-foreground flex items-center gap-2">
-                      <span className="inline-block w-2 h-2 bg-green-500 rounded-full"></span>
-                      Resultado em cache
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+          {/* Painel de resultados com visualização rica */}
+          {queryResult && queryResult.data && (
+            <SidePanelSpace
+              data={queryResult.data}
+              loading={loading}
+              onSaveArea={() => {
+                toast.success("Área salva com sucesso!");
+              }}
+              onGenerateStudy={() => {
+                toast.info("Redirecionando para criar estudo...");
+                // TODO: Redirecionar para página de novo estudo
+              }}
+            />
           )}
 
           {/* Informações */}

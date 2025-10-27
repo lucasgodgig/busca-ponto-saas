@@ -111,7 +111,7 @@ export default function Dashboard() {
       <header className="border-b bg-background">
         <div className="flex items-center justify-between px-6 py-4">
           <div className="flex items-center gap-4">
-            <h1 className="text-2xl font-bold">Busca Ponto</h1>
+            <h1 className="text-2xl font-bold cursor-pointer hover:text-primary transition-colors" onClick={() => setLocation("/settings")}>Busca Ponto</h1>
             {tenantData?.tenant && (
               <Badge variant="secondary">{tenantData.tenant.name}</Badge>
             )}

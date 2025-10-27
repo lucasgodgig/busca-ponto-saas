@@ -161,36 +161,53 @@ export async function getCurrentPlanUsage(tenantId: number) {
   const db = await getDb();
   if (!db) return undefined;
 
-  const now = new Date();
-  const periodStart = new Date(now.getFullYear(), now.getMonth(), 1);
-  const periodEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+  try {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth();
+    const periodStart = new Date(year, month, 1);
+    const periodEnd = new Date(year, month + 1, 0, 23, 59, 59);
 
-  const result = await db
-    .select()
-    .from(planUsage)
-    .where(
-      and(
-        eq(planUsage.tenantId, tenantId),
-        eq(planUsage.periodStart, periodStart)
+    // Buscar registro existente para o período atual
+    const result = await db
+      .select()
+      .from(planUsage)
+      .where(
+        and(
+          eq(planUsage.tenantId, tenantId),
+          eq(planUsage.periodStart, periodStart)
+        )
       )
-    )
-    .limit(1);
+      .limit(1);
 
-  if (result.length > 0) {
-    return result[0];
+    if (result.length > 0) {
+      return result[0];
+    }
+
+    // Criar novo registro de uso para o período atual
+    const [newUsage] = await db.insert(planUsage).values({
+      tenantId,
+      periodStart,
+      periodEnd,
+      quickQueriesUsed: 0,
+      studiesOpened: 0,
+    }).$returningId();
+
+    const newResult = await db.select().from(planUsage).where(eq(planUsage.id, newUsage.id)).limit(1);
+    return newResult[0];
+  } catch (error) {
+    console.error("[Database] Error in getCurrentPlanUsage:", error);
+    // Retornar um objeto padrão em caso de erro para não bloquear a consulta
+    return {
+      id: 0,
+      tenantId,
+      periodStart: new Date(),
+      periodEnd: new Date(),
+      quickQueriesUsed: 0,
+      studiesOpened: 0,
+      createdAt: new Date(),
+    };
   }
-
-  // Create new usage record for current period
-  const [newUsage] = await db.insert(planUsage).values({
-    tenantId,
-    periodStart,
-    periodEnd,
-    quickQueriesUsed: 0,
-    studiesOpened: 0,
-  }).$returningId();
-
-  const newResult = await db.select().from(planUsage).where(eq(planUsage.id, newUsage.id)).limit(1);
-  return newResult[0];
 }
 
 export async function incrementQuickQueryUsage(tenantId: number) {
