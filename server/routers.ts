@@ -190,14 +190,27 @@ export const appRouter = router({
 
     // Buscar concorrentes
     searchCompetitors: protectedProcedure
-      .input(z.object({
-        lat: z.number(),
-        lng: z.number(),
-        radius: z.number().int().positive(),
-        businessType: z.string().min(2),
-      }))
+      .input(
+        z.object({
+          lat: z.number(),
+          lng: z.number(),
+          radius: z.number().int().positive(),
+          types: z.array(z.string().min(1)).default([]),
+          cursor: z.string().optional(),
+        })
+      )
       .query(async ({ input }) => {
-        return await searchCompetitors(input.lat, input.lng, input.radius, input.businessType);
+        if (!input.types.length) {
+          return { results: [], nextPageToken: undefined };
+        }
+
+        return await searchCompetitors({
+          lat: input.lat,
+          lng: input.lng,
+          radius: input.radius,
+          types: input.types,
+          pageToken: input.cursor,
+        });
       }),
   }),
 

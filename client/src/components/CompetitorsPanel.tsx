@@ -8,12 +8,13 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AlertCircle, ArrowUpDown, Download, MapPin, Star } from "lucide-react";
 import {
+  computeDistanceMeters,
   exportNearbyToCsv,
-  fetchNearby,
   formatDistance,
   mapSegmentToTypes,
   NearbyPlace,
 } from "@/services/placesNearby";
+import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 
 interface CompetitorsPanelProps {
@@ -25,73 +26,79 @@ interface CompetitorsPanelProps {
 type SortOption = "distance" | "rating";
 
 export default function CompetitorsPanel({ center, radius, segment }: CompetitorsPanelProps) {
-  const [places, setPlaces] = useState<NearbyPlace[]>([]);
   const [sortBy, setSortBy] = useState<SortOption>("distance");
-  const [loading, setLoading] = useState(false);
-  const [nextPageToken, setNextPageToken] = useState<string | undefined>();
 
   const hasCenter = !!center;
   const trimmedSegment = segment.trim();
+  const types = useMemo(() => mapSegmentToTypes(trimmedSegment), [trimmedSegment]);
+  const enabled = hasCenter && types.length > 0;
 
-  const loadPlaces = useCallback(
-    async (pageToken?: string, append = false) => {
-      if (!center || !trimmedSegment) return;
-
-      const types = mapSegmentToTypes(trimmedSegment);
-      if (!types.length) {
-        toast.warning("Defina um segmento válido para buscar concorrentes");
-        return;
-      }
-
-      setLoading(true);
-      try {
-        const response = await fetchNearby({
-          lat: center.lat,
-          lng: center.lng,
-          radius,
-          types,
-          pageToken,
-        });
-
-        setPlaces((current) => (append ? [...current, ...response.results] : response.results));
-        setNextPageToken(response.nextPageToken);
-      } catch (error) {
-        console.error("Erro ao buscar concorrentes", error);
-        toast.error("Não foi possível carregar os concorrentes");
-      } finally {
-        setLoading(false);
-      }
+  const competitorsQuery = trpc.places.searchCompetitors.useInfiniteQuery(
+    {
+      lat: center?.lat ?? 0,
+      lng: center?.lng ?? 0,
+      radius,
+      types,
     },
-    [center, radius, trimmedSegment]
+    {
+      enabled,
+      getNextPageParam: (lastPage) => lastPage.nextPageToken ?? undefined,
+      refetchOnWindowFocus: false,
+    }
   );
 
   useEffect(() => {
-    if (!center || !trimmedSegment) {
-      setPlaces([]);
-      setNextPageToken(undefined);
-      return;
+    if (competitorsQuery.error) {
+      console.error("Erro ao buscar concorrentes", competitorsQuery.error);
+      toast.error("Não foi possível carregar os concorrentes");
+    }
+  }, [competitorsQuery.error]);
+
+  const aggregatedPlaces = useMemo(() => {
+    if (!center || !competitorsQuery.data) {
+      return [] as NearbyPlace[];
     }
 
-    loadPlaces();
-  }, [center, radius, trimmedSegment, loadPlaces]);
+    const dedup = new Map<string, NearbyPlace>();
+    for (const page of competitorsQuery.data.pages) {
+      for (const place of page.results) {
+        const id = place.placeId || `${place.lat}-${place.lng}`;
+        const distance = computeDistanceMeters(center, { lat: place.lat, lng: place.lng });
+        dedup.set(id, {
+          id,
+          name: place.name,
+          lat: place.lat,
+          lng: place.lng,
+          distance_m: distance,
+          rating: place.rating,
+          user_ratings_total: place.userRatingsTotal,
+          open_now: place.openNow,
+          address: place.address,
+          url: place.placeId ? `https://www.google.com/maps/place/?q=place_id:${place.placeId}` : undefined,
+        });
+      }
+    }
+
+    return Array.from(dedup.values());
+  }, [center, competitorsQuery.data]);
 
   const sortedPlaces = useMemo(() => {
-    const items = [...places];
+    const items = [...aggregatedPlaces];
     if (sortBy === "rating") {
       return items.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
     }
     return items.sort((a, b) => a.distance_m - b.distance_m);
-  }, [places, sortBy]);
+  }, [aggregatedPlaces, sortBy]);
 
   const handleExport = useCallback(() => {
     if (!center) return;
-    if (!places.length) {
+    if (!sortedPlaces.length) {
       toast.warning("Nenhum concorrente para exportar");
       return;
     }
     exportNearbyToCsv(sortedPlaces, center);
     toast.success("CSV exportado com sucesso!");
-  }, [center, places.length, sortedPlaces]);
+  }, [center, sortedPlaces]);
 
   if (!hasCenter) {
     return null;
@@ -108,6 +115,22 @@ export default function CompetitorsPanel({ center, radius, segment }: Competitor
       </Card>
     );
   }
+
+  if (!types.length) {
+    return (
+      <Card className="border-amber-200 bg-amber-50">
+        <CardHeader>
+          <CardTitle className="text-sm font-semibold text-amber-900 flex items-center gap-2">
+            <AlertCircle className="w-4 h-4" /> Segmento não reconhecido. Ajuste o termo para continuar.
+          </CardTitle>
+        </CardHeader>
+      </Card>
+    );
+  }
+
+  const initialLoading = competitorsQuery.isLoading && !competitorsQuery.data;
+  const isFetchingMore = competitorsQuery.isFetchingNextPage;
+  const hasResults = sortedPlaces.length > 0;
 
   return (
     <Card className="border-blue-200 bg-blue-50">
@@ -131,7 +154,7 @@ export default function CompetitorsPanel({ center, radius, segment }: Competitor
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
-        {loading && !places.length ? (
+        {initialLoading ? (
           <div className="space-y-2">
             {Array.from({ length: 4 }).map((_, index) => (
               <Skeleton key={index} className="h-16 w-full rounded-xl" />
@@ -139,11 +162,11 @@ export default function CompetitorsPanel({ center, radius, segment }: Competitor
           </div>
         ) : null}
 
-        {!loading && !places.length ? (
+        {!initialLoading && !hasResults ? (
           <div className="text-sm text-blue-900/80">Nenhum concorrente encontrado para o segmento selecionado.</div>
         ) : null}
 
-        {places.length > 0 ? (
+        {hasResults ? (
           <ScrollArea className="max-h-72 pr-3">
             <div className="space-y-3">
               {sortedPlaces.map((place) => (
@@ -187,15 +210,16 @@ export default function CompetitorsPanel({ center, radius, segment }: Competitor
           </ScrollArea>
         ) : null}
 
-        {nextPageToken ? (
+        {competitorsQuery.hasNextPage ? (
           <Button
             variant="secondary"
             className="w-full"
             size="sm"
-            onClick={() => loadPlaces(nextPageToken, true)}
-            disabled={loading}
+            onClick={() => competitorsQuery.fetchNextPage()}
+            disabled={isFetchingMore}
           >
-            <ArrowUpDown className="w-4 h-4 mr-2" /> Carregar mais
+            <ArrowUpDown className="w-4 h-4 mr-2" />
+            {isFetchingMore ? "Carregando..." : "Carregar mais"}
           </Button>
         ) : null}
       </CardContent>

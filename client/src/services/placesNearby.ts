@@ -1,7 +1,5 @@
 import { GoogleBoundsLiteral } from "@/lib/google";
 
-const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || import.meta.env.VITE_GOOGLE_PLACES_API_KEY || "";
-
 export type NearbyPlace = {
   id: string;
   name: string;
@@ -15,17 +13,6 @@ export type NearbyPlace = {
   url?: string;
 };
 
-export type NearbyResponse = {
-  results: NearbyPlace[];
-  nextPageToken?: string;
-};
-
-function ensureApiKey() {
-  if (!GOOGLE_API_KEY) {
-    throw new Error("Google Places API key not configured.");
-  }
-}
-
 export function mapSegmentToTypes(segment: string): string[] {
   const normalized = segment.trim().toLowerCase();
 
@@ -33,11 +20,21 @@ export function mapSegmentToTypes(segment: string): string[] {
     academias: ["gym", "fitness_center"],
     academia: ["gym", "fitness_center"],
     gym: ["gym", "fitness_center"],
+    crossfit: ["gym", "fitness_center"],
+    musculacao: ["gym", "fitness_center"],
+    pilates: ["gym", "fitness_center"],
+    "personal trainer": ["gym", "fitness_center"],
+
     farmacias: ["pharmacy", "drugstore"],
     farmacia: ["pharmacy", "drugstore"],
+    drogaria: ["pharmacy", "drugstore"],
+    drogarias: ["pharmacy", "drugstore"],
+
     petshop: ["pet_store", "veterinary_care"],
     petshops: ["pet_store", "veterinary_care"],
     pet: ["pet_store", "veterinary_care"],
+    veterinario: ["veterinary_care", "pet_store"],
+    veterinaria: ["veterinary_care", "pet_store"],
   };
 
   if (mappings[normalized]) {
@@ -47,37 +44,11 @@ export function mapSegmentToTypes(segment: string): string[] {
   return normalized ? [normalized] : [];
 }
 
-function buildNearbyUrl(params: {
-  lat: number;
-  lng: number;
-  radius: number;
-  types: string[];
-  pageToken?: string;
-}) {
-  const { lat, lng, radius, types, pageToken } = params;
-  const url = new URL("https://maps.googleapis.com/maps/api/place/nearbysearch/json");
-  url.searchParams.set("location", `${lat},${lng}`);
-  url.searchParams.set("radius", `${radius}`);
-  if (pageToken) {
-    url.searchParams.set("pagetoken", pageToken);
-  } else {
-    if (types.length) {
-      url.searchParams.set("type", types[0]);
-      if (types.length > 1) {
-        url.searchParams.set("keyword", types.slice(1).join(" "));
-      }
-    }
-  }
-  url.searchParams.set("key", GOOGLE_API_KEY);
-  url.searchParams.set("language", "pt-BR");
-  return url.toString();
-}
-
 function toRadians(value: number) {
   return (value * Math.PI) / 180;
 }
 
-function computeDistanceMeters(a: { lat: number; lng: number }, b: { lat: number; lng: number }) {
+export function computeDistanceMeters(a: { lat: number; lng: number }, b: { lat: number; lng: number }) {
   const R = 6371000; // Earth radius in meters
   const dLat = toRadians(b.lat - a.lat);
   const dLng = toRadians(b.lng - a.lng);
@@ -89,52 +60,6 @@ function computeDistanceMeters(a: { lat: number; lng: number }, b: { lat: number
     Math.sin(dLng / 2) * Math.sin(dLng / 2) * Math.cos(lat1) * Math.cos(lat2);
   const c = 2 * Math.atan2(Math.sqrt(hav), Math.sqrt(1 - hav));
   return Math.round(R * c);
-}
-
-export async function fetchNearby(params: {
-  lat: number;
-  lng: number;
-  radius: number;
-  types: string[];
-  pageToken?: string;
-}): Promise<NearbyResponse> {
-  ensureApiKey();
-
-  const url = buildNearbyUrl(params);
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error(`Nearby search failed with status ${response.status}`);
-  }
-
-  const data = await response.json();
-  if (!data.results) {
-    return { results: [] };
-  }
-
-  const results: NearbyPlace[] = data.results.map((place: any) => {
-    const location = place.geometry?.location;
-    const lat = location?.lat ?? 0;
-    const lng = location?.lng ?? 0;
-    const distance_m = computeDistanceMeters({ lat: params.lat, lng: params.lng }, { lat, lng });
-
-    return {
-      id: place.place_id,
-      name: place.name,
-      lat,
-      lng,
-      distance_m,
-      rating: typeof place.rating === "number" ? place.rating : undefined,
-      user_ratings_total: place.user_ratings_total,
-      open_now: place.opening_hours?.open_now,
-      address: place.vicinity || place.formatted_address,
-      url: place.place_id ? `https://www.google.com/maps/place/?q=place_id:${place.place_id}` : undefined,
-    };
-  });
-
-  return {
-    results,
-    nextPageToken: data.next_page_token,
-  };
 }
 
 export function formatDistance(distanceMeters: number): string {
@@ -195,3 +120,8 @@ export function boundsFromRadius(center: { lat: number; lng: number }, radius: n
     west: center.lng - lngDelta,
   };
 }
+
+export type NearbyPage = {
+  results: NearbyPlace[];
+  nextPageToken?: string;
+};
