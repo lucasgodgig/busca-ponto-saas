@@ -152,8 +152,21 @@ export default function MapShell({ tenantId, onQuickQuery, loading = false }: Ma
       </div>
 
       {/* Painel lateral - 40% da tela */}
-      <div className="w-[40%] bg-muted/30 overflow-y-auto">
-        <div className="p-6 space-y-6">
+      <div className="w-[40%] bg-muted/30 flex flex-col h-full">
+        {queryResult && queryResult.data ? (
+          <SidePanelSpace
+            data={queryResult.data}
+            loading={loading}
+            onSaveArea={() => {
+              toast.success("Área salva com sucesso!");
+            }}
+            onGenerateStudy={() => {
+              toast.info("Redirecionando para criar estudo...");
+              // TODO: Redirecionar para página de novo estudo
+            }}
+          />
+        ) : (
+        <div className="p-6 space-y-6 overflow-y-auto">
           {/* Busca de endereço */}
           <Card>
             <CardHeader>
@@ -277,37 +290,21 @@ export default function MapShell({ tenantId, onQuickQuery, loading = false }: Ma
             )}
           </Button>
 
-          {/* Painel de resultados com visualização rica */}
-          {queryResult && queryResult.data && (
-            <SidePanelSpace
-              data={queryResult.data}
-              loading={loading}
-              onSaveArea={() => {
-                toast.success("Área salva com sucesso!");
-              }}
-              onGenerateStudy={() => {
-                toast.info("Redirecionando para criar estudo...");
-                // TODO: Redirecionar para página de novo estudo
-              }}
-            />
-          )}
-
           {/* Informações */}
-          {!queryResult && (
-            <Card>
-              <CardContent className="pt-6">
-                <div className="text-sm text-muted-foreground space-y-2">
-                  <p>
-                    💡 <strong>Dica:</strong> Clique no mapa para definir um ponto de análise
-                  </p>
-                  <p>
-                    📊 As consultas são debitadas do seu plano mensal
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          )}
+          <Card>
+            <CardContent className="pt-6">
+              <div className="text-sm text-muted-foreground space-y-2">
+                <p>
+                  💡 <strong>Dica:</strong> Clique no mapa para definir um ponto de análise
+                </p>
+                <p>
+                  📊 As consultas são debitadas do seu plano mensal
+                </p>
+              </div>
+            </CardContent>
+          </Card>
         </div>
+        )}
       </div>
     </div>
   );

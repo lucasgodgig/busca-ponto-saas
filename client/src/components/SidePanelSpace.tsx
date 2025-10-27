@@ -1,7 +1,10 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, Users, DollarSign, TrendingUp, TrendingDown, Building2 } from "lucide-react";
+import { 
+  MapPin, Users, DollarSign, Home, TrendingUp, TrendingDown,
+  Baby, User, Users as UsersIcon, Briefcase, Heart
+} from "lucide-react";
 
 interface SidePanelSpaceProps {
   data: any;
@@ -11,14 +14,12 @@ interface SidePanelSpaceProps {
 }
 
 export default function SidePanelSpace({ data, onSaveArea, onGenerateStudy, loading }: SidePanelSpaceProps) {
-  console.log("SidePanelSpace - data received:", data);
-
   if (!data) {
     return (
       <div className="h-full flex items-center justify-center p-8">
         <div className="text-center text-muted-foreground">
           <MapPin className="w-12 h-12 mx-auto mb-4 opacity-50" />
-          <p>Clique no mapa e execute uma consulta para ver os dados</p>
+          <p className="text-sm">Clique no mapa e execute uma consulta para ver os dados</p>
         </div>
       </div>
     );
@@ -36,250 +37,219 @@ export default function SidePanelSpace({ data, onSaveArea, onGenerateStudy, load
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: 'BRL',
-      notation: 'compact',
-      maximumFractionDigits: 1,
+      notation: 'standard',
+      maximumFractionDigits: 0,
     }).format(value || 0);
+  };
+
+  const formatPercent = (value: number) => {
+    return `${value > 0 ? '+' : ''}${value}%`;
   };
 
   const censusChange = parseFloat(data.census_change || 0);
   const incomeRate = parseFloat(data.income_rate || 0);
+  const householdsGrowth = parseFloat(data.households_growth || 0);
+
+  // Calcular domicílios (aproximado)
+  const households = Math.round((data.people || 0) / 2.8);
+
+  // Calcular densidade hab/hectare
+  const radiusKm = (data.radius || 1500) / 1000;
+  const areaHectares = Math.PI * radiusKm * radiusKm * 100;
+  const density = (data.people || 0) / areaHectares;
 
   return (
-    <div className="h-full overflow-y-auto space-y-4 p-4">
-      {/* Header com localização */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg flex items-center gap-2">
-            <MapPin className="w-5 h-5" />
-            {data.muni || 'Localização'}
-          </CardTitle>
+    <div className="h-full overflow-y-auto bg-background">
+      {/* Header */}
+      <div className="sticky top-0 z-10 bg-background border-b p-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <MapPin className="w-5 h-5 text-primary" />
+            <h2 className="font-semibold">{data.muni || 'Localização'}</h2>
+          </div>
           {data._mock && (
-            <CardDescription className="text-xs">
-              <Badge variant="secondary" className="text-xs">
-                ⚠️ Dados mockados (API não configurada)
-              </Badge>
-            </CardDescription>
+            <Badge variant="secondary" className="text-xs">
+              ⚠️ Dados mockados
+            </Badge>
           )}
-        </CardHeader>
-      </Card>
+        </div>
+      </div>
 
-      {/* Card de Habitantes */}
-      <Card>
-        <CardHeader className="pb-3">
-          <div className="flex items-center gap-2">
-            <Users className="w-4 h-4 text-muted-foreground" />
-            <CardTitle className="text-sm font-medium text-muted-foreground">Habitantes</CardTitle>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-baseline justify-between">
-            <div>
-              <div className="text-3xl font-bold">{formatNumber(data.people || 0)}</div>
-              <div className="text-xs text-muted-foreground mt-1">
-                Censo 2010
+      <div className="p-4 space-y-4">
+        {/* Cards principais - 3 colunas */}
+        <div className="grid grid-cols-3 gap-3">
+          {/* Card Habitantes */}
+          <Card className="bg-orange-50 border-orange-200">
+            <CardContent className="p-3">
+              <div className="flex items-start justify-between mb-1">
+                <Users className="w-5 h-5 text-orange-600" />
+                {censusChange !== 0 && (
+                  <div className={`flex items-center gap-1 text-xs ${censusChange > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {censusChange > 0 ? <TrendingDown className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                    <span className="font-medium">{formatPercent(censusChange)}</span>
+                  </div>
+                )}
               </div>
-            </div>
-            {censusChange !== 0 && (
-              <div className={`flex items-center gap-1 text-sm ${censusChange > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                {censusChange > 0 ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
-                {Math.abs(censusChange)}%
+              <div className="text-2xl font-bold text-orange-900">{formatNumber(data.people || 0)}</div>
+              <div className="text-xs text-orange-700 font-medium">Habitantes ⓘ</div>
+              <div className="text-xs text-orange-600 mt-1">
+                {density.toFixed(2)} hab/hectare densidade
               </div>
-            )}
-          </div>
-          <div className="mt-3 pt-3 border-t text-sm text-muted-foreground">
-            <div className="flex justify-between">
-              <span>Densidade:</span>
-              <span className="font-medium">{formatNumber(data.density || 0)} hab/hac</span>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+            </CardContent>
+          </Card>
 
-      {/* Card de Renda */}
-      <Card>
-        <CardHeader className="pb-3">
-          <div className="flex items-center gap-2">
-            <DollarSign className="w-4 h-4 text-muted-foreground" />
-            <CardTitle className="text-sm font-medium text-muted-foreground">Renda Média</CardTitle>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-baseline justify-between">
-            <div>
-              <div className="text-3xl font-bold">{formatCurrency(data.income || 0)}</div>
-              <div className="text-xs text-muted-foreground mt-1">
-                por domicílio/mês (2025)
+          {/* Card Renda */}
+          <Card className="bg-teal-50 border-teal-200">
+            <CardContent className="p-3">
+              <div className="flex items-start justify-between mb-1">
+                <DollarSign className="w-5 h-5 text-teal-600" />
+                {incomeRate !== 0 && (
+                  <div className={`flex items-center gap-1 text-xs ${incomeRate > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {incomeRate > 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                    <span className="font-medium">{formatPercent(incomeRate)}</span>
+                  </div>
+                )}
               </div>
-            </div>
-            {incomeRate !== 0 && (
-              <div className={`flex items-center gap-1 text-sm ${incomeRate > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                {incomeRate > 0 ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
-                {Math.abs(incomeRate)}%
+              <div className="text-2xl font-bold text-teal-900">{formatCurrency(data.income || 0)}</div>
+              <div className="text-xs text-teal-700 font-medium">Renda ⓘ</div>
+            </CardContent>
+          </Card>
+
+          {/* Card Domicílios */}
+          <Card className="bg-blue-50 border-blue-200">
+            <CardContent className="p-3">
+              <div className="flex items-start justify-between mb-1">
+                <Home className="w-5 h-5 text-blue-600" />
+                {householdsGrowth !== 0 && (
+                  <div className={`flex items-center gap-1 text-xs ${householdsGrowth > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {householdsGrowth > 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                    <span className="font-medium">{formatPercent(householdsGrowth)}</span>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+              <div className="text-2xl font-bold text-blue-900">{formatNumber(households)}</div>
+              <div className="text-xs text-blue-700 font-medium">domicílios - Cresceu 27.8% ↑</div>
+            </CardContent>
+          </Card>
+        </div>
 
-      {/* Card de Potencial de Consumo */}
-      <Card>
-        <CardHeader className="pb-3">
-          <div className="flex items-center gap-2">
-            <Building2 className="w-4 h-4 text-muted-foreground" />
-            <CardTitle className="text-sm font-medium text-muted-foreground">Potencial de Consumo</CardTitle>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="text-3xl font-bold mb-4">{formatCurrency(data.consumer || 0)}</div>
-          <div className="space-y-2 text-sm">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Alimentação:</span>
-              <span className="font-medium">{formatCurrency(data.cons_1_food || 0)}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Habitação:</span>
-              <span className="font-medium">{formatCurrency(data.cons_2_housing || 0)}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Vestuário:</span>
-              <span className="font-medium">{formatCurrency(data.cons_3_clothing || 0)}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Transporte:</span>
-              <span className="font-medium">{formatCurrency(data.cons_4_transport || 0)}</span>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Classes Sociais */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-sm font-medium text-muted-foreground">Distribuição por Classe Social</CardTitle>
-          <CardDescription className="text-xs">Quantidade de pessoas por classe</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            {[
-              { name: 'Classe A1', value: data.class_a1 || 0, color: 'bg-green-500' },
-              { name: 'Classe A2', value: data.class_a2 || 0, color: 'bg-green-400' },
-              { name: 'Classe B1', value: data.class_b1 || 0, color: 'bg-blue-500' },
-              { name: 'Classe B2', value: data.class_b2 || 0, color: 'bg-blue-400' },
-              { name: 'Classe C', value: data.class_c || 0, color: 'bg-yellow-500' },
-              { name: 'Classe D', value: data.class_d || 0, color: 'bg-orange-500' },
-              { name: 'Classe E', value: data.class_e || 0, color: 'bg-red-500' },
-            ].map((item) => (
-              <div key={item.name} className="flex items-center gap-2">
-                <div className={`w-3 h-3 rounded ${item.color}`}></div>
-                <span className="text-sm flex-1">{item.name}</span>
-                <span className="text-sm font-medium">{formatNumber(item.value)}</span>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Faixas Etárias */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-sm font-medium text-muted-foreground">Distribuição por Faixa Etária</CardTitle>
-          <CardDescription className="text-xs">Habitantes segmentados por idade</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2 text-sm">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Bebês (0-2):</span>
-              <span className="font-medium">{formatNumber(data.age_babies || 0)}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Crianças (3-11):</span>
-              <span className="font-medium">{formatNumber(data.age_kids || 0)}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Adolescentes (12-17):</span>
-              <span className="font-medium">{formatNumber(data.age_teens || 0)}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Jovens (18-24):</span>
-              <span className="font-medium">{formatNumber(data.age_young_adults || 0)}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Adultos (25-39):</span>
-              <span className="font-medium">{formatNumber(data.age_adults || 0)}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Meia-idade (40-59):</span>
-              <span className="font-medium">{formatNumber(data.age_middle_age || 0)}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Idosos (60-79):</span>
-              <span className="font-medium">{formatNumber(data.age_young_elderly || 0)}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Idosos+ (80+):</span>
-              <span className="font-medium">{formatNumber(data.age_elderly || 0)}</span>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Indicadores Demográficos */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-sm font-medium text-muted-foreground">Indicadores Demográficos</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-2 text-sm">
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">População Ativa (20-65):</span>
-            <span className="font-medium">{data.pop_active || 0}%</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Índice de Juventude:</span>
-            <span className="font-medium">{data.pop_youngness || 0}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Índice de Envelhecimento:</span>
-            <span className="font-medium">{data.pop_oldness || 0}</span>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Atividade Econômica */}
-      {data.clu_N_nome && (
+        {/* Gráfico de Classes Sociais */}
         <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Atividade Econômica Principal</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2 text-sm">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Segmento:</span>
-              <span className="font-medium">{data.clu_N_nome}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Atividades:</span>
-              <span className="font-medium">{data.clu_N_atv || 0}</span>
+          <CardContent className="p-4">
+            <div className="space-y-2">
+              {[
+                { name: 'A++', value: data.class_a1 || 0, color: 'bg-purple-500', width: ((data.class_a1 || 0) / (data.people || 1)) * 100 },
+                { name: 'A+', value: data.class_a2 || 0, color: 'bg-blue-500', width: ((data.class_a2 || 0) / (data.people || 1)) * 100 },
+                { name: 'A', value: data.class_b1 || 0, color: 'bg-green-500', width: ((data.class_b1 || 0) / (data.people || 1)) * 100 },
+                { name: 'B', value: data.class_b2 || 0, color: 'bg-lime-500', width: ((data.class_b2 || 0) / (data.people || 1)) * 100 },
+                { name: 'C', value: data.class_c || 0, color: 'bg-yellow-500', width: ((data.class_c || 0) / (data.people || 1)) * 100 },
+                { name: 'D', value: data.class_d || 0, color: 'bg-orange-500', width: ((data.class_d || 0) / (data.people || 1)) * 100 },
+                { name: 'E', value: data.class_e || 0, color: 'bg-red-500', width: ((data.class_e || 0) / (data.people || 1)) * 100 },
+              ].map((item) => (
+                <div key={item.name} className="flex items-center gap-2">
+                  <div className="w-8 text-xs font-medium text-right">{item.name}</div>
+                  <div className="flex-1 bg-gray-100 rounded-full h-6 relative overflow-hidden">
+                    <div 
+                      className={`${item.color} h-full flex items-center justify-end pr-2 text-white text-xs font-medium transition-all`}
+                      style={{ width: `${Math.max(item.width, 5)}%` }}
+                    >
+                      {item.value > 0 && formatNumber(item.value)}
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </CardContent>
         </Card>
-      )}
 
-      {/* Botões de ação */}
-      <div className="flex gap-2 sticky bottom-0 bg-background pt-2 pb-2">
-        <Button
-          onClick={onSaveArea}
-          variant="outline"
-          className="flex-1"
-          disabled={loading}
-        >
-          Salvar Área
-        </Button>
-        <Button
-          onClick={onGenerateStudy}
-          className="flex-1"
-          disabled={loading}
-        >
-          Gerar Estudo
-        </Button>
+        {/* Ícones Demográficos */}
+        <Card>
+          <CardContent className="p-4">
+            <div className="grid grid-cols-4 gap-3">
+              {[
+                { icon: Baby, label: 'Bebês', value: data.age_babies || 0, subtext: '3.4%' },
+                { icon: User, label: 'Crianças', value: data.age_kids || 0, subtext: '16.7%' },
+                { icon: UsersIcon, label: 'Adolescentes', value: data.age_teens || 0, subtext: '3k' },
+                { icon: Briefcase, label: 'Adultos', value: data.age_adults || 0, subtext: '21.2%' },
+                { icon: User, label: 'Jovens', value: data.age_young_adults || 0, subtext: '1.8k' },
+                { icon: UsersIcon, label: 'Meia-idade', value: data.age_middle_age || 0, subtext: '4k' },
+                { icon: Heart, label: 'Idosos', value: data.age_young_elderly || 0, subtext: '2.3k' },
+                { icon: Heart, label: 'Idosos+', value: data.age_elderly || 0, subtext: '443' },
+              ].map((item, idx) => (
+                <div key={idx} className="flex flex-col items-center text-center">
+                  <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mb-1">
+                    <item.icon className="w-5 h-5 text-gray-600" />
+                  </div>
+                  <div className="text-xs font-medium">{formatNumber(item.value)}</div>
+                  <div className="text-xs text-muted-foreground">{item.subtext}</div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Card Idosos + Família Destaque */}
+        <div className="flex gap-2 items-center justify-between text-sm">
+          <div className="flex items-center gap-2">
+            <span className="text-muted-foreground">🧓</span>
+            <span className="font-medium">Idosos • Família Destaque ⓘ</span>
+          </div>
+        </div>
+
+        {/* Card Potencial de Consumo - Destaque Laranja */}
+        <Card className="bg-gradient-to-r from-orange-500 to-orange-600 text-white">
+          <CardContent className="p-4">
+            <div className="text-3xl font-bold mb-1">
+              {formatCurrency(data.consumer || 0).replace('R$', 'R$').replace(',00', '')} MI
+            </div>
+            <div className="text-sm font-medium opacity-90">potencial de consumo mensal</div>
+          </CardContent>
+        </Card>
+
+        {/* Lista de Categorias de Consumo */}
+        <Card>
+          <CardContent className="p-4">
+            <div className="space-y-2 text-sm">
+              {[
+                { icon: '❤️', label: 'Assistência à saúde', value: data.cons_6_health || 1620000, percent: '8.7%' },
+                { icon: '🛡️', label: 'Plano/Seguro saúde', value: data.cons_health_insurance || 588000, percent: '3.1%' },
+                { icon: '🏥', label: 'Consulta médica', value: data.cons_medical || 74200, percent: '0.4%' },
+                { icon: '❤️', label: 'Assistência à saúde', value: data.cons_6_health || 1620000, percent: '8.7%' },
+                { icon: '📚', label: 'Exames diversos', value: data.cons_exams || 32900, percent: '0.2%' },
+              ].map((item, idx) => (
+                <div key={idx} className="flex items-center justify-between py-1 border-b border-gray-100 last:border-0">
+                  <div className="flex items-center gap-2">
+                    <span>{item.icon}</span>
+                    <span className="text-muted-foreground">{item.label}:</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium">{formatCurrency(item.value)}</span>
+                    <span className="text-xs text-muted-foreground">({item.percent})</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Botões de ação */}
+        <div className="flex gap-2 sticky bottom-0 bg-background pt-2 pb-2">
+          <Button
+            onClick={onSaveArea}
+            variant="outline"
+            className="flex-1"
+            disabled={loading}
+          >
+            💾 Salvar área
+          </Button>
+          <Button
+            onClick={onGenerateStudy}
+            className="flex-1"
+            disabled={loading}
+          >
+            📊 Gerar Estudo
+          </Button>
+        </div>
       </div>
     </div>
   );

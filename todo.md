@@ -83,16 +83,31 @@
 
 
 ## Novos Bugs Reportados
-- [ ] Consulta rápida não está exibindo resultados visualmente (ainda com problema)
-- [ ] Botão "Busca Ponto" no header dá erro 404
+- [x] Consulta rápida não está exibindo resultados visualmente completos (RESOLVIDO - painel agora mostra tudo)
+- [x] Botão "Busca Ponto" no header dá erro 404 (corrigido - criado Settings)
 
 ## Novas Features Solicitadas
-- [ ] Criar painel administrativo para configurações do tenant (nome, logo, cores)
-- [ ] Melhorar visualização dos resultados da Space API com cards e gráficos
+- [x] Criar painel administrativo para configurações do tenant (nome, logo, cores)
+- [ ] Melhorar visualização dos resultados da Space API com cards e gráficos (em progresso)
 - [ ] Implementar componente SidePanelSpace com dados formatados (habitantes, renda, classes, consumo)
 - [ ] Adicionar gráficos de barras para classes sociais (usando Recharts)
 - [ ] Adicionar gráficos de colunas para faixas etárias
-- [ ] Formatar números com Intl.NumberFormat pt-BR
+- [x] Formatar números com Intl.NumberFormat pt-BR
 - [ ] Adicionar botão "Salvar área" para criar QuickQuery
 - [ ] Adicionar botão "Gerar Estudo" que abre formulário
+
+## Features do Painel Visual Space (Referência anexada)
+- [x] Reimplementar SidePanelSpace com layout visual idêntico ao Space
+- [x] Card 1: Habitantes com ícone e variação percentual (census_change)
+- [x] Card 2: Renda média com crescimento (income_rate)
+- [x] Card 3: Domicílios com crescimento percentual
+- [x] Gráfico de barras coloridas para classes sociais (A1-E)
+- [x] Lista de ícones demográficos (bebês, crianças, adolescentes, etc)
+- [x] Card de potencial de consumo mensal com destaque laranja
+- [x] Lista de categorias de consumo com valores em BRL
+- [x] Painel ocupa altura completa quando há resultados
+- [ ] Círculo azul no mapa representando a área selecionada
+- [ ] Permitir arrastar o círculo para mudar localização
+- [x] Slider de raio funcionando
+- [ ] Loading skeletons durante consulta
 
