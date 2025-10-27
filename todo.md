@@ -126,3 +126,13 @@
 - [x] Remover categorias específicas de consumo (saúde, plano, exames) - dados mockados não incluem
 - [x] Manter apenas dados gerais de consumo no painel
 
+
+
+
+## Bugs Reportados (27/10/2025 - Sessão 2)
+- [ ] Mapa precisa ter estilo visual da SpaceData
+- [ ] Dados extraídos estão bagunçados no painel
+- [ ] Concorrentes não estão sendo puxados
+- [ ] Busca de localização do Google não está funcionando
+- [ ] Layout do painel precisa ser reorganizado
+
