@@ -83,7 +83,7 @@ export default function MapShell({ tenantId, loading = false }: MapShellProps) {
       console.error("Erro ao gerar círculo:", error);
       return null;
     }
-  }, [marker, radius]);
+  }, [marker?.lat, marker?.lng, radius[0]]);
 
   const updateAutocompleteBounds = useCallback(() => {
     const mapInstance = mapRef.current?.getMap();
@@ -98,7 +98,7 @@ export default function MapShell({ tenantId, loading = false }: MapShellProps) {
       south: sw.lat,
       west: sw.lng,
     });
-  }, []);
+  }, [mapRef]);
 
   const handleLocationSelect = useCallback(
     ({ lat, lng, address }: { lat: number; lng: number; address: string }) => {
@@ -115,7 +115,7 @@ export default function MapShell({ tenantId, loading = false }: MapShellProps) {
 
       toast.success("Localização atualizada!");
     },
-    []
+    [mapRef]
   );
 
   const spaceQueryMutation = trpc.space.query.useMutation({
