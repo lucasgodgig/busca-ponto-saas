@@ -70,10 +70,16 @@ export default function MapShell({ tenantId, loading = false }: MapShellProps) {
     if (!marker) return null;
     try {
       const circleFeature = circle([marker.lng, marker.lat], radius[0] / 1000, { units: "kilometers" });
+      // Remover propriedades extras do Turf que causam erro no MapLibre
+      const cleanFeature = {
+        type: circleFeature.type,
+        geometry: circleFeature.geometry,
+        properties: {}
+      };
       // Garantir que é um FeatureCollection válido
       return {
         type: "FeatureCollection" as const,
-        features: [circleFeature]
+        features: [cleanFeature]
       };
     } catch (error) {
       console.error("Erro ao gerar círculo:", error);
@@ -404,7 +410,7 @@ export default function MapShell({ tenantId, loading = false }: MapShellProps) {
         >
           {/* Círculo Geodésico */}
           {circleData && (
-            <Source id="circle-source" type="geojson" data={circleData as any}>
+            <Source id="circle-source" type="geojson" data={circleData}>
               <Layer
                 id="circle-fill"
                 type="fill"
