@@ -210,6 +210,7 @@ export const appRouter = router({
         lat: z.number().min(-90).max(90),
         lng: z.number().min(-180).max(180),
         radius: z.number().int().positive().max(ENV.spaceMaxRadius),
+        segment: z.string().optional(),
       }))
       .mutation(async ({ ctx, input }) => {
         const tenantCtx = await validateTenantAccess(ctx, input.tenantId);
@@ -233,6 +234,7 @@ export const appRouter = router({
           lat: input.lat,
           lng: input.lng,
           radius: input.radius,
+          segment: input.segment,
         });
 
         // Registrar consulta no banco

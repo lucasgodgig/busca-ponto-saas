@@ -5,6 +5,7 @@ export interface SpaceQueryParams {
   lat: number;
   lng: number;
   radius: number;
+  segment?: string;
 }
 
 export interface SpaceApiResponse {
@@ -16,7 +17,7 @@ export interface SpaceApiResponse {
 /**
  * Gerar dados mockados da Space API baseados na documentação real
  */
-function generateMockSpaceData(lat: number, lng: number, radius: number) {
+function generateMockSpaceData(lat: number, lng: number, radius: number, segment?: string) {
   return {
     muni: "São Paulo",
     people: Math.floor(Math.random() * 50000) + 10000,
@@ -89,7 +90,7 @@ function generateMockSpaceData(lat: number, lng: number, radius: number) {
  * NUNCA expor a chave da API no frontend
  */
 export async function querySpaceApi(params: SpaceQueryParams): Promise<SpaceApiResponse> {
-  const { lat, lng, radius } = params;
+  const { lat, lng, radius, segment } = params;
 
   // Validar limites
   if (radius > ENV.spaceMaxRadius) {
@@ -104,7 +105,7 @@ export async function querySpaceApi(params: SpaceQueryParams): Promise<SpaceApiR
     console.warn("[Space API] Credenciais não configuradas, retornando dados mockados");
     return {
       ok: true,
-      data: generateMockSpaceData(lat, lng, radius),
+      data: generateMockSpaceData(lat, lng, radius, segment),
     };
   }
 
@@ -152,7 +153,7 @@ export async function querySpaceApi(params: SpaceQueryParams): Promise<SpaceApiR
     console.warn("[Space API] Erro de conexão, usando dados mockados como fallback");
     return {
       ok: true,
-      data: generateMockSpaceData(lat, lng, radius),
+      data: generateMockSpaceData(lat, lng, radius, segment),
     };
   }
 }
@@ -165,7 +166,7 @@ const queryCache = new Map<string, { data: any; timestamp: number }>();
 const CACHE_TTL = 20 * 60 * 1000; // 20 minutos
 
 function getCacheKey(params: SpaceQueryParams): string {
-  return `${params.lat.toFixed(5)},${params.lng.toFixed(5)},${params.radius}`;
+  return `${params.lat.toFixed(5)},${params.lng.toFixed(5)},${params.radius},${params.segment || ''}`;
 }
 
 export async function querySpaceApiWithCache(params: SpaceQueryParams): Promise<SpaceApiResponse> {

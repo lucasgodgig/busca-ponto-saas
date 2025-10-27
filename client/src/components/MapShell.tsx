@@ -47,11 +47,11 @@ export default function MapShell({ tenantId, loading = false }: MapShellProps) {
   const [showSuggestions, setShowSuggestions] = useState(false);
 
   // Estado do estilo do mapa
-  const [mapStyle, setMapStyle] = useState<'topo' | 'light'>('topo');
+  const [mapStyle, setMapStyle] = useState<'positron' | 'voyager'>('positron');
   
-  const mapStyleUrl = mapStyle === 'topo' 
-    ? 'https://basemaps.arcgisonline.com/arcgis/rest/services/World_Topo_Map/VectorTileServer/resources/styles/root.json'
-    : 'https://basemaps.arcgisonline.com/arcgis/rest/services/Canvas/World_Light_Gray_Base/VectorTileServer/resources/styles/root.json';
+  const mapStyleUrl = mapStyle === 'positron' 
+    ? 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json'
+    : 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json';
 
   // Estado das camadas
   const [layers, setLayers] = useState({
@@ -151,6 +151,7 @@ export default function MapShell({ tenantId, loading = false }: MapShellProps) {
         lat: marker.lat,
         lng: marker.lng,
         radius: radius[0],
+        segment: businessSegment || undefined,
       });
 
       setCompetitors([]);
@@ -318,20 +319,20 @@ export default function MapShell({ tenantId, loading = false }: MapShellProps) {
           <CardContent className="space-y-2">
             <div className="flex gap-2">
               <Button
-                variant={mapStyle === 'topo' ? 'default' : 'outline'}
+                variant={mapStyle === 'positron' ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => setMapStyle('topo')}
-                className="flex-1"
-              >
-                Topográfico
-              </Button>
-              <Button
-                variant={mapStyle === 'light' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setMapStyle('light')}
+                onClick={() => setMapStyle('positron')}
                 className="flex-1"
               >
                 Claro
+              </Button>
+              <Button
+                variant={mapStyle === 'voyager' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setMapStyle('voyager')}
+                className="flex-1"
+              >
+                Detalhado
               </Button>
             </div>
           </CardContent>

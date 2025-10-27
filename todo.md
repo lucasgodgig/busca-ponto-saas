@@ -202,3 +202,12 @@
 - [ ] Testar Nearby Search → retorna e plota tipos do segmento
 - [ ] LGPD e segurança: não logar chaves, CORS restrito
 
+
+
+
+## Bugs Críticos Reportados (27/10/2025 - Sessão Final)
+- [ ] Mapa está branco, não mostra localização
+- [ ] Consulta rápida puxando dados errados (só saúde)
+- [ ] Concorrentes não aparecem nos resultados
+- [ ] Dados não estão sendo filtrados por segmento
+
