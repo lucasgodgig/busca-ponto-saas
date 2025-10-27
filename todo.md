@@ -146,3 +146,51 @@
 - [x] Melhorar visual do painel lateral
 - [x] Adicionar cores e estilos do SpaceData
 
+
+
+
+## Melhorias Finais (Prompt Esri + Normalização) - 27/10/2025
+- [ ] Trocar mapa para Esri basemaps (World Topo Map + Light Gray Canvas)
+- [ ] Adicionar toggle para alternar entre estilos de mapa
+- [ ] Adicionar AttributionControl da Esri
+- [ ] Implementar círculo geodésico com turf.circle() (raio em metros)
+- [ ] Marcador arrastável no mapa
+- [ ] Atualizar círculo ao arrastar marcador
+- [ ] Tooltip com endereço e raio (ex: "Av. Paulista 1000 • 1,5 km")
+- [ ] Criar tipos TypeScript completos para normalização Space (SpaceNormalized)
+- [ ] Implementar normalizeSpace() sem NaN/Infinity
+- [ ] Mapeamento de 13 categorias de consumo com rótulos PT-BR
+- [ ] Classes sociais (A1-E) com percentuais e domicílios
+- [ ] Faixas etárias opcionais (14 faixas)
+- [ ] Formatação de valores (moeda, número, percentual) com Intl.NumberFormat
+- [ ] Refinar Google Places Autocomplete com restrição Brasil
+- [ ] Geocoding de place_id → lat/lng
+- [ ] Preenchimento automático de endereço formatado
+- [ ] Suporte para Enter → Geocoding do texto
+- [ ] Google Places Nearby Search para concorrentes
+- [ ] Mapeamento de tipos por segmento (academias, farmácias, petshops, etc)
+- [ ] Plotar marcadores de concorrentes no mapa
+- [ ] Lista de concorrentes no painel (nome, rating, reviews, distância, status)
+- [ ] Deduplicação de concorrentes por nome e coordenadas
+- [ ] Paginação com next_page_token
+- [ ] Exportar CSV de concorrentes
+- [ ] Debounce 400ms para mudanças de área
+- [ ] Throttle 1 req/s por usuário
+- [ ] Cancelar requisições anteriores ao mudar área
+- [ ] Skeletons de loading durante consulta
+- [ ] Estados de erro amigáveis
+- [ ] Cards no painel: Habitantes, Renda, Potencial (com densidade)
+- [ ] Gráfico 1: Barras para classes sociais (A1-E)
+- [ ] Gráfico 2: Barras horizontais para categorias de consumo
+- [ ] Faixa etária: Colunas compactas (se presente)
+- [ ] Botão "Salvar área" (cria QuickQuery com payload normalizado)
+- [ ] Botão "Gerar Estudo" (abre formulário do tenant)
+- [ ] Paleta: azul escuro #0F172A + branco
+- [ ] Cards com rounded-2xl
+- [ ] Sombras suaves
+- [ ] Layout: Mapa 60% | Painel 40% (fixo)
+- [ ] Testar resposta Space sem consumer → usa cons_a_total (sem NaN)
+- [ ] Testar autocomplete → resolve place_id corretamente
+- [ ] Testar Nearby Search → retorna e plota tipos do segmento
+- [ ] LGPD e segurança: não logar chaves, CORS restrito
+
