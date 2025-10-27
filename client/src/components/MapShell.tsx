@@ -8,52 +8,54 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Loader2, MapPin, Search, ArrowLeft, Zap, Download } from "lucide-react";
+import { Loader2, MapPin, ArrowLeft, Zap } from "lucide-react";
 import { toast } from "sonner";
 import { trpc } from "@/lib/trpc";
 import SidePanelSpace from "@/components/SidePanelSpace";
+import { setupSpaceDataTheme, spaceDataThemeConstants } from "@/lib/spaceDataTheme";
+import LocationSearch from "@/components/LocationSearch";
+import CompetitorsPanel from "@/components/CompetitorsPanel";
+import { GoogleBoundsLiteral } from "@/lib/google";
 
 interface MapShellProps {
   tenantId: number;
   loading?: boolean;
 }
 
+interface AnalysisParams {
+  center: { lat: number; lng: number };
+  radius: number;
+  segment: string;
+  address?: string;
+}
+
 export default function MapShell({ tenantId, loading = false }: MapShellProps) {
   const mapRef = useRef<MapRef>(null);
-  
-  // Estado do mapa
+  const themeCleanupRef = useRef<(() => void) | null>(null);
+
   const [viewport, setViewport] = useState({
     latitude: -23.55052,
     longitude: -46.633308,
     zoom: 13,
   });
 
-  // Estado do marcador e raio
   const [marker, setMarker] = useState<{ lat: number; lng: number } | null>({
     lat: -23.55052,
     lng: -46.633308,
   });
-  const [radius, setRadius] = useState([1500]); // em metros
-  const [addressLabel, setAddressLabel] = useState("São Paulo, SP");
+  const [radius, setRadius] = useState([1500]);
 
-  // Estado de busca
   const [searchAddress, setSearchAddress] = useState("");
+  const [selectedAddress, setSelectedAddress] = useState("");
   const [businessSegment, setBusinessSegment] = useState("");
   const [searching, setSearching] = useState(false);
-  const [addressSuggestions, setAddressSuggestions] = useState<any[]>([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [autocompleteBounds, setAutocompleteBounds] = useState<GoogleBoundsLiteral | null>(null);
 
-  // Estado do estilo do mapa
-  const [mapStyle, setMapStyle] = useState<'positron' | 'voyager'>('positron');
-  
-  const mapStyleUrl = mapStyle === 'positron' 
-    ? 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json'
-    : 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json';
+  const mapStyleUrl = "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json";
+  const panelCardClass = "border border-white/60 bg-white/85 backdrop-blur-sm shadow-[0_20px_50px_-35px_rgba(13,31,79,0.45)]";
 
-  // Estado das camadas
   const [layers, setLayers] = useState({
     demografia: true,
     renda: true,
@@ -61,25 +63,21 @@ export default function MapShell({ tenantId, loading = false }: MapShellProps) {
     concorrencia: true,
   });
 
-  // Estado dos resultados
   const [queryResult, setQueryResult] = useState<any>(null);
-  const [competitors, setCompetitors] = useState<any[]>([]);
+  const [analysisParams, setAnalysisParams] = useState<AnalysisParams | null>(null);
 
-  // Gerar círculo geodésico
   const circleData = useMemo(() => {
     if (!marker) return null;
     try {
       const circleFeature = circle([marker.lng, marker.lat], radius[0] / 1000, { units: "kilometers" });
-      // Remover propriedades extras do Turf que causam erro no MapLibre
       const cleanFeature = {
         type: circleFeature.type,
         geometry: circleFeature.geometry,
-        properties: {}
+        properties: {},
       };
-      // Garantir que é um FeatureCollection válido
       return {
         type: "FeatureCollection" as const,
-        features: [cleanFeature]
+        features: [cleanFeature],
       };
     } catch (error) {
       console.error("Erro ao gerar círculo:", error);
@@ -87,54 +85,39 @@ export default function MapShell({ tenantId, loading = false }: MapShellProps) {
     }
   }, [marker, radius]);
 
-  const handleSearchAddressChange = useCallback((value: string) => {
-    setSearchAddress(value);
-    
-    if (value.length <= 2) {
-      setAddressSuggestions([]);
-      setShowSuggestions(false);
-    }
+  const updateAutocompleteBounds = useCallback(() => {
+    const mapInstance = mapRef.current?.getMap();
+    if (!mapInstance) return;
+    const bounds = mapInstance.getBounds();
+    if (!bounds) return;
+    const ne = bounds.getNorthEast();
+    const sw = bounds.getSouthWest();
+    setAutocompleteBounds({
+      north: ne.lat,
+      east: ne.lng,
+      south: sw.lat,
+      west: sw.lng,
+    });
   }, []);
 
-  // Buscar sugestões quando o valor muda
-  const { data: addressData } = trpc.places.searchAddress.useQuery(
-    { query: searchAddress },
-    { enabled: searchAddress.length > 2 }
+  const handleLocationSelect = useCallback(
+    ({ lat, lng, address }: { lat: number; lng: number; address: string }) => {
+      setMarker({ lat, lng });
+      setViewport((prev) => ({ ...prev, latitude: lat, longitude: lng, zoom: Math.max(prev.zoom, 15) }));
+      setSelectedAddress(address);
+      setSearchAddress(address);
+
+      mapRef.current?.flyTo({
+        center: [lng, lat],
+        zoom: 15,
+        duration: 1000,
+      });
+
+      toast.success("Localização atualizada!");
+    },
+    []
   );
 
-  // Atualizar sugestões quando dados chegam
-  useEffect(() => {
-    if (addressData && searchAddress.length > 2) {
-      setAddressSuggestions(addressData ? [addressData] : []);
-      setShowSuggestions(true);
-    }
-  }, [addressData, searchAddress]);
-
-  const handleSelectAddress = useCallback((address: any) => {
-    const lat = address.geometry?.location?.lat || address.lat;
-    const lng = address.geometry?.location?.lng || address.lng;
-    const formattedAddress = address.formatted_address || address.name || "";
-    
-    setSearchAddress("");
-    setAddressLabel(formattedAddress);
-    setMarker({ lat, lng });
-    setViewport({
-      latitude: lat,
-      longitude: lng,
-      zoom: 15,
-    });
-    setShowSuggestions(false);
-
-    mapRef.current?.flyTo({
-      center: [lng, lat],
-      zoom: 15,
-      duration: 1000,
-    });
-
-    toast.success("Localização atualizada!");
-  }, []);
-
-  // Mutation para consulta rápida
   const spaceQueryMutation = trpc.space.query.useMutation({
     onSuccess: (result) => {
       setQueryResult(result);
@@ -146,7 +129,6 @@ export default function MapShell({ tenantId, loading = false }: MapShellProps) {
     },
   });
 
-  // Executar consulta rápida
   const handleQuickQuery = useCallback(async () => {
     if (!marker) {
       toast.error("Selecione uma localização no mapa");
@@ -154,148 +136,101 @@ export default function MapShell({ tenantId, loading = false }: MapShellProps) {
     }
 
     setSearching(true);
+    const trimmedSegment = businessSegment.trim();
+
     try {
-      // Executar consulta à Space API
       await spaceQueryMutation.mutateAsync({
         tenantId,
         lat: marker.lat,
         lng: marker.lng,
         radius: radius[0],
-        segment: businessSegment || undefined,
+        segment: trimmedSegment || undefined,
       });
 
-      setCompetitors([]);
+      setAnalysisParams({
+        center: { lat: marker.lat, lng: marker.lng },
+        radius: radius[0],
+        segment: trimmedSegment,
+        address: selectedAddress || searchAddress,
+      });
     } finally {
       setSearching(false);
     }
-  }, [marker, radius, tenantId, spaceQueryMutation]);
+  }, [marker, radius, tenantId, businessSegment, selectedAddress, searchAddress, spaceQueryMutation]);
 
-  // Buscar concorrentes quando houver segmento
-  const { data: competitorData } = trpc.places.searchCompetitors.useQuery(
-    {
-      lat: marker?.lat || 0,
-      lng: marker?.lng || 0,
-      radius: radius[0],
-      businessType: businessSegment,
-    },
-    { enabled: !!businessSegment && !!marker }
-  );
-
-  useEffect(() => {
-    if (competitorData) {
-      setCompetitors(competitorData || []);
-    }
-  }, [competitorData]);
-
-  // Voltar aos controles
   const handleBack = useCallback(() => {
     setQueryResult(null);
-    setCompetitors([]);
+    setAnalysisParams(null);
   }, []);
 
-  // Exportar CSV
-  const handleExportCSV = useCallback(() => {
-    if (!competitors || competitors.length === 0) {
-      toast.error("Nenhum concorrente para exportar");
-      return;
-    }
+  const handleMapLoad = useCallback(() => {
+    const mapInstance = mapRef.current?.getMap();
+    if (!mapInstance) return;
 
-    const csv = [
-      ["Nome", "Endereço", "Rating", "Avaliações", "Latitude", "Longitude"],
-      ...competitors.map(c => [
-        c.name,
-        c.address,
-        c.rating || "N/A",
-        c.userRatingsTotal || "N/A",
-        c.lat,
-        c.lng,
-      ])
-    ].map(row => row.map(cell => `"${cell}"`).join(",")).join("\n");
+    themeCleanupRef.current?.();
+    themeCleanupRef.current = setupSpaceDataTheme(mapInstance) ?? null;
+    updateAutocompleteBounds();
+  }, [updateAutocompleteBounds]);
 
-    const blob = new Blob([csv], { type: "text/csv" });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `concorrentes-${new Date().toISOString().split('T')[0]}.csv`;
-    a.click();
-    window.URL.revokeObjectURL(url);
+  useEffect(() => {
+    const mapInstance = mapRef.current?.getMap();
+    if (!mapInstance) return;
 
-    toast.success("CSV exportado com sucesso!");
-  }, [competitors]);
+    themeCleanupRef.current?.();
+    themeCleanupRef.current = setupSpaceDataTheme(mapInstance) ?? null;
 
-  // Renderizar painel lateral
+    updateAutocompleteBounds();
+
+    return () => {
+      themeCleanupRef.current?.();
+      themeCleanupRef.current = null;
+    };
+  }, [mapStyleUrl, updateAutocompleteBounds]);
+
   const renderSidePanel = () => {
     if (queryResult) {
       return (
-        <SidePanelSpace 
-          data={queryResult?.data} 
-          competitors={competitors}
-          onBack={handleBack}
-          onExportCSV={handleExportCSV}
-        />
+        <div className="space-y-4 overflow-y-auto h-full pb-4">
+          <SidePanelSpace
+            data={queryResult?.data}
+            onBack={handleBack}
+            address={analysisParams?.address || selectedAddress || searchAddress}
+            radius={analysisParams?.radius ?? radius[0]}
+          />
+          <CompetitorsPanel
+            center={analysisParams?.center ?? null}
+            radius={analysisParams?.radius ?? radius[0]}
+            segment={analysisParams?.segment ?? ""}
+          />
+        </div>
       );
     }
 
     return (
       <div className="space-y-4 overflow-y-auto h-full pb-4">
-        {/* Buscar Localização */}
-        <Card className="border-0 shadow-sm">
+        <Card className={panelCardClass}>
           <CardHeader className="pb-3">
             <CardTitle className="text-base font-semibold">Buscar Localização</CardTitle>
             <CardDescription className="text-xs">Digite um endereço ou CEP</CardDescription>
           </CardHeader>
           <CardContent className="space-y-2">
-            <div className="relative">
-              <Input
-                type="text"
-                placeholder="Ex: Av. Paulista, 1000, São Paulo"
-                value={searchAddress}
-                onChange={(e) => handleSearchAddressChange(e.target.value)}
-                onFocus={() => addressSuggestions.length > 0 && setShowSuggestions(true)}
-                className="pr-10 border-green-200 focus:border-green-500 focus:ring-green-500"
-              />
-              <Button
-                size="sm"
-                variant="ghost"
-                className="absolute right-1 top-1/2 -translate-y-1/2 text-green-600 hover:text-green-700"
-                onClick={() => handleSelectAddress({ lat: marker?.lat, lng: marker?.lng })}
-              >
-                <Search className="w-4 h-4" />
-              </Button>
-              
-              {showSuggestions && addressSuggestions.length > 0 && (
-                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 max-h-48 overflow-y-auto">
-                  {addressSuggestions.map((suggestion, idx) => (
-                    <div
-                      key={idx}
-                      onClick={() => handleSelectAddress(suggestion)}
-                      className="px-4 py-2 hover:bg-green-50 cursor-pointer text-sm border-b last:border-b-0"
-                    >
-                      {suggestion.formatted_address || suggestion.name}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+            <LocationSearch
+              value={searchAddress}
+              onChange={setSearchAddress}
+              onSelect={handleLocationSelect}
+              bounds={autocompleteBounds}
+            />
             <p className="text-xs text-gray-500">Ou clique no mapa para definir um ponto</p>
           </CardContent>
         </Card>
 
-        {/* Raio de Análise */}
-        <Card className="border-0 shadow-sm">
+        <Card className={panelCardClass}>
           <CardHeader className="pb-3">
             <CardTitle className="text-base font-semibold">Raio de Análise</CardTitle>
             <CardDescription className="text-xs">{radius[0]}m ({(radius[0] / 1000).toFixed(2)}km)</CardDescription>
           </CardHeader>
           <CardContent className="space-y-2">
-            <Slider
-              value={radius}
-              onValueChange={setRadius}
-              min={500}
-              max={5000}
-              step={100}
-              className="w-full"
-            />
+            <Slider value={radius} onValueChange={setRadius} min={500} max={5000} step={100} className="w-full" />
             <div className="flex justify-between text-xs text-gray-500">
               <span>500m</span>
               <span>5km</span>
@@ -303,53 +238,24 @@ export default function MapShell({ tenantId, loading = false }: MapShellProps) {
           </CardContent>
         </Card>
 
-        {/* Segmento do Negócio */}
-        <Card className="border-0 shadow-sm">
+        <Card className={panelCardClass}>
           <CardHeader className="pb-3">
             <CardTitle className="text-base font-semibold">Segmento do Negócio</CardTitle>
-            <CardDescription className="text-xs">Digite o tipo de negócio para buscar concorrentes</CardDescription>
+            <CardDescription className="text-xs">Informe o segmento para buscar concorrentes</CardDescription>
           </CardHeader>
           <CardContent className="space-y-2">
             <Input
               type="text"
-              placeholder="Ex: padaria, farmácia, restaurante"
+              placeholder="Ex: academias, farmácias, petshops"
               value={businessSegment}
               onChange={(e) => setBusinessSegment(e.target.value)}
-              className="border-purple-200 focus:border-purple-500 focus:ring-purple-500"
+              className="border-sky-200 focus:border-sky-500 focus:ring-sky-500"
             />
-            <p className="text-xs text-yellow-600">⚠️ Será usado para buscar concorrentes próximos</p>
+            <p className="text-xs text-yellow-600">⚠️ Usado para listar concorrentes via Google Places</p>
           </CardContent>
         </Card>
 
-        {/* Estilo do Mapa */}
-        <Card className="border-0 shadow-sm">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base font-semibold">Estilo do Mapa</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <div className="flex gap-2">
-              <Button
-                variant={mapStyle === 'positron' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setMapStyle('positron')}
-                className="flex-1"
-              >
-                Claro
-              </Button>
-              <Button
-                variant={mapStyle === 'voyager' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setMapStyle('voyager')}
-                className="flex-1"
-              >
-                Detalhado
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Camadas de Dados */}
-        <Card className="border-0 shadow-sm">
+        <Card className={panelCardClass}>
           <CardHeader className="pb-3">
             <CardTitle className="text-base font-semibold">Camadas de Dados</CardTitle>
             <CardDescription className="text-xs">Selecione as informações a visualizar</CardDescription>
@@ -361,7 +267,10 @@ export default function MapShell({ tenantId, loading = false }: MapShellProps) {
                 <Switch
                   checked={value}
                   onCheckedChange={(checked) =>
-                    setLayers({ ...layers, [key]: checked })
+                    setLayers({
+                      ...layers,
+                      [key]: checked,
+                    })
                   }
                 />
               </div>
@@ -369,11 +278,10 @@ export default function MapShell({ tenantId, loading = false }: MapShellProps) {
           </CardContent>
         </Card>
 
-        {/* Botão de Executar Consulta */}
         <Button
           onClick={handleQuickQuery}
           disabled={searching || !marker}
-          className="w-full h-11 text-base font-semibold bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-lg shadow-md"
+          className="w-full h-11 text-base font-semibold bg-gradient-to-r from-sky-500 via-sky-600 to-indigo-600 hover:from-sky-600 hover:via-sky-700 hover:to-indigo-700 text-white rounded-xl shadow-[0_15px_35px_rgba(56,131,255,0.45)]"
         >
           {searching ? (
             <>
@@ -392,83 +300,70 @@ export default function MapShell({ tenantId, loading = false }: MapShellProps) {
   };
 
   return (
-    <div className="flex h-full gap-4 bg-gray-50">
-      {/* Mapa */}
-      <div className="flex-1 rounded-lg overflow-hidden shadow-lg">
+    <div className="flex h-full gap-4 bg-[#040617]">
+      <div className="relative flex-1 rounded-3xl overflow-hidden shadow-[0_40px_120px_-45px_rgba(79,199,255,0.65)] border border-white/5">
         <Map
           ref={mapRef}
           initialViewState={viewport}
           style={{ width: "100%", height: "100%" }}
           mapStyle={mapStyleUrl}
-          onMove={(evt) => setViewport(evt.viewState)}
+          onLoad={handleMapLoad}
+          onMove={(evt) => {
+            setViewport(evt.viewState);
+            updateAutocompleteBounds();
+          }}
           onClick={(e) => {
             const { lng, lat } = e.lngLat;
             setMarker({ lat, lng });
-            setAddressLabel(`${lat.toFixed(4)}, ${lng.toFixed(4)}`);
+            setSelectedAddress("");
             setSearchAddress("");
           }}
         >
-          {/* Círculo Geodésico */}
           {circleData && (
             <Source id="circle-source" type="geojson" data={circleData}>
               <Layer
                 id="circle-fill"
                 type="fill"
                 paint={{
-                  "fill-color": "#4ade80",
-                  "fill-opacity": 0.1,
+                  "fill-color": spaceDataThemeConstants.PRIMARY_GLOW,
+                  "fill-opacity": 0.12,
                 }}
               />
               <Layer
                 id="circle-stroke"
                 type="line"
                 paint={{
-                  "line-color": "#22c55e",
-                  "line-width": 2,
+                  "line-color": spaceDataThemeConstants.SECONDARY_GLOW,
+                  "line-width": 2.2,
+                  "line-opacity": 0.9,
                 }}
               />
             </Source>
           )}
 
-          {/* Marcador */}
           {marker && (
-            <Marker
-              longitude={marker.lng}
-              latitude={marker.lat}
-              anchor="bottom"
-            >
-              <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-green-600 rounded-full border-3 border-white shadow-lg flex items-center justify-center cursor-move transform hover:scale-110 transition-transform">
-                <MapPin className="w-5 h-5 text-white" />
+            <Marker longitude={marker.lng} latitude={marker.lat} anchor="bottom">
+              <div className="relative">
+                <div className="absolute inset-1 rounded-full bg-[radial-gradient(circle_at_30%_30%,rgba(138,245,255,0.9),rgba(23,133,255,0.4))] blur-sm opacity-80" />
+                <div className="w-11 h-11 bg-gradient-to-br from-cyan-300 via-sky-500 to-blue-600 rounded-full border border-white/40 shadow-[0_15px_45px_rgba(79,199,255,0.5)] flex items-center justify-center cursor-move transform hover:scale-110 transition-transform relative">
+                  <MapPin className="w-5 h-5 text-white drop-shadow" />
+                </div>
               </div>
             </Marker>
           )}
-
-          {/* Marcadores de Concorrentes */}
-          {competitors.map((competitor, idx) => (
-            <Marker
-              key={idx}
-              longitude={competitor.lng}
-              latitude={competitor.lat}
-              anchor="bottom"
-            >
-              <div className="w-8 h-8 bg-blue-500 rounded-full border-2 border-white shadow-lg flex items-center justify-center text-white text-xs font-bold hover:scale-125 transition-transform">
-                {idx + 1}
-              </div>
-            </Marker>
-          ))}
         </Map>
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(79,199,255,0.25),transparent_55%)]" />
+        <div
+          className="pointer-events-none absolute inset-0 opacity-80 mix-blend-screen"
+          style={{ background: "linear-gradient(140deg, rgba(9,18,56,0.85) 0%, rgba(15,42,122,0.55) 45%, rgba(14,95,128,0.35) 100%)" }}
+        />
+        <div className="pointer-events-none absolute inset-0 border border-white/10 rounded-3xl" />
       </div>
 
-      {/* Painel Lateral */}
-      <div className="w-96 bg-white rounded-lg shadow-lg overflow-hidden flex flex-col">
-        <div className="bg-gradient-to-r from-green-50 to-blue-50 border-b border-gray-200 p-4 flex items-center justify-between">
+      <div className="w-96 bg-white/95 backdrop-blur rounded-3xl shadow-[0_35px_120px_-45px_rgba(13,31,79,0.8)] overflow-hidden flex flex-col border border-white/60">
+        <div className="bg-gradient-to-r from-sky-100 via-cyan-100 to-transparent border-b border-white/60 p-4 flex items-center justify-between">
           {queryResult && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleBack}
-              className="flex items-center gap-2 text-green-600 hover:text-green-700"
-            >
+            <Button variant="ghost" size="sm" onClick={handleBack} className="flex items-center gap-2 text-sky-700 hover:text-sky-800">
               <ArrowLeft className="w-4 h-4" />
               Voltar
             </Button>
@@ -476,24 +371,11 @@ export default function MapShell({ tenantId, loading = false }: MapShellProps) {
           <h2 className="text-lg font-bold text-gray-800">
             {queryResult ? "Resultados da Análise" : "Análise de Localização"}
           </h2>
-          {competitors.length > 0 && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleExportCSV}
-              className="flex items-center gap-2 text-blue-600 hover:text-blue-700"
-              title="Exportar concorrentes como CSV"
-            >
-              <Download className="w-4 h-4" />
-            </Button>
-          )}
+          <div className="w-10" />
         </div>
-        
-        <div className="flex-1 overflow-y-auto p-4">
-          {renderSidePanel()}
-        </div>
+
+        <div className="flex-1 overflow-y-auto p-4">{renderSidePanel()}</div>
       </div>
     </div>
   );
 }
-
