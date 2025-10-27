@@ -7,4 +7,8 @@ export const ENV = {
   isProduction: process.env.NODE_ENV === "production",
   forgeApiUrl: process.env.BUILT_IN_FORGE_API_URL ?? "",
   forgeApiKey: process.env.BUILT_IN_FORGE_API_KEY ?? "",
+  spaceApiBaseUrl: process.env.SPACE_API_BASE_URL ?? "",
+  spaceApiKey: process.env.SPACE_API_KEY ?? "",
+  spaceDefaultRadius: parseInt(process.env.SPACE_DEFAULT_RADIUS ?? "1500"),
+  spaceMaxRadius: parseInt(process.env.SPACE_MAX_RADIUS ?? "5000"),
 };

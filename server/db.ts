@@ -1,6 +1,17 @@
-import { eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users } from "../drizzle/schema";
+import { 
+  InsertUser, 
+  users, 
+  tenants, 
+  memberships, 
+  studies,
+  quickQueries,
+  planUsage,
+  auditLogs,
+  Tenant,
+  Membership
+} from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -56,8 +67,8 @@ export async function upsertUser(user: InsertUser): Promise<void> {
       values.role = user.role;
       updateSet.role = user.role;
     } else if (user.openId === ENV.ownerOpenId) {
-      values.role = 'admin';
-      updateSet.role = 'admin';
+      values.role = 'admin_bp';
+      updateSet.role = 'admin_bp';
     }
 
     if (!values.lastSignedIn) {
@@ -89,4 +100,186 @@ export async function getUserByOpenId(openId: string) {
   return result.length > 0 ? result[0] : undefined;
 }
 
-// TODO: add feature queries here as your schema grows.
+// Multi-tenant queries
+
+export async function getUserMemberships(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  const result = await db
+    .select({
+      membership: memberships,
+      tenant: tenants,
+    })
+    .from(memberships)
+    .leftJoin(tenants, eq(memberships.tenantId, tenants.id))
+    .where(eq(memberships.userId, userId));
+
+  return result;
+}
+
+export async function getTenantById(tenantId: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db.select().from(tenants).where(eq(tenants.id, tenantId)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function getUserMembershipInTenant(userId: number, tenantId: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db
+    .select()
+    .from(memberships)
+    .where(and(eq(memberships.userId, userId), eq(memberships.tenantId, tenantId)))
+    .limit(1);
+
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function getTenantMembers(tenantId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  const result = await db
+    .select({
+      membership: memberships,
+      user: users,
+    })
+    .from(memberships)
+    .leftJoin(users, eq(memberships.userId, users.id))
+    .where(eq(memberships.tenantId, tenantId));
+
+  return result;
+}
+
+// Plan usage queries
+
+export async function getCurrentPlanUsage(tenantId: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const now = new Date();
+  const periodStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  const periodEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+
+  const result = await db
+    .select()
+    .from(planUsage)
+    .where(
+      and(
+        eq(planUsage.tenantId, tenantId),
+        eq(planUsage.periodStart, periodStart)
+      )
+    )
+    .limit(1);
+
+  if (result.length > 0) {
+    return result[0];
+  }
+
+  // Create new usage record for current period
+  const [newUsage] = await db.insert(planUsage).values({
+    tenantId,
+    periodStart,
+    periodEnd,
+    quickQueriesUsed: 0,
+    studiesOpened: 0,
+  }).$returningId();
+
+  const newResult = await db.select().from(planUsage).where(eq(planUsage.id, newUsage.id)).limit(1);
+  return newResult[0];
+}
+
+export async function incrementQuickQueryUsage(tenantId: number) {
+  const db = await getDb();
+  if (!db) return;
+
+  const usage = await getCurrentPlanUsage(tenantId);
+  if (!usage) return;
+
+  await db
+    .update(planUsage)
+    .set({ quickQueriesUsed: usage.quickQueriesUsed + 1 })
+    .where(eq(planUsage.id, usage.id));
+}
+
+export async function incrementStudyUsage(tenantId: number) {
+  const db = await getDb();
+  if (!db) return;
+
+  const usage = await getCurrentPlanUsage(tenantId);
+  if (!usage) return;
+
+  await db
+    .update(planUsage)
+    .set({ studiesOpened: usage.studiesOpened + 1 })
+    .where(eq(planUsage.id, usage.id));
+}
+
+// Audit log
+
+export async function createAuditLog(log: {
+  tenantId?: number;
+  actorId?: number;
+  action: string;
+  targetType?: string;
+  targetId?: number;
+  metaJson?: Record<string, any>;
+}) {
+  const db = await getDb();
+  if (!db) return;
+
+  await db.insert(auditLogs).values(log);
+}
+
+// Quick queries
+
+export async function getTenantQuickQueries(tenantId: number, limit = 20, offset = 0) {
+  const db = await getDb();
+  if (!db) return [];
+
+  const result = await db
+    .select({
+      query: quickQueries,
+      user: users,
+    })
+    .from(quickQueries)
+    .leftJoin(users, eq(quickQueries.userId, users.id))
+    .where(eq(quickQueries.tenantId, tenantId))
+    .orderBy(desc(quickQueries.createdAt))
+    .limit(limit)
+    .offset(offset);
+
+  return result;
+}
+
+// Studies
+
+export async function getTenantStudies(tenantId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  const result = await db
+    .select({
+      study: studies,
+      creator: users,
+    })
+    .from(studies)
+    .leftJoin(users, eq(studies.createdBy, users.id))
+    .where(eq(studies.tenantId, tenantId))
+    .orderBy(desc(studies.createdAt));
+
+  return result;
+}
+
+export async function getStudyById(studyId: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db.select().from(studies).where(eq(studies.id, studyId)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
