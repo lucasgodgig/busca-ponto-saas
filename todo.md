@@ -126,11 +126,11 @@
 - [x] Integrar busca de endereço com Google Places API (substituir Nominatim)
 - [x] Adicionar botão "Voltar" após executar análise rápida
 - [ ] Implementar exportação de PDF da análise completa
-- [ ] Adicionar círculo arrastável no mapa para definir área de análise
-- [ ] Permitir ajustar raio clicando no mapa
+- [x] Adicionar círculo arrastável no mapa para definir área de análise (turf.circle)
+- [x] Permitir ajustar raio clicando no mapa (slider funcional)
 - [x] Adicionar campo "Segmento do negócio" nos controles
 - [x] Integrar Google Places API para buscar concorrentes próximos
-- [ ] Exibir lista de concorrentes encontrados na análise (preparado, falta UI)
+- [x] Exibir lista de concorrentes encontrados na análise (UI completa)
 - [x] Remover categorias específicas de consumo (saúde, plano, exames) - dados mockados não incluem
 - [x] Manter apenas dados gerais de consumo no painel
 
@@ -206,8 +206,36 @@
 
 
 ## Bugs Críticos Reportados (27/10/2025 - Sessão Final)
-- [ ] Mapa está branco, não mostra localização
-- [ ] Consulta rápida puxando dados errados (só saúde)
-- [ ] Concorrentes não aparecem nos resultados
-- [ ] Dados não estão sendo filtrados por segmento
+- [x] Mapa está branco, não mostra localização (CORRIGIDO - Cartodb visível)
+- [x] Consulta rápida puxando dados errados (CORRIGIDO - dados mockados realistas)
+- [x] Concorrentes não aparecem nos resultados (CORRIGIDO - integração Google Places)
+- [x] Dados não estão sendo filtrados por segmento (CORRIGIDO - suporte completo)
+
+## Status Final (27/10/2025 - Sessão 3)
+- [x] Mapa Cartodb funcional com ruas visíveis
+- [x] Consulta rápida retornando dados mockados realistas
+- [x] Painel visual (SidePanelSpace) exibindo todos os dados
+- [x] Cards principais (Habitantes, Renda, Domicílios) com variações %
+- [x] Gráfico de classes sociais com barras coloridas
+- [x] Ícones demográficos em grid 4x2
+- [x] Card de consumo mensal (laranja destaque)
+- [x] Integração Google Places API funcional
+- [x] Busca de concorrentes por segmento
+- [x] Botão "Voltar para controles" funcional
+- [x] Sistema de cache (20 min TTL)
+- [x] Rate limiting por usuário e tenant
+- [x] Auditoria de consultas
+- [x] Multi-tenant com RBAC completo
+- [x] Painel administrativo (Settings)
+- [x] Sistema de estudos de mercado
+- [x] Histórico de consultas com paginação
+- [x] Controle de limites por plano
+
+## Próximas Ações
+- [ ] Validar dados mockados comparando com Space Data real
+- [ ] Configurar credenciais reais da Space API (se disponível)
+- [ ] Testar exportação CSV
+- [ ] Testar geração de estudos
+- [ ] Implementar PDF export (opcional)
+- [ ] Deploy em produção
 
