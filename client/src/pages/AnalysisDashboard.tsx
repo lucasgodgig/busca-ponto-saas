@@ -167,15 +167,7 @@ export default function AnalysisDashboard() {
               <h1 className="text-3xl font-bold text-gray-900">Análise de Localização</h1>
               <p className="text-sm text-gray-600 mt-1">Dashboard de dados demográficos e de mercado</p>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => window.location.href = "/app"}
-              className="gap-2"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Voltar ao Mapa
-            </Button>
+
           </div>
 
           {/* Cards principais */}

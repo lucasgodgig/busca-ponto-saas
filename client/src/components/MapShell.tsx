@@ -18,6 +18,7 @@ export default function MapShell({ tenantId, loading = false }: MapShellProps) {
   const mapRef = useRef<MapRef>(null);
   const themeCleanupRef = useRef<(() => void) | null>(null);
 
+
   const [viewport, setViewport] = useState({
     latitude: -23.55052,
     longitude: -46.633308,
@@ -125,6 +126,15 @@ export default function MapShell({ tenantId, loading = false }: MapShellProps) {
     }
   }, [radius, marker]);
 
+  // Handle reset
+  const handleReset = useCallback(() => {
+    setMarker(null);
+    setSpaceData(null);
+    setSpaceError(null);
+    clearAnalysisCircle(mapRef.current?.getMap());
+
+  }, []);
+
   return (
     <div className="flex h-screen w-full bg-gray-100">
       {/* Left Panel */}
@@ -134,12 +144,7 @@ export default function MapShell({ tenantId, loading = false }: MapShellProps) {
         segment={segment}
         onSegmentChange={setSegment}
         loading={spaceLoading}
-        onReset={() => {
-          setMarker(null);
-          setSpaceData(null);
-          setSpaceError(null);
-          clearAnalysisCircle(mapRef.current?.getMap());
-        }}
+        onReset={handleReset}
       />
 
       {/* Map Container */}

@@ -141,10 +141,7 @@ export default function DataPanel({ data, loading }: DataPanelProps) {
                   Potencial de Consumo
                 </p>
                 <p className="text-2xl font-bold text-blue-900">
-                  R$ {(totals.consumo_total / 1000).toLocaleString("pt-BR", {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}
+                  R$ {(totals.consumo_total / 1000000).toFixed(1).replace('.', ',')}
                   M
                 </p>
                 <p className="text-xs text-blue-600">Total na área</p>
