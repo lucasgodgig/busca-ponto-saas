@@ -1,4 +1,4 @@
-import { useLocation, useParams } from "wouter";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -21,11 +21,8 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 export default function GeneratedStudiesListPage() {
-  const { tenantId } = useParams<{ tenantId: string }>();
-  const { data: studies, isLoading } = trpc.generatedStudies.list.useQuery(
-    { tenantId: parseInt(tenantId || "0") },
-    { enabled: !!tenantId }
-  );
+  const [, setLocation] = useLocation();
+  const { data: studies, isLoading } = trpc.generatedStudies.list.useQuery();
 
   if (isLoading) {
     return <div className="p-4">Carregando estudos...</div>;
@@ -39,7 +36,7 @@ export default function GeneratedStudiesListPage() {
           <p className="text-gray-600">Gerencie seus estudos de mercado</p>
         </div>
         <Button asChild>
-          <a href={`/tenant/${tenantId}/generate-study`}>+ Novo Estudo</a>
+          <a href="/generate-study">+ Novo Estudo</a>
         </Button>
       </div>
 
@@ -48,7 +45,7 @@ export default function GeneratedStudiesListPage() {
           <CardContent className="pt-6 text-center">
             <p className="text-gray-500 mb-4">Nenhum estudo criado ainda</p>
             <Button asChild>
-              <a href={`/tenant/${tenantId}/generate-study`}>Criar Primeiro Estudo</a>
+              <a href="/generate-study">Criar Primeiro Estudo</a>
             </Button>
           </CardContent>
         </Card>
@@ -88,7 +85,7 @@ export default function GeneratedStudiesListPage() {
                   </div>
                   <div className="text-right">
                     <Button variant="outline" size="sm" asChild>
-                      <a href={`/tenant/${tenantId}/studies/${study.id}`}>Ver Detalhes</a>
+                      <a href={`/generated-studies/${study.id}`}>Ver Detalhes</a>
                     </Button>
                   </div>
                 </div>

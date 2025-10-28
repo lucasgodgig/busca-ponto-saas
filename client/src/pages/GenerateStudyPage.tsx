@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useLocation, useParams } from "wouter";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -23,7 +23,6 @@ const SEGMENTS = [
 
 export default function GenerateStudyPage() {
   const [, setLocation] = useLocation();
-  const { tenantId } = useParams<{ tenantId: string }>();
   const [title, setTitle] = useState("");
   const [segment, setSegment] = useState("");
   const [lat, setLat] = useState(-23.55);
@@ -43,7 +42,6 @@ export default function GenerateStudyPage() {
     setIsLoading(true);
     try {
       const result = await createMutation.mutateAsync({
-        tenantId: parseInt(tenantId || "0"),
         title,
         segment,
         lat,
@@ -53,7 +51,7 @@ export default function GenerateStudyPage() {
       });
 
       toast.success("Estudo criado com sucesso!");
-      setLocation(`/tenant/${tenantId}/studies/${result.studyId}`);
+      setLocation(`/generated-studies/${result.studyId}`);
     } catch (error) {
       toast.error("Erro ao criar estudo");
       console.error(error);
@@ -164,7 +162,7 @@ export default function GenerateStudyPage() {
             <div className="flex gap-2 pt-4">
               <Button
                 variant="outline"
-                onClick={() => setLocation(`/tenant/${tenantId}/studies`)}
+                onClick={() => setLocation("/generated-studies")}
               >
                 Cancelar
               </Button>

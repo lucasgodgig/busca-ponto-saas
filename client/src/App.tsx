@@ -30,9 +30,9 @@ function Router() {
       <Route path={"/studies/new"} component={NewStudy} />
       <Route path={"/settings"} component={Settings} />
       <Route path={"/analysis"} component={AnalysisDashboard} />
-      <Route path={"/tenant/:tenantId/generate-study"} component={GenerateStudyPage} />
-      <Route path={"/tenant/:tenantId/studies"} component={GeneratedStudiesListPage} />
-      <Route path={"/tenant/:tenantId/studies/:studyId"} component={GeneratedStudyDetailsPage} />
+      <Route path={"/generate-study"} component={GenerateStudyPage} />
+      <Route path={"/generated-studies"} component={GeneratedStudiesListPage} />
+      <Route path={"/generated-studies/:studyId"} component={GeneratedStudyDetailsPage} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

@@ -539,6 +539,143 @@ export const appRouter = router({
       }),
   }),
 
+  // Generated Studies
+  generatedStudies: router({
+    create: protectedProcedure
+      .input(z.object({
+        title: z.string().min(1),
+        segment: z.string().min(1),
+        lat: z.number().min(-90).max(90),
+        lng: z.number().min(-180).max(180),
+        radiusM: z.number().int().positive(),
+        notes: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        if (!ctx.user) {
+          throw new TRPCError({ code: "UNAUTHORIZED" });
+        }
+
+        const dbInstance = await db.getDb();
+        if (!dbInstance) {
+          throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database nao disponivel" });
+        }
+
+        const memberships = await db.getUserMemberships(ctx.user.id);
+        if (!memberships.length) {
+          throw new TRPCError({ code: "FORBIDDEN", message: "Usuario nao pertence a nenhum tenant" });
+        }
+
+        const tenantId = memberships[0].membership.tenantId;
+
+        const { generatedStudies } = await import("../drizzle/schema");
+        const result = await dbInstance
+          .insert(generatedStudies)
+          .values({
+            tenantId,
+            createdBy: ctx.user.id,
+            title: input.title,
+            segment: input.segment,
+            lat: input.lat.toString(),
+            lng: input.lng.toString(),
+            radiusM: input.radiusM,
+            notes: input.notes,
+            status: "queued",
+          });
+
+        const studyId = (result as any).insertId;
+
+        await db.createAuditLog({
+          tenantId,
+          actorId: ctx.user.id,
+          action: "generated_study_created",
+          targetType: "generated_study",
+          targetId: studyId,
+          metaJson: input,
+        });
+
+        return { studyId };
+      }),
+
+    list: protectedProcedure
+      .query(async ({ ctx }) => {
+        if (!ctx.user) {
+          throw new TRPCError({ code: "UNAUTHORIZED" });
+        }
+
+        const dbInstance = await db.getDb();
+        if (!dbInstance) {
+          throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database nao disponivel" });
+        }
+
+        const memberships = await db.getUserMemberships(ctx.user.id);
+        if (!memberships.length) {
+          throw new TRPCError({ code: "FORBIDDEN", message: "Usuario nao pertence a nenhum tenant" });
+        }
+
+        const tenantId = memberships[0].membership.tenantId;
+
+        const { generatedStudies } = await import("../drizzle/schema");
+        const { eq } = await import("drizzle-orm");
+
+        const studies = await dbInstance
+          .select()
+          .from(generatedStudies)
+          .where(eq(generatedStudies.tenantId, tenantId))
+          .orderBy((t: any) => t.createdAt);
+
+        return studies.map((s: any) => ({
+          ...s,
+          lat: parseFloat(s.lat),
+          lng: parseFloat(s.lng),
+        }));
+      }),
+
+    get: protectedProcedure
+      .input(z.object({ studyId: z.number() }))
+      .query(async ({ ctx, input }) => {
+        if (!ctx.user) {
+          throw new TRPCError({ code: "UNAUTHORIZED" });
+        }
+
+        const dbInstance = await db.getDb();
+        if (!dbInstance) {
+          throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database nao disponivel" });
+        }
+
+        const memberships = await db.getUserMemberships(ctx.user.id);
+        if (!memberships.length) {
+          throw new TRPCError({ code: "FORBIDDEN", message: "Usuario nao pertence a nenhum tenant" });
+        }
+
+        const tenantId = memberships[0].membership.tenantId;
+
+        const { generatedStudies } = await import("../drizzle/schema");
+        const { eq, and } = await import("drizzle-orm");
+
+        const studies = await dbInstance
+          .select()
+          .from(generatedStudies)
+          .where(
+            and(
+              eq(generatedStudies.id, input.studyId),
+              eq(generatedStudies.tenantId, tenantId)
+            )
+          )
+          .limit(1);
+
+        if (!studies.length) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Estudo nao encontrado" });
+        }
+
+        const study = studies[0];
+        return {
+          ...study,
+          lat: parseFloat(study.lat),
+          lng: parseFloat(study.lng),
+        };
+      }),
+  }),
+
   // Admin BP routes
   admin: router({
     // Atualizar limites de um tenant

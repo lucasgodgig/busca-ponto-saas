@@ -1,4 +1,4 @@
-import { useLocation, useParams } from "wouter";
+import { useParams } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -13,13 +13,10 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 export default function GeneratedStudyDetailsPage() {
-  const { tenantId, studyId } = useParams<{ tenantId: string; studyId: string }>();
+  const { studyId } = useParams<{ studyId: string }>();
   const { data: study, isLoading } = trpc.generatedStudies.get.useQuery(
-    {
-      tenantId: parseInt(tenantId || "0"),
-      studyId: parseInt(studyId || "0"),
-    },
-    { enabled: !!tenantId && !!studyId }
+    { studyId: parseInt(studyId || "0") },
+    { enabled: !!studyId }
   );
 
   if (isLoading) {
@@ -33,7 +30,7 @@ export default function GeneratedStudyDetailsPage() {
   return (
     <div className="p-4 max-w-4xl mx-auto">
       <Button variant="ghost" className="mb-4" asChild>
-        <a href={`/tenant/${tenantId}/studies`}>
+        <a href="/generated-studies">
           <ArrowLeft className="w-4 h-4 mr-2" />
           Voltar
         </a>

@@ -1,12 +1,13 @@
 # Busca Ponto SaaS - TODO
 
-## Status: ✅ CONCLUÍDO - TODAS AS 9 FASES IMPLEMENTADAS
+## Status: ✅ CONCLUÍDO - TODAS AS 9 FASES IMPLEMENTADAS + CORREÇÃO 404
 
-**Versão Atual:** 4dd6a6a3
-**Data:** 28/10/2025
+**Versão Atual:** 9973be0f
+**Data:** 28/10/2025 (Sessão 5)
 **Desenvolvedor:** Manus AI
 **Features:** server, db, user
 **Servidor:** ✅ Running na porta 3000
+**Último Fix:** Corrigido erro 404 ao visualizar detalhes do estudo
 
 ---
 
@@ -506,4 +507,15 @@
 ---
 
 **Projeto 100% Funcional e Pronto para Testes! 🎉**
+
+
+
+
+## Bugs Corrigidos (28/10/2025 - Sessão 5)
+- [x] Erro 404 ao clicar em "Ver Detalhes" do estudo (RESOLVIDO)
+  - Adicionado campos tenantId e createdBy à tabela generatedStudies
+  - Implementado endpoints TRPC (create, list, get) com validação de tenant
+  - Simplificado rotas para não precisar de tenantId na URL
+  - Testado fluxo completo: criar estudo → listar → visualizar detalhes ✅
+  - Banco de dados: migração 0004_melodic_jimmy_woo.sql aplicada com sucesso
 

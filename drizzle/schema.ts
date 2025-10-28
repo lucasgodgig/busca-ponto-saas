@@ -300,6 +300,8 @@ export const inviteCodesRelations = relations(inviteCodes, ({ one }) => ({
  */
 export const generatedStudies = mysqlTable('generatedStudies', {
   id: int('id').autoincrement().primaryKey(),
+  tenantId: int('tenantId').notNull(),
+  createdBy: int('createdBy').notNull(),
   title: varchar('title', { length: 255 }).notNull(),
   segment: varchar('segment', { length: 255 }).notNull(),
   lat: varchar('lat', { length: 50 }).notNull(),
@@ -314,7 +316,16 @@ export const generatedStudies = mysqlTable('generatedStudies', {
   updatedAt: timestamp('updatedAt').defaultNow().onUpdateNow().notNull(),
 });
 
-export const generatedStudiesRelations = relations(generatedStudies, ({ one }) => ({}));
+export const generatedStudiesRelations = relations(generatedStudies, ({ one }) => ({
+  tenant: one(tenants, {
+    fields: [generatedStudies.tenantId],
+    references: [tenants.id],
+  }),
+  creator: one(users, {
+    fields: [generatedStudies.createdBy],
+    references: [users.id],
+  }),
+}));
 
 // Type exports
 export type User = typeof users.$inferSelect;
