@@ -567,3 +567,9 @@
 - [x] Trocar "Análise de Localização" por "Mapa Interativo" no título (CORRIGIDO)
 - [x] Adicionar disclaimer: "Dados conectados de ferramentas oficiais com base no Censo. Para informações específicas, consulte o time da Busca Ponto" (CORRIGIDO)
 
+
+
+
+## Bugs Reportados (28/10/2025 - Sessão 8)
+- [x] AddressSearch perde foco quando sugestões aparecem durante a digitação (pausa a digitação) - CORRIGIDO removendo suggestions da dependência do useEffect
+

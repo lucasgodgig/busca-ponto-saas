@@ -22,6 +22,7 @@ declare global {
 
 export default function AddressSearch({ onAddressSelect, loading }: AddressSearchProps) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const suggestionsRef = useRef<Suggestion[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedAddress, setSelectedAddress] = useState<string>("");
@@ -63,6 +64,7 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
 
     if (value.length < 2) {
       setSuggestions([]);
+      suggestionsRef.current = [];
       setShowSuggestions(false);
       return;
     }
@@ -88,9 +90,15 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
               description: prediction.description,
               placeId: prediction.place_id,
             }));
+            suggestionsRef.current = newSuggestions;
             setSuggestions(newSuggestions);
             setShowSuggestions(true);
             setError(null);
+            
+            // Restaurar foco no input após atualizar as sugestões
+            if (inputRef.current) {
+              inputRef.current.focus();
+            }
           } else if (status !== window.google.maps.places.PlacesServiceStatus.ZERO_RESULTS) {
             setError("Erro ao buscar sugestões");
           }
@@ -100,7 +108,7 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
     }, 300);
   }, []);
 
-  // Adicionar listener ao input
+  // Adicionar listener ao input - apenas uma vez
   useEffect(() => {
     const input = inputRef.current;
     if (!input) return;
@@ -111,22 +119,35 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
     };
 
     const handleFocus = () => {
-      if (suggestions.length > 0) {
+      if (suggestionsRef.current.length > 0) {
         setShowSuggestions(true);
       }
     };
 
+    const handleBlur = (e: FocusEvent) => {
+      // Verificar se o foco saiu para um elemento fora do componente
+      // Usar setTimeout para permitir que o clique na sugestão seja processado
+      setTimeout(() => {
+        const relatedTarget = e.relatedTarget as HTMLElement;
+        if (!relatedTarget || !relatedTarget.closest('[class*="cursor-pointer"]')) {
+          setShowSuggestions(false);
+        }
+      }, 100);
+    };
+
     input.addEventListener("input", handleInput);
     input.addEventListener("focus", handleFocus);
+    input.addEventListener("blur", handleBlur);
 
     return () => {
       input.removeEventListener("input", handleInput);
       input.removeEventListener("focus", handleFocus);
+      input.removeEventListener("blur", handleBlur);
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
       }
     };
-  }, [suggestions, handleInputChange]);
+  }, [handleInputChange]); // Apenas handleInputChange como dependência
 
   // Handler para selecionar uma sugestão
   const handleSelectSuggestion = useCallback((suggestion: Suggestion) => {
@@ -157,6 +178,7 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
           setSelectedAddress(address);
           setError(null);
           setSuggestions([]);
+          suggestionsRef.current = [];
           
           if (inputRef.current) {
             inputRef.current.value = address;
@@ -181,9 +203,11 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
   const handleClear = useCallback(() => {
     if (inputRef.current) {
       inputRef.current.value = "";
+      inputRef.current.focus();
       setSelectedAddress("");
       setError(null);
       setSuggestions([]);
+      suggestionsRef.current = [];
       setShowSuggestions(false);
     }
   }, []);
