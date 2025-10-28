@@ -182,6 +182,9 @@ export default function MapShell({ tenantId, loading = false }: MapShellProps) {
         <div className="space-y-4">
           <SidePanelSpace
             data={queryResult}
+            center={marker}
+            segment={businessSegment}
+            radius={radius[0]}
           />
         </div>
       );

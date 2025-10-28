@@ -13,6 +13,7 @@ import {
   Users as UsersIcon,
   Heart,
 } from "lucide-react";
+import CompetitorsPanel from "./CompetitorsPanel";
 
 interface SidePanelSpaceProps {
   data: any;
@@ -22,6 +23,8 @@ interface SidePanelSpaceProps {
   loading?: boolean;
   address?: string;
   radius?: number;
+  center?: { lat: number; lng: number } | null;
+  segment?: string;
 }
 
 const normalizeNumber = (value: unknown, fallback = 0) => {
@@ -59,6 +62,8 @@ export default function SidePanelSpace({
   loading,
   address,
   radius,
+  center,
+  segment,
 }: SidePanelSpaceProps) {
   if (!data) {
     return (
@@ -254,6 +259,10 @@ export default function SidePanelSpace({
             </div>
           </CardContent>
         </Card>
+
+        {center && segment && (
+          <CompetitorsPanel center={center} radius={areaRadius} segment={segment} />
+        )}
 
         <div className="flex gap-2 sticky bottom-0 bg-background pt-2 pb-2">
           <Button onClick={onSaveArea} variant="outline" className="flex-1" disabled={loading}>

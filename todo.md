@@ -279,3 +279,11 @@
 - [x] Página de validação de código retorna "inválido" mesmo com código correto (CORRIGIDO - redirecionamento para home funcionando)
 - [x] Usuários conseguem acessar /app e /onboarding sem validar código primeiro (CORRIGIDO - bloqueio implementado em ambas as páginas)
 
+
+
+
+## Novas Features Solicitadas (28/10/2025 - Sessão 7)
+- [x] Listar concorrentes em tabela/lista na consulta rápida (não como marcadores no mapa) (CONCLUIDO - CompetitorsPanel integrado)
+- [x] Remover marcadores de concorrentes do mapa (CONCLUIDO - apenas marcador principal)
+- [x] Adicionar seção de "Concorrentes" no painel de resultados com informações (nome, endereço, distância) (CONCLUIDO - painel com sort e export)
+
