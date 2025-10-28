@@ -5,6 +5,7 @@ import { Loader2, MapPin } from "lucide-react";
 import { toast } from "sonner";
 import LeftPanel from "@/components/LeftPanel";
 import DataPanel from "@/components/DataPanel";
+import AddressSearch from "@/components/AddressSearch";
 import { upsertAnalysisCircle, clearAnalysisCircle } from "@/lib/mapCircle";
 import type { SpaceData } from "@/services/spaceClient";
 
@@ -29,6 +30,39 @@ export default function MapShell({ tenantId, loading = false }: MapShellProps) {
   const [spaceLoading, setSpaceLoading] = useState(false);
   const [spaceData, setSpaceData] = useState<SpaceData | null>(null);
   const [spaceError, setSpaceError] = useState<string | null>(null);
+
+  // Handle address selection
+  const handleAddressSelect = useCallback(
+    (lat: number, lng: number, address: string) => {
+      const newMarker = { lat, lng };
+      setMarker(newMarker);
+
+      // Update circle on map
+      const map = mapRef.current?.getMap();
+      if (map) {
+        upsertAnalysisCircle({
+          map,
+          center: [lng, lat],
+          radiusMeters: radius[0],
+        });
+      }
+
+      // Fetch space data
+      setSpaceLoading(true);
+      setSpaceError(null);
+      fetch(`/api/space?lat=${lat}&lng=${lng}&radius=${radius[0]}`)
+        .then((res) => res.json())
+        .then((data) => {
+          setSpaceData(data);
+          setSpaceLoading(false);
+        })
+        .catch((err) => {
+          setSpaceError(err.message);
+          setSpaceLoading(false);
+        });
+    },
+    [radius]
+  );
 
   // Handle map click
   const handleMapClick = useCallback(
@@ -96,18 +130,21 @@ export default function MapShell({ tenantId, loading = false }: MapShellProps) {
         segment={segment}
         onSegmentChange={setSegment}
         loading={spaceLoading}
+        onReset={() => {
+          setMarker(null);
+          setSpaceData(null);
+          setSpaceError(null);
+          clearAnalysisCircle(mapRef.current?.getMap());
+        }}
       />
 
       {/* Map Container */}
       <div className="flex-1 flex flex-col relative">
-        {/* Header with Busca Ponto branding */}
-        <div className="bg-white border-b shadow-sm px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <MapPin className="w-6 h-6 text-blue-600" />
-            <h1 className="text-2xl font-bold text-gray-900">Busca Ponto</h1>
-          </div>
+        {/* Header with search and coordinates */}
+        <div className="flex flex-col gap-3 bg-white border-b p-4">
+          <AddressSearch onAddressSelect={handleAddressSelect} loading={spaceLoading} />
           {marker && (
-            <div className="text-sm text-gray-600">
+            <div className="text-xs text-gray-600">
               Ponto selecionado: {marker.lat.toFixed(4)}, {marker.lng.toFixed(4)}
             </div>
           )}

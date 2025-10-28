@@ -83,12 +83,10 @@ export default function DataPanel({ data, loading }: DataPanelProps) {
               <div>
                 <p className="text-sm text-orange-600 font-medium">Habitantes</p>
                 <p className="text-2xl font-bold text-orange-900">
-                  {head.people.toLocaleString("pt-BR", {
-                    maximumFractionDigits: 0,
-                  })}
+                  {Math.round(head.people).toLocaleString("pt-BR")}
                 </p>
                 <p className="text-xs text-orange-600">
-                  {density} hab/hectare
+                  {parseFloat(density).toLocaleString("pt-BR", { maximumFractionDigits: 2 })} hab/hectare
                 </p>
               </div>
               <Users className="w-10 h-10 text-orange-500 opacity-50" />
@@ -103,7 +101,8 @@ export default function DataPanel({ data, loading }: DataPanelProps) {
                 <p className="text-sm text-green-600 font-medium">Renda Média</p>
                 <p className="text-2xl font-bold text-green-900">
                   R$ {head.income.toLocaleString("pt-BR", {
-                    maximumFractionDigits: 1,
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
                   })}
                 </p>
                 <p className="text-xs text-green-600">Renda per capita</p>
@@ -122,7 +121,8 @@ export default function DataPanel({ data, loading }: DataPanelProps) {
                 </p>
                 <p className="text-2xl font-bold text-blue-900">
                   R$ {(totals.consumo_total / 1000000).toLocaleString("pt-BR", {
-                    maximumFractionDigits: 1,
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
                   })}
                   M
                 </p>
@@ -176,7 +176,8 @@ export default function DataPanel({ data, loading }: DataPanelProps) {
             <p className="text-sm text-gray-600 mb-2">Consumo Corrente</p>
             <p className="text-2xl font-bold text-gray-900">
               R$ {(totals.consumo_corrente / 1000000).toLocaleString("pt-BR", {
-                maximumFractionDigits: 1,
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
               })}
               M
             </p>
@@ -188,7 +189,8 @@ export default function DataPanel({ data, loading }: DataPanelProps) {
             <p className="text-sm text-gray-600 mb-2">Despesas</p>
             <p className="text-2xl font-bold text-gray-900">
               R$ {(totals.despesas / 1000000).toLocaleString("pt-BR", {
-                maximumFractionDigits: 1,
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
               })}
               M
             </p>

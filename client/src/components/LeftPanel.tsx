@@ -10,6 +10,7 @@ interface LeftPanelProps {
   segment: string;
   onSegmentChange: (value: string) => void;
   loading?: boolean;
+  onReset?: () => void;
 }
 
 const SEGMENTS = [
@@ -25,14 +26,18 @@ export default function LeftPanel({
   segment,
   onSegmentChange,
   loading = false,
+  onReset,
 }: LeftPanelProps) {
   return (
     <div className="w-80 bg-white shadow-lg flex flex-col h-full overflow-y-auto">
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 border-b">
+      <button
+        onClick={onReset}
+        className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 border-b hover:from-blue-700 hover:to-blue-800 transition text-left"
+      >
         <h1 className="text-2xl font-bold">Busca Ponto</h1>
         <p className="text-sm text-blue-100">Análise de Localização</p>
-      </div>
+      </button>
 
       {/* Content */}
       <div className="flex-1 p-4 space-y-6">
