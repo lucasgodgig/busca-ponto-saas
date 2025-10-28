@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import LeftPanel from "@/components/LeftPanel";
 import DataPanel from "@/components/DataPanel";
 import AddressSearch from "@/components/AddressSearch";
+import PDFReport from "@/components/PDFReport";
 import { upsertAnalysisCircle, clearAnalysisCircle } from "@/lib/mapCircle";
 import type { SpaceData } from "@/services/spaceClient";
 
@@ -27,6 +28,7 @@ export default function MapShell({ tenantId, loading = false, onNavigateHome }: 
   });
 
   const [marker, setMarker] = useState<{ lat: number; lng: number } | null>(null);
+  const [address, setAddress] = useState<string>("");
   const [radius, setRadius] = useState([1500]);
   const [segment, setSegment] = useState("academia");
   const [spaceLoading, setSpaceLoading] = useState(false);
@@ -35,9 +37,10 @@ export default function MapShell({ tenantId, loading = false, onNavigateHome }: 
 
   // Handle address selection
   const handleAddressSelect = useCallback(
-    (lat: number, lng: number, address: string) => {
+    (lat: number, lng: number, addressStr: string) => {
       const newMarker = { lat, lng };
       setMarker(newMarker);
+      setAddress(addressStr);
 
       // Update circle on map
       const map = mapRef.current?.getMap();
@@ -193,6 +196,12 @@ export default function MapShell({ tenantId, loading = false, onNavigateHome }: 
         {/* Info Panel at bottom */}
         {(spaceData || spaceLoading) && (
           <div className="bg-white border-t shadow-lg p-6 overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold">Analise de Dados</h3>
+              {spaceData && (
+                <PDFReport address={address} segment={segment} data={spaceData} />
+              )}
+            </div>
             <DataPanel data={spaceData} loading={spaceLoading} segment={segment} />
           </div>
         )}

@@ -631,3 +631,9 @@
 - [x] Remover categorias específicas do segmento se não tiverem dados (ex: Petshop não deve mostrar Recreação se valor for 0) - CORRIGIDO (filtra valores > 0)
 - [x] Adicionar "Delivery" como opção de segmento que puxa "Alimentação fora do domicílio" - CONCLUÍDO (Delivery adicionado)
 
+
+
+
+## Features Solicitadas (28/10/2025 - Sessão 16)
+- [x] Adicionar botão para imprimir/exportar em PDF com endereço, segmento e todas as informações - CONCLUÍDO (componente PDFReport criado)
+
