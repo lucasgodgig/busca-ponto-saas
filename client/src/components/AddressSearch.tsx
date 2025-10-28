@@ -1,9 +1,17 @@
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect, useState, useCallback } from "react";
 import { Search, Loader2, MapPin, AlertCircle, X } from "lucide-react";
 
 interface AddressSearchProps {
   onAddressSelect: (lat: number, lng: number, address: string) => void;
   loading?: boolean;
+}
+
+interface Suggestion {
+  id: string;
+  description: string;
+  placeId: string;
+  lat?: number;
+  lng?: number;
 }
 
 declare global {
@@ -17,67 +25,168 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedAddress, setSelectedAddress] = useState<string>("");
-  const autocompleteRef = useRef<any>(null);
+  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const autocompleteServiceRef = useRef<any>(null);
+  const placesServiceRef = useRef<any>(null);
+  const sessionTokenRef = useRef<any>(null);
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Inicializar Google Places API uma única vez
   useEffect(() => {
-    // Carregar Google Places Autocomplete
     if (!window.google) {
       setError("Google Maps API não carregada");
       return;
     }
 
+    try {
+      // Criar novo session token para cada busca
+      sessionTokenRef.current = new window.google.maps.places.AutocompleteSessionToken();
+      
+      // Inicializar serviços
+      autocompleteServiceRef.current = new window.google.maps.places.AutocompleteService();
+      placesServiceRef.current = new window.google.maps.places.PlacesService(
+        document.createElement("div")
+      );
+    } catch (err) {
+      console.error("Erro ao carregar Google Places:", err);
+      setError("Erro ao carregar Google Places");
+    }
+  }, []);
+
+  // Handler para input com debounce
+  const handleInputChange = useCallback((value: string) => {
+    // Limpar timer anterior
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    if (value.length < 2) {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+
+    // Debounce de 300ms antes de fazer a requisição
+    debounceTimerRef.current = setTimeout(() => {
+      if (!autocompleteServiceRef.current) return;
+
+      setIsLoading(true);
+      
+      // Buscar predictions
+      autocompleteServiceRef.current.getPlacePredictions(
+        {
+          input: value,
+          componentRestrictions: { country: "br" },
+          sessionToken: sessionTokenRef.current,
+          types: ["geocode", "establishment"], // Incluir estabelecimentos
+        },
+        (predictions: any[], status: string) => {
+          if (status === window.google.maps.places.PlacesServiceStatus.OK && predictions) {
+            const newSuggestions: Suggestion[] = predictions.map((prediction) => ({
+              id: prediction.place_id,
+              description: prediction.description,
+              placeId: prediction.place_id,
+            }));
+            setSuggestions(newSuggestions);
+            setShowSuggestions(true);
+            setError(null);
+          } else if (status !== window.google.maps.places.PlacesServiceStatus.ZERO_RESULTS) {
+            setError("Erro ao buscar sugestões");
+          }
+          setIsLoading(false);
+        }
+      );
+    }, 300);
+  }, []);
+
+  // Adicionar listener ao input
+  useEffect(() => {
     const input = inputRef.current;
     if (!input) return;
 
-    try {
-      // Criar autocomplete com opções melhoradas
-      autocompleteRef.current = new window.google.maps.places.Autocomplete(input, {
-        types: ["geocode"],
-        componentRestrictions: { country: "br" },
-        fields: ["geometry", "formatted_address", "address_components"],
-      });
+    const handleInput = (e: Event) => {
+      const value = (e.target as HTMLInputElement).value;
+      handleInputChange(value);
+    };
 
-      // Listener para quando um lugar é selecionado
-      autocompleteRef.current.addListener("place_changed", () => {
-        const place = autocompleteRef.current.getPlace();
-
-        if (!place.geometry) {
-          setError("Nenhuma localização encontrada para este endereço");
-          return;
-        }
-
-        const lat = place.geometry.location.lat();
-        const lng = place.geometry.location.lng();
-        const address = place.formatted_address;
-
-        setSelectedAddress(address);
-        setError(null);
-        onAddressSelect(lat, lng, address);
-      });
-
-      // Listener para erros
-      autocompleteRef.current.addListener("invalid_address", () => {
-        setError("Endereço inválido. Tente novamente.");
-      });
-    } catch (err) {
-      setError("Erro ao carregar autocomplete do Google Places");
-    }
-
-    return () => {
-      // Cleanup
-      if (autocompleteRef.current) {
-        window.google.maps.event.clearInstanceListeners(autocompleteRef.current);
+    const handleFocus = () => {
+      if (suggestions.length > 0) {
+        setShowSuggestions(true);
       }
     };
+
+    input.addEventListener("input", handleInput);
+    input.addEventListener("focus", handleFocus);
+
+    return () => {
+      input.removeEventListener("input", handleInput);
+      input.removeEventListener("focus", handleFocus);
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, [suggestions, handleInputChange]);
+
+  // Handler para selecionar uma sugestão
+  const handleSelectSuggestion = useCallback((suggestion: Suggestion) => {
+    console.log('[AddressSearch] handleSelectSuggestion chamado com:', suggestion);
+    if (!placesServiceRef.current) {
+      console.error('[AddressSearch] placesServiceRef.current é null');
+      return;
+    }
+
+    setIsLoading(true);
+    setShowSuggestions(false);
+
+    // Obter detalhes do lugar
+    placesServiceRef.current.getDetails(
+      {
+        placeId: suggestion.placeId,
+        fields: ["geometry", "formatted_address"],
+        sessionToken: sessionTokenRef.current,
+      },
+      (place: any, status: string) => {
+        console.log('[AddressSearch] getDetails callback:', { status, hasGeometry: !!place?.geometry });
+        if (status === window.google.maps.places.PlacesServiceStatus.OK && place.geometry) {
+          const lat = place.geometry.location.lat();
+          const lng = place.geometry.location.lng();
+          const address = place.formatted_address;
+
+          console.log('[AddressSearch] Coordenadas obtidas:', { lat, lng, address });
+          setSelectedAddress(address);
+          setError(null);
+          setSuggestions([]);
+          
+          if (inputRef.current) {
+            inputRef.current.value = address;
+          }
+
+          // Criar novo session token para próxima busca
+          sessionTokenRef.current = new window.google.maps.places.AutocompleteSessionToken();
+
+          // Chamar callback com coordenadas
+          console.log('[AddressSearch] Chamando onAddressSelect com:', { lat, lng, address });
+          onAddressSelect(lat, lng, address);
+        } else {
+          console.error('[AddressSearch] Erro ao obter detalhes:', status);
+          setError("Erro ao obter detalhes do local");
+        }
+        setIsLoading(false);
+      }
+    );
   }, [onAddressSelect]);
 
-  const handleClear = () => {
+  // Handler para limpar input
+  const handleClear = useCallback(() => {
     if (inputRef.current) {
       inputRef.current.value = "";
       setSelectedAddress("");
       setError(null);
+      setSuggestions([]);
+      setShowSuggestions(false);
     }
-  };
+  }, []);
 
   return (
     <div className="w-full">
@@ -107,6 +216,28 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
           )}
         </div>
 
+        {/* Dropdown de sugestões */}
+        {showSuggestions && suggestions.length > 0 && (
+          <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-64 overflow-y-auto">
+            {suggestions.map((suggestion) => (
+              <div
+                key={suggestion.id}
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleSelectSuggestion(suggestion);
+                }}
+                className="w-full text-left px-4 py-3 hover:bg-blue-50 border-b border-gray-100 last:border-b-0 transition-colors flex items-start gap-3 cursor-pointer"
+              >
+                <MapPin className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm text-gray-900 truncate">{suggestion.description}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
         {/* Mensagem de sucesso */}
         {selectedAddress && !error && (
           <div className="mt-2 p-3 bg-green-50 border border-green-200 rounded-lg flex items-start gap-2">
@@ -132,7 +263,7 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
         {/* Dica de uso */}
         {!selectedAddress && !error && (
           <p className="mt-2 text-xs text-gray-500">
-            Digite um endereço, bairro, CEP ou cidade para buscar
+            Digite um endereço, bairro, CEP, cidade ou local específico (Terminal de Ônibus, Estação, etc) para buscar
           </p>
         )}
       </div>

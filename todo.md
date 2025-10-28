@@ -551,3 +551,10 @@
   - Solução: Implementar /api/space/debug, melhorar normalizeSpace com fallbacks, garantir disparo do fetch
   - Checklist: Verificar Network, confirmar /api/space com 200, ajustar mapeamento de nomes
 
+
+
+
+## Bugs Reportados (28/10/2025 - Sessão 7)
+- [x] AddressSearch perde foco a cada 1-2 letras digitadas (precisa clicar novamente) - CORRIGIDO com debounce e useCallback
+- [x] AddressSearch não carrega dados após selecionar um lugar (callback não é chamado) - CORRIGIDO com onMouseDown em vez de onClick
+
