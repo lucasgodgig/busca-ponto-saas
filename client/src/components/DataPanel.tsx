@@ -70,8 +70,9 @@ export default function DataPanel({ data, loading }: DataPanelProps) {
       value: cat.valor,
     }));
 
-  // Calcular densidade populacional
-  const density = head.people > 0 ? (head.people / 1.5).toFixed(2) : "0";
+  // Calcular densidade populacional (head.people já está em milhares, converter para habitantes)
+  const inhabitants = head.people * 1000; // Converter de milhares para habitantes
+  const density = inhabitants > 0 ? (inhabitants / 1.5).toFixed(2) : "0";
 
   return (
     <div className="space-y-4">
@@ -83,7 +84,7 @@ export default function DataPanel({ data, loading }: DataPanelProps) {
               <div>
                 <p className="text-sm text-orange-600 font-medium">Habitantes</p>
                 <p className="text-2xl font-bold text-orange-900">
-                  {Math.round(head.people).toLocaleString("pt-BR")}
+                  {Math.round(inhabitants).toLocaleString("pt-BR")}
                 </p>
                 <p className="text-xs text-orange-600">
                   {parseFloat(density).toLocaleString("pt-BR", { maximumFractionDigits: 2 })} hab/hectare
@@ -100,7 +101,7 @@ export default function DataPanel({ data, loading }: DataPanelProps) {
               <div>
                 <p className="text-sm text-green-600 font-medium">Renda Média</p>
                 <p className="text-2xl font-bold text-green-900">
-                  R$ {head.income.toLocaleString("pt-BR", {
+                  R$ {(head.income * 1000).toLocaleString("pt-BR", {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2,
                   })}
@@ -120,7 +121,7 @@ export default function DataPanel({ data, loading }: DataPanelProps) {
                   Potencial de Consumo
                 </p>
                 <p className="text-2xl font-bold text-blue-900">
-                  R$ {(totals.consumo_total / 1000000).toLocaleString("pt-BR", {
+                  R$ {(totals.consumo_total / 1000).toLocaleString("pt-BR", {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2,
                   })}
