@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { FileDown } from "lucide-react";
+import { useEffect, useRef } from "react";
 import type { SpaceData } from "@/services/spaceClient";
 
 interface PDFReportProps {
@@ -44,6 +45,8 @@ interface PDFReportProps {
 }
 
 export default function PDFReport({ address, segment, data }: PDFReportProps) {
+  const printWindowRef = useRef<Window | null>(null);
+
   const generatePDF = () => {
     const htmlContent = `
       <!DOCTYPE html>
@@ -202,9 +205,6 @@ export default function PDFReport({ address, segment, data }: PDFReportProps) {
             body {
               padding: 0;
             }
-            .no-print {
-              display: none;
-            }
           }
         </style>
       </head>
@@ -320,15 +320,17 @@ export default function PDFReport({ address, segment, data }: PDFReportProps) {
     `;
 
     // Criar um blob com o conteúdo HTML
-    const blob = new Blob([htmlContent], { type: "text/html" });
+    const blob = new Blob([htmlContent], { type: "text/html;charset=utf-8" });
     const url = URL.createObjectURL(blob);
 
     // Abrir em nova aba para impressão
     const printWindow = window.open(url, "_blank");
     if (printWindow) {
-      printWindow.addEventListener("load", () => {
+      printWindowRef.current = printWindow;
+      // Esperar o documento carregar e então abrir o diálogo de impressão
+      setTimeout(() => {
         printWindow.print();
-      });
+      }, 500);
     }
   };
 
