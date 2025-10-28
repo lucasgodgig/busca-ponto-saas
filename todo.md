@@ -558,3 +558,12 @@
 - [x] AddressSearch perde foco a cada 1-2 letras digitadas (precisa clicar novamente) - CORRIGIDO com debounce e useCallback
 - [x] AddressSearch não carrega dados após selecionar um lugar (callback não é chamado) - CORRIGIDO com onMouseDown em vez de onClick
 
+
+
+
+## Melhorias Solicitadas (28/10/2025 - Sessão 7)
+- [x] Mapa fica muito pequeno quando puxa os dados - aumentar tamanho do mapa (CORRIGIDO - mapa 70%, painel 30%)
+- [x] Remover "Ponto selecionado: -23.5518, -46.6158" do painel (CORRIGIDO)
+- [x] Trocar "Análise de Localização" por "Mapa Interativo" no título (CORRIGIDO)
+- [x] Adicionar disclaimer: "Dados conectados de ferramentas oficiais com base no Censo. Para informações específicas, consulte o time da Busca Ponto" (CORRIGIDO)
+

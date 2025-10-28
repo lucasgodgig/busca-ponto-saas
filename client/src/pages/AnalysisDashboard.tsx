@@ -154,20 +154,27 @@ export default function AnalysisDashboard() {
   return (
     <div className="flex h-screen bg-gray-50">
       {/* Mapa à esquerda */}
-      <div className="w-1/2 border-r border-gray-200 relative">
+      <div className="flex-1 border-r border-gray-200 relative">
         <MapShell tenantId={data?.tenantId || ""} />
       </div>
 
       {/* Dashboard à direita */}
-      <div className="w-1/2 overflow-y-auto">
+      <div className="w-[500px] overflow-y-auto">
         <div className="p-6 space-y-6">
           {/* Header */}
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Análise de Localização</h1>
+              <h1 className="text-3xl font-bold text-gray-900">Mapa Interativo</h1>
               <p className="text-sm text-gray-600 mt-1">Dashboard de dados demográficos e de mercado</p>
             </div>
 
+          </div>
+
+          {/* Disclaimer */}
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <p className="text-sm text-blue-900">
+              <span className="font-medium">Dados conectados</span> de ferramentas oficiais com base no Censo. Para informações específicas, consulte o time da Busca Ponto.
+            </p>
           </div>
 
           {/* Cards principais */}

@@ -149,14 +149,9 @@ export default function MapShell({ tenantId, loading = false }: MapShellProps) {
 
       {/* Map Container */}
       <div className="flex-1 flex flex-col relative">
-        {/* Header with search and coordinates */}
+        {/* Header with search */}
         <div className="flex flex-col gap-3 bg-white border-b p-4">
           <AddressSearch onAddressSelect={handleAddressSelect} loading={spaceLoading} />
-          {marker && (
-            <div className="text-xs text-gray-600">
-              Ponto selecionado: {marker.lat.toFixed(4)}, {marker.lng.toFixed(4)}
-            </div>
-          )}
         </div>
 
         {/* Map */}
