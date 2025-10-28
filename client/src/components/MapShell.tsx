@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import LeftPanel from "@/components/LeftPanel";
 import DataPanel from "@/components/DataPanel";
 import AddressSearch from "@/components/AddressSearch";
-import PDFReport from "@/components/PDFReport";
+import { PDFReport } from "@/components/PDFReport";
 import { upsertAnalysisCircle, clearAnalysisCircle } from "@/lib/mapCircle";
 import type { SpaceData } from "@/services/spaceClient";
 
