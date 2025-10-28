@@ -3,8 +3,8 @@ import Map, { MapRef, Marker, Source, Layer } from "react-map-gl/maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { Loader2, MapPin } from "lucide-react";
 import { toast } from "sonner";
-import { trpc } from "@/lib/trpc";
 import LeftPanel from "@/components/LeftPanel";
+import DataPanel from "@/components/DataPanel";
 import { upsertAnalysisCircle, clearAnalysisCircle } from "@/lib/mapCircle";
 import type { SpaceData } from "@/services/spaceClient";
 
@@ -52,14 +52,12 @@ export default function MapShell({ tenantId, loading = false }: MapShellProps) {
       setSpaceError(null);
       
       try {
-        const result = await trpc.space.normalize.mutate({
-          lat: newMarker.lat,
-          lng: newMarker.lng,
-          radius: radius[0],
-        });
+        const response = await fetch(`/api/space?lat=${newMarker.lat}&lng=${newMarker.lng}&radius=${radius[0]}`);
+        const result = await response.json();
         
         if (result.ok && result.data) {
           setSpaceData(result.data);
+          toast.success("Dados carregados com sucesso!");
         } else {
           setSpaceError("Erro ao buscar dados");
           toast.error("Erro ao buscar dados da localização");
@@ -150,28 +148,9 @@ export default function MapShell({ tenantId, loading = false }: MapShellProps) {
         </div>
 
         {/* Info Panel at bottom */}
-        {spaceData && !spaceLoading && (
-          <div className="bg-white border-t shadow-lg p-6">
-            <div className="grid grid-cols-3 gap-6">
-              <div className="text-center">
-                <p className="text-sm text-gray-600">Habitantes</p>
-                <p className="text-2xl font-bold text-blue-600">
-                  {spaceData.head?.people?.toLocaleString() || "0"}
-                </p>
-              </div>
-              <div className="text-center">
-                <p className="text-sm text-gray-600">Renda Média</p>
-                <p className="text-2xl font-bold text-green-600">
-                  R$ {spaceData.head?.income?.toLocaleString() || "0"}
-                </p>
-              </div>
-              <div className="text-center">
-                <p className="text-sm text-gray-600">Potencial de Consumo</p>
-                <p className="text-2xl font-bold text-purple-600">
-                  R$ {spaceData.head?.consumer?.toLocaleString() || "0"}
-                </p>
-              </div>
-            </div>
+        {(spaceData || spaceLoading) && (
+          <div className="bg-white border-t shadow-lg p-6 max-h-96 overflow-y-auto">
+            <DataPanel data={spaceData} loading={spaceLoading} />
           </div>
         )}
 
