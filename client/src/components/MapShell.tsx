@@ -5,6 +5,8 @@ import Map, { MapRef, Marker, Source, Layer } from "react-map-gl/maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { upsertAnalysisCircle, clearAnalysisCircle } from "@/lib/mapCircle";
+
 import { Slider } from "@/components/ui/slider";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
@@ -37,13 +39,10 @@ export default function MapShell({ tenantId, loading = false }: MapShellProps) {
   const [viewport, setViewport] = useState({
     latitude: -23.55052,
     longitude: -46.633308,
-    zoom: 13,
+    zoom: 11,
   });
 
-  const [marker, setMarker] = useState<{ lat: number; lng: number } | null>({
-    lat: -23.55052,
-    lng: -46.633308,
-  });
+  const [marker, setMarker] = useState<{ lat: number; lng: number } | null>(null);
   const [radius, setRadius] = useState([1500]);
 
   const [searchAddress, setSearchAddress] = useState("");
@@ -65,44 +64,7 @@ export default function MapShell({ tenantId, loading = false }: MapShellProps) {
   const [queryResult, setQueryResult] = useState<any>(null);
   const [analysisParams, setAnalysisParams] = useState<AnalysisParams | null>(null);
 
-  // Gerar círculo manualmente sem Turf para evitar propriedades extras
-  const circleData = useMemo(() => {
-    if (!marker) return null;
-    try {
-      const radiusInMeters = radius[0];
-      const points: [number, number][] = [];
-      const steps = 64;
-      const earthRadiusKm = 6371;
-      
-      for (let i = 0; i < steps; i++) {
-        const angle = (i / steps) * (Math.PI * 2);
-        const dx = (radiusInMeters / 1000 / earthRadiusKm) * Math.cos(angle);
-        const dy = (radiusInMeters / 1000 / earthRadiusKm) * Math.sin(angle);
-        
-        const lat = marker.lat + (dy * 180) / Math.PI;
-        const lng = marker.lng + (dx * 180) / (Math.PI * Math.cos((marker.lat * Math.PI) / 180));
-        points.push([lng, lat]);
-      }
-      points.push(points[0]); // Fechar o círculo
-      
-      return {
-        type: "FeatureCollection" as const,
-        features: [
-          {
-            type: "Feature" as const,
-            geometry: {
-              type: "Polygon" as const,
-              coordinates: [points],
-            },
-            properties: {},
-          },
-        ],
-      };
-    } catch (error) {
-      console.error("Erro ao gerar círculo:", error);
-      return null;
-    }
-  }, [marker?.lat, marker?.lng, radius[0]]);
+
 
   const updateAutocompleteBounds = useCallback(() => {
     const mapInstance = mapRef.current?.getMap();
@@ -158,6 +120,16 @@ export default function MapShell({ tenantId, loading = false }: MapShellProps) {
     const trimmedSegment = businessSegment.trim();
 
     try {
+      // Desenhar o círculo no mapa
+      const map = mapRef.current?.getMap();
+      if (map) {
+        upsertAnalysisCircle({
+          map,
+          center: [marker.lng, marker.lat],
+          radiusMeters: radius[0],
+        });
+      }
+
       await spaceQueryMutation.mutateAsync({
         tenantId,
         lat: marker.lat,
@@ -194,6 +166,16 @@ export default function MapShell({ tenantId, loading = false }: MapShellProps) {
     }
   }, []);
 
+  // Cleanup do círculo quando o componente é desmontado
+  useEffect(() => {
+    return () => {
+      const map = mapRef.current?.getMap();
+      if (map) {
+        clearAnalysisCircle(map);
+      }
+    };
+  }, []);
+
   const renderSidePanel = () => {
     if (queryResult) {
       return (
@@ -207,6 +189,18 @@ export default function MapShell({ tenantId, loading = false }: MapShellProps) {
 
     return (
       <div className="space-y-4 overflow-y-auto h-full pb-4">
+        {!marker && (
+          <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-center">
+            <p className="text-sm text-blue-700 font-medium">Clique no mapa para selecionar uma localização</p>
+          </div>
+        )}
+
+        {marker && (
+          <div className="p-3 bg-green-50 border border-green-200 rounded-lg text-center">
+            <p className="text-sm text-green-700 font-medium">Ponto selecionado: {marker.lat.toFixed(4)}, {marker.lng.toFixed(4)}</p>
+          </div>
+        )}
+
         <Card className={panelCardClass}>
           <CardHeader className="pb-3">
             <CardTitle className="text-base font-semibold">Buscar Localização</CardTitle>
@@ -219,81 +213,102 @@ export default function MapShell({ tenantId, loading = false }: MapShellProps) {
               onSelect={handleLocationSelect}
               bounds={autocompleteBounds}
             />
-            <p className="text-xs text-gray-500">Ou clique no mapa para definir um ponto</p>
           </CardContent>
         </Card>
 
-        <Card className={panelCardClass}>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base font-semibold">Raio de Análise</CardTitle>
-            <CardDescription className="text-xs">{radius[0]}m ({(radius[0] / 1000).toFixed(2)}km)</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <Slider value={radius} onValueChange={setRadius} min={500} max={5000} step={100} className="w-full" />
-            <div className="flex justify-between text-xs text-gray-500">
-              <span>500m</span>
-              <span>5km</span>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className={panelCardClass}>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base font-semibold">Segmento do Negócio</CardTitle>
-            <CardDescription className="text-xs">Informe o segmento para buscar concorrentes</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <Input
-              type="text"
-              placeholder="Ex: academias, farmácias, petshops"
-              value={businessSegment}
-              onChange={(e) => setBusinessSegment(e.target.value)}
-              className="border-sky-200 focus:border-sky-500 focus:ring-sky-500"
-            />
-            <p className="text-xs text-yellow-600">⚠️ Usado para listar concorrentes via Google Places</p>
-          </CardContent>
-        </Card>
-
-        <Card className={panelCardClass}>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base font-semibold">Camadas de Dados</CardTitle>
-            <CardDescription className="text-xs">Selecione as informações a visualizar</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {Object.entries(layers).map(([key, value]) => (
-              <div key={key} className="flex items-center justify-between">
-                <Label className="capitalize cursor-pointer text-sm">{key.replace("_", " ")}</Label>
-                <Switch
-                  checked={value}
-                  onCheckedChange={(checked) =>
-                    setLayers({
-                      ...layers,
-                      [key]: checked,
-                    })
-                  }
+        {marker && (
+          <>
+            <Card className={panelCardClass}>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base font-semibold">Raio de Análise</CardTitle>
+                <CardDescription className="text-xs">{radius[0]}m ({(radius[0] / 1000).toFixed(2)}km)</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <Slider
+                  value={radius}
+                  onValueChange={(newRadius) => {
+                    setRadius(newRadius);
+                    // Atualizar círculo no mapa
+                    const map = mapRef.current?.getMap();
+                    if (map && marker) {
+                      upsertAnalysisCircle({
+                        map,
+                        center: [marker.lng, marker.lat],
+                        radiusMeters: newRadius[0],
+                      });
+                    }
+                  }}
+                  min={500}
+                  max={5000}
+                  step={100}
+                  className="w-full"
                 />
-              </div>
-            ))}
-          </CardContent>
-        </Card>
+                <div className="flex justify-between text-xs text-gray-500">
+                  <span>500m</span>
+                  <span>5km</span>
+                </div>
+              </CardContent>
+            </Card>
 
-        <Button
-          onClick={handleQuickQuery}
-          disabled={searching || !marker}
-          className="w-full h-11 text-base font-semibold bg-gradient-to-r from-sky-500 via-sky-600 to-indigo-600 hover:from-sky-600 hover:via-sky-700 hover:to-indigo-700 text-white rounded-xl shadow-[0_15px_35px_rgba(56,131,255,0.45)]"
-        >
-          {searching ? (
-            <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              Executando...
-            </>
-          ) : (
-            <>
-              <Zap className="w-4 h-4 mr-2" />
-              Executar Consulta Rápida
-            </>
-          )}
-        </Button>
+            <Card className={panelCardClass}>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base font-semibold">Segmento do Negócio</CardTitle>
+                <CardDescription className="text-xs">Informe o segmento para buscar concorrentes</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <Input
+                  type="text"
+                  placeholder="Ex: academias, farmácias, petshops"
+                  value={businessSegment}
+                  onChange={(e) => setBusinessSegment(e.target.value)}
+                  className="border-sky-200 focus:border-sky-500 focus:ring-sky-500"
+                />
+                <p className="text-xs text-yellow-600">⚠️ Usado para listar concorrentes via Google Places</p>
+              </CardContent>
+            </Card>
+
+            <Card className={panelCardClass}>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base font-semibold">Camadas de Dados</CardTitle>
+                <CardDescription className="text-xs">Selecione as informações a visualizar</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {Object.entries(layers).map(([key, value]) => (
+                  <div key={key} className="flex items-center justify-between">
+                    <Label className="capitalize cursor-pointer text-sm">{key.replace("_", " ")}</Label>
+                    <Switch
+                      checked={value}
+                      onCheckedChange={(checked) =>
+                        setLayers({
+                          ...layers,
+                          [key]: checked,
+                        })
+                      }
+                    />
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+
+            <Button
+              onClick={handleQuickQuery}
+              disabled={searching}
+              className="w-full h-11 text-base font-semibold bg-gradient-to-r from-sky-500 via-sky-600 to-indigo-600 hover:from-sky-600 hover:via-sky-700 hover:to-indigo-700 text-white rounded-xl shadow-[0_15px_35px_rgba(56,131,255,0.45)]"
+            >
+              {searching ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Executando...
+                </>
+              ) : (
+                <>
+                  <Zap className="w-4 h-4 mr-2" />
+                  Executar Consulta Rápida
+                </>
+              )}
+            </Button>
+          </>
+        )}
       </div>
     );
   };
@@ -319,14 +334,17 @@ export default function MapShell({ tenantId, loading = false }: MapShellProps) {
           }}
         >
           {marker && (
-            <Marker longitude={marker.lng} latitude={marker.lat} anchor="bottom">
-              <div className="relative">
-                <div className="absolute inset-1 rounded-full bg-[radial-gradient(circle_at_30%_30%,rgba(138,245,255,0.9),rgba(23,133,255,0.4))] blur-sm opacity-80" />
-                <div className="w-11 h-11 bg-gradient-to-br from-cyan-300 via-sky-500 to-blue-600 rounded-full border border-white/40 shadow-[0_15px_45px_rgba(79,199,255,0.5)] flex items-center justify-center cursor-move transform hover:scale-110 transition-transform relative">
-                  <MapPin className="w-5 h-5 text-white drop-shadow" />
+            <>
+              <Marker longitude={marker.lng} latitude={marker.lat} anchor="bottom">
+                <div className="relative">
+                  <div className="absolute inset-1 rounded-full bg-[radial-gradient(circle_at_30%_30%,rgba(138,245,255,0.9),rgba(23,133,255,0.4))] blur-sm opacity-80" />
+                  <div className="w-11 h-11 bg-gradient-to-br from-cyan-300 via-sky-500 to-blue-600 rounded-full border border-white/40 shadow-[0_15px_45px_rgba(79,199,255,0.5)] flex items-center justify-center cursor-move transform hover:scale-110 transition-transform relative">
+                    <MapPin className="w-5 h-5 text-white drop-shadow" />
+                  </div>
                 </div>
-              </div>
-            </Marker>
+              </Marker>
+
+            </>
           )}
         </Map>
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(79,199,255,0.25),transparent_55%)]" />

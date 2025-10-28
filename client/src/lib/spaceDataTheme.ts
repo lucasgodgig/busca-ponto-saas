@@ -2,11 +2,11 @@ import type { Map as MapLibreMap, LayerSpecification } from "maplibre-gl";
 
 const isDev = typeof import.meta !== "undefined" ? import.meta.env?.DEV ?? false : false;
 
-const BACKGROUND_COLOR = "#05071b";
-const LAND_COLOR = "#080d2b";
-const WATER_COLOR = "#0d1f4f";
-const PRIMARY_GLOW = "#4fc7ff";
-const SECONDARY_GLOW = "#8af5ff";
+const BACKGROUND_COLOR = "#f5f5f5"; // Fundo claro
+const LAND_COLOR = "#e8e8e8"; // Terra clara
+const WATER_COLOR = "#b3d9ff"; // Água azul claro
+const PRIMARY_GLOW = "#1976d2"; // Azul primário
+const SECONDARY_GLOW = "#42a5f5"; // Azul secundário
 
 interface LayerMatcher {
   idIncludes?: string[];
@@ -48,41 +48,41 @@ const LAYER_MATCHERS: LayerMatcher[] = [
     idIncludes: ["boundary"],
     type: "line",
     paint: {
-      "line-color": "#23305f",
-      "line-opacity": 0.6,
+      "line-color": "#999999",
+      "line-opacity": 0.4,
     },
   },
   {
     idIncludes: ["road", "highway"],
     type: "line",
     paint: {
-      "line-color": "#2d4bcf",
-      "line-width": 1.4,
-      "line-opacity": 0.85,
+      "line-color": "#666666",
+      "line-width": 1.2,
+      "line-opacity": 0.7,
     },
   },
   {
     idIncludes: ["path", "street"],
     type: "line",
     paint: {
-      "line-color": "#345fe0",
-      "line-opacity": 0.6,
+      "line-color": "#888888",
+      "line-opacity": 0.5,
     },
   },
   {
     idIncludes: ["building"],
     type: "fill",
     paint: {
-      "fill-color": "#0f1c45",
-      "fill-opacity": 0.85,
+      "fill-color": "#d0d0d0",
+      "fill-opacity": 0.6,
     },
   },
   {
     idIncludes: ["building"],
     type: "line",
     paint: {
-      "line-color": "#1d3a7b",
-      "line-opacity": 0.5,
+      "line-color": "#999999",
+      "line-opacity": 0.3,
     },
   },
 ];
@@ -128,11 +128,11 @@ export function applySpaceDataTheme(map: MapLibreMap) {
   try {
     (map as unknown as { setFog?: (options: Record<string, any>) => void }).setFog?.({
       "range": [1, 10],
-      "horizon-blend": 0.2,
-      "color": "#030716",
-      "high-color": "#0d1f4f",
-      "space-color": "#02030c",
-      "star-intensity": 0.15,
+      "horizon-blend": 0.1,
+      "color": "#ffffff",
+      "high-color": "#f0f0f0",
+      "space-color": "#e8e8e8",
+      "star-intensity": 0,
     });
   } catch (error) {
     if (isDev) {
@@ -143,8 +143,8 @@ export function applySpaceDataTheme(map: MapLibreMap) {
   try {
     (map as unknown as { setLight?: (options: Record<string, any>) => void }).setLight?.({
       anchor: "viewport",
-      color: SECONDARY_GLOW,
-      intensity: 0.6,
+      color: "#ffffff",
+      intensity: 1,
     });
   } catch (error) {
     if (isDev) {

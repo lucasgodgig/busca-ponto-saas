@@ -253,3 +253,11 @@
 ## Bugs Encontrados (27/10/2025 - Sessão 4)
 - [x] Console error: sources.circle-source: unknown property "data-loc" (CORRIGIDO - circleData agora é FeatureCollection válido)
 
+
+
+
+## Bugs Encontrados (28/10/2025 - Sessão 5)
+- [x] Botão "Busca Ponto" na barra superior leva para Settings em vez de voltar ao mapa (CORRIGIDO - agora leva para /app)
+- [x] Círculo geodésico não aparece no mapa (CORRIGIDO - turf.circle() com upsertAnalysisCircle() funcionando)
+- [x] Mapa está com estilo muito escuro (modo noturno) com linhas azuis fortes - precisa de estilo mais claro (CORRIGIDO - tema claro implementado)
+
