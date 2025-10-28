@@ -13,6 +13,9 @@ import NewStudy from "./pages/NewStudy";
 import Settings from "./pages/Settings";
 import InviteCodeValidation from "./pages/InviteCodeValidation";
 import AnalysisDashboard from "./pages/AnalysisDashboard";
+import GenerateStudyPage from "./pages/GenerateStudyPage";
+import GeneratedStudiesListPage from "./pages/GeneratedStudiesListPage";
+import GeneratedStudyDetailsPage from "./pages/GeneratedStudyDetailsPage";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -27,6 +30,9 @@ function Router() {
       <Route path={"/studies/new"} component={NewStudy} />
       <Route path={"/settings"} component={Settings} />
       <Route path={"/analysis"} component={AnalysisDashboard} />
+      <Route path={"/tenant/:tenantId/generate-study"} component={GenerateStudyPage} />
+      <Route path={"/tenant/:tenantId/studies"} component={GeneratedStudiesListPage} />
+      <Route path={"/tenant/:tenantId/studies/:studyId"} component={GeneratedStudyDetailsPage} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
