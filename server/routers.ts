@@ -244,6 +244,90 @@ export const appRouter = router({
 
   // Space API e Quick Queries
   space: router({
+    // Normalizar dados da Space API
+    normalize: protectedProcedure
+      .input(z.object({
+        lat: z.number().min(-90).max(90),
+        lng: z.number().min(-180).max(180),
+        radius: z.number().int().positive().max(ENV.spaceMaxRadius),
+      }))
+      .query(async ({ input }) => {
+        const num = (v: any, d = 0) => {
+          const n = Number(v);
+          return Number.isFinite(n) ? n : d;
+        };
+
+        const result = await querySpaceApiWithCache({
+          lat: input.lat,
+          lng: input.lng,
+          radius: input.radius,
+        });
+
+        const raw = result.data || {};
+        const people = num(raw?.people, 0);
+        const income = num(raw?.income, 0);
+        const consumer = num(raw?.consumer ?? raw?.cons_a_total, 0);
+
+        const classes = [
+          ["A1", "class_a1"],
+          ["A2", "class_a2"],
+          ["B1", "class_b1"],
+          ["B2", "class_b2"],
+          ["C", "class_c"],
+          ["D", "class_d"],
+          ["E", "class_e"],
+        ].map(([sigla, key]: any) => ({ sigla, domicilios: num(raw?.[key], 0) }));
+        const totalDom = classes.reduce((s, c) => s + c.domicilios, 0);
+        classes.forEach(
+          (c: any) =>
+            (c["pct"] = totalDom > 0 ? (c.domicilios / totalDom) * 100 : 0)
+        );
+
+        const categorias = [
+          ["cons_1_food", "Alimentação", 1],
+          ["cons_2_housing", "Habitação", 2],
+          ["cons_3_clothing", "Vestuário", 3],
+          ["cons_4_transport", "Transporte", 4],
+          ["cons_5_hygiene_care", "Higiene & Cuidados", 5],
+          ["cons_6_health", "Saúde", 6],
+          ["cons_7_education", "Educação", 7],
+          ["cons_8_recreation", "Lazer", 8],
+          ["cons_9_tobacco", "Fumo", 9],
+          ["cons_10_personal_services", "Serviços Pessoais", 10],
+          ["cons_12_others", "Outros", 12],
+          ["cons_13_asset_increase", "Aumento de Ativos", 13],
+          ["cons_14_liability_reduction", "Redução de Passivos", 14],
+        ].map(([k, rotulo, ord]: any) => ({
+          chave: String(k),
+          rotulo,
+          ordem: ord,
+          valor: num(raw?.[k], 0),
+        }));
+
+        const ages = Object.entries(raw || {})
+          .filter(([k]) => k.startsWith("age_"))
+          .map(([k, v]) => ({
+            chave: k,
+            rotulo: k.replace("age_", "").toUpperCase(),
+            valor: num(v, 0),
+          }));
+
+        return {
+          ok: true,
+          data: {
+            head: { people, income, consumer },
+            totals: {
+              consumo_total: num(raw?.cons_a_total, 0),
+              consumo_corrente: num(raw?.cons_b_current, 0),
+              despesas: num(raw?.cons_c_expenditure, 0),
+            },
+            categorias,
+            classes,
+            faixas: ages,
+          },
+        };
+      }),
+
     // Consultar Space API
     query: protectedProcedure
       .input(z.object({

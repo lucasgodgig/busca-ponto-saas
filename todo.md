@@ -296,8 +296,12 @@
 - [x] Concorrentes não respeitam o raio de análise selecionado (CORRIGIDO - respeitam raio)
 
 ## Novas Features Solicitadas (28/10/2025 - Sessão 8)
-- [ ] Criar dashboard visual separado que abre ao clicar em "Executar Consulta Rápida"
-- [ ] Dashboard com gráficos, cards e informações visuais (não linhas de código)
-- [ ] Mapa permanece visível ao lado do dashboard
-- [ ] Permitir voltar ao mapa para fazer novas análises
+- [x] Criar dashboard visual separado que abre ao clicar em "Executar Consulta Rápida" (CONCLUIDO)
+- [x] Dashboard com gráficos, cards e informações visuais (não linhas de código) (CONCLUIDO)
+- [x] Mapa permanece visível ao lado do dashboard (CONCLUIDO)
+- [x] Permitir voltar ao mapa para fazer novas análises (CONCLUIDO)
+
+## Bugs Encontrados (28/10/2025 - Sessão 9)
+- [ ] Dados do dashboard retornam zerados (habitantes, renda, domicílios, classes sociais, faixas etárias)
+- [ ] Dados mockados não estão sendo gerados com valores realistas
 

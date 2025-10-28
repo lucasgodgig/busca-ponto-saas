@@ -30,7 +30,9 @@ function normalizeSpaceApiResponse(data: any) {
       cleaned = cleaned.replace(/\./g, '');
       cleaned = cleaned.replace(',', '.');
       const num = parseFloat(cleaned);
-      if (isMillion) return num * 1000000;
+      // Não multiplicar por 1 milhão - o valor já vem em milhões
+      // Ex: "259.9 MI" = 259.9 (já é o valor em milhões)
+      if (isMillion) return num;
       return isFinite(num) ? num : 0;
     }
     return 0;
@@ -40,7 +42,8 @@ function normalizeSpaceApiResponse(data: any) {
     ...data,
     people: parseNumber(data.people),
     income: parseNumber(data.income),
-    consumer: parseNumber(data.consumer),
+    // Potencial de consumo em milhões (dividir por 1000 para ter em milhares)
+    consumer: parseNumber(data.consumer) / 1000,
     cons_a_total: parseNumber(data.cons_a_total),
     cons_b_current: parseNumber(data.cons_b_current),
     cons_c_expenditure: parseNumber(data.cons_c_expenditure),
@@ -91,8 +94,10 @@ function generateMockSpaceData(lat: number, lng: number, radius: number, segment
   // Renda media em SP: ~R$ 3000-4000
   const income = Math.floor(Math.random() * 1500) + 3000;
   
-  // Potencial de consumo: renda * populacao * 0.7 (70% disponivel)
-  const consumer = Math.floor(people * income * 0.7);
+  // Potencial de consumo: renda * 0.7 (70% disponivel para consumo)
+  const consumer = Math.floor(income * 0.7);
+  
+  console.log('[generateMockSpaceData] Dados gerados:', { people, income, consumer, radiusKm, areaHectares });
   
   return {
     muni: "Localizacao Analisada",
@@ -101,21 +106,21 @@ function generateMockSpaceData(lat: number, lng: number, radius: number, segment
     density: densityPerHectare,
     consumer,
     
-    // Potencial de consumo por categoria (distribuicao realista)
-    cons_a_total: Math.floor(consumer * 0.25),
-    cons_b_current: Math.floor(consumer * 0.35),
-    cons_c_expenditure: Math.floor(consumer * 0.40),
-    cons_1_food: Math.floor(consumer * 0.25),
-    cons_2_housing: Math.floor(consumer * 0.20),
-    cons_3_clothing: Math.floor(consumer * 0.08),
-    cons_4_transport: Math.floor(consumer * 0.12),
-    cons_5_hygiene_care: Math.floor(consumer * 0.06),
-    cons_6_health: Math.floor(consumer * 0.10),
-    cons_7_education: Math.floor(consumer * 0.07),
-    cons_8_recreation: Math.floor(consumer * 0.05),
-    cons_9_tobacco: Math.floor(consumer * 0.02),
-    cons_10_personal_services: Math.floor(consumer * 0.04),
-    cons_12_others: Math.floor(consumer * 0.03),
+    // Potencial de consumo por categoria (distribuicao realista por pessoa)
+    cons_a_total: Math.floor(consumer * people * 0.25),
+    cons_b_current: Math.floor(consumer * people * 0.35),
+    cons_c_expenditure: Math.floor(consumer * people * 0.40),
+    cons_1_food: Math.floor(consumer * people * 0.25),
+    cons_2_housing: Math.floor(consumer * people * 0.20),
+    cons_3_clothing: Math.floor(consumer * people * 0.08),
+    cons_4_transport: Math.floor(consumer * people * 0.12),
+    cons_5_hygiene_care: Math.floor(consumer * people * 0.06),
+    cons_6_health: Math.floor(consumer * people * 0.10),
+    cons_7_education: Math.floor(consumer * people * 0.07),
+    cons_8_recreation: Math.floor(consumer * people * 0.05),
+    cons_9_tobacco: Math.floor(consumer * people * 0.02),
+    cons_10_personal_services: Math.floor(consumer * people * 0.04),
+    cons_12_others: Math.floor(consumer * people * 0.03),
     
     // Classes sociais (distribuicao realista do Brasil)
     class_a1: Math.floor(people * 0.01),

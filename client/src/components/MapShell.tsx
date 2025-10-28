@@ -19,6 +19,7 @@ import { setupSpaceDataTheme, spaceDataThemeConstants } from "@/lib/spaceDataThe
 import LocationSearch from "@/components/LocationSearch";
 import CompetitorsPanel from "@/components/CompetitorsPanel";
 import { GoogleBoundsLiteral } from "@/lib/google";
+import type { SpaceData } from "@/services/spaceClient";
 
 interface MapShellProps {
   tenantId: number;
@@ -63,6 +64,9 @@ export default function MapShell({ tenantId, loading = false }: MapShellProps) {
 
   const [queryResult, setQueryResult] = useState<any>(null);
   const [analysisParams, setAnalysisParams] = useState<AnalysisParams | null>(null);
+  const [spaceData, setSpaceData] = useState<SpaceData | null>(null);
+  const [spaceLoading, setSpaceLoading] = useState(false);
+  const [spaceError, setSpaceError] = useState<string | null>(null);
 
 
 
@@ -130,6 +134,30 @@ export default function MapShell({ tenantId, loading = false }: MapShellProps) {
         });
       }
 
+      // Buscar dados normalizados
+      setSpaceLoading(true);
+      setSpaceError(null);
+      let normalizedData = null;
+      
+      try {
+        const result = await trpc.space.normalize.query({
+          lat: marker.lat,
+          lng: marker.lng,
+          radius: radius[0],
+        });
+        if (result.ok) {
+          normalizedData = result.data;
+          setSpaceData(normalizedData);
+        } else {
+          throw new Error(result.error || 'Erro ao buscar dados');
+        }
+      } catch (err: any) {
+        console.error('Erro ao buscar dados:', err);
+        setSpaceError(err?.message || 'Erro ao buscar dados');
+      } finally {
+        setSpaceLoading(false);
+      }
+
       const result = await spaceQueryMutation.mutateAsync({
         tenantId,
         lat: marker.lat,
@@ -138,8 +166,10 @@ export default function MapShell({ tenantId, loading = false }: MapShellProps) {
         segment: trimmedSegment || undefined,
       });
 
+      console.log('[MapShell] Resultado da API:', result);
+
       sessionStorage.setItem('analysisData', JSON.stringify({
-        data: result,
+        data: normalizedData || result,
         address: selectedAddress,
         radius: radius[0],
         center: marker,
