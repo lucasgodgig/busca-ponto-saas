@@ -609,3 +609,11 @@
 - [x] Quando clica em "Mapa Interativo" para voltar para home, o input não é limpo - CORRIGIDO (agora limpa e usa navegação local)
 - [ ] Implementar dados específicos por segmento (ex: Academia = Recreação e esportes + padrão) - EM PROGRESSO (arquivo segmentConfig.ts criado)
 
+
+
+
+## Bugs Reportados (28/10/2025 - Sessão 13)
+- [ ] Dados de consumo específico por segmento (cons_8_recreation) estão zerados - não estão sendo puxados da API
+- [x] Implementar gráfico padrão com categorias fixas: Consumo Total, Alimentos, Vestuário, Transporte, Higiene, Saúde, Educação - CONCLUÍDO (ConsumptionCategoriesChart criado)
+- [x] Adicionar categorias específicas por segmento: Farmácia (Remédios), Academia (Recreação e esportes), etc - CONCLUÍDO (segmentCategoryMap implementado)
+

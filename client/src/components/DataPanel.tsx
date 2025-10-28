@@ -3,6 +3,8 @@ import { Users, DollarSign, TrendingUp } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { getConsumptionKey, getConsumptionLabel } from "@/lib/segmentConfig";
 import SegmentConsumptionChart from "./SegmentConsumptionChart";
+import ConsumptionCategoriesChart from "./ConsumptionCategoriesChart";
+import type { SpaceData } from "@/services/spaceClient";
 
 interface SpaceDataHead {
   people: number;
@@ -219,20 +221,13 @@ export default function DataPanel({ data, loading, segment }: DataPanelProps) {
         </Card>
       </div>
 
-      {/* Gráfico de Potencial de Consumo por Segmento */}
-      {segment && (() => {
-        const consumptionKey = getConsumptionKey(segment);
-        const segmentConsumption = consumptionKey ? data[consumptionKey] : 0;
-        console.log('[DataPanel] Segment:', segment, 'Key:', consumptionKey, 'Value:', segmentConsumption);
-        return (
-          <SegmentConsumptionChart
-            segment={segment}
-            totalConsumption={totals.consumo_total}
-            segmentConsumption={segmentConsumption || 0}
-            segmentLabel={getConsumptionLabel(segment) || 'Segmento'}
-          />
-        );
-      })()}
+      {/* Gráfico de Categorias de Consumo */}
+      {data && (
+        <ConsumptionCategoriesChart
+          data={data as SpaceData}
+          segment={segment || 'outros'}
+        />
+      )}
     </div>
   );
 }
