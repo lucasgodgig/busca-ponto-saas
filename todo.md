@@ -519,3 +519,13 @@
   - Testado fluxo completo: criar estudo → listar → visualizar detalhes ✅
   - Banco de dados: migração 0004_melodic_jimmy_woo.sql aplicada com sucesso
 
+
+
+## Bugs Reportados (28/10/2025 - Sessão 5 - Continuação)
+- [x] Erro 404 ao clicar em estudo criado (RESOLVIDO ✅)
+  - Estudo é criado com sucesso no banco
+  - Página de lista mostra o estudo
+  - Ao clicar em "Ver Detalhes", navega corretamente para /generated-studies/:id
+  - Componente GeneratedStudyDetailsPage carrega dados corretamente
+  - Fluxo completo testado e funcional
+
