@@ -16,6 +16,7 @@ import AnalysisDashboard from "./pages/AnalysisDashboard";
 import GenerateStudyPage from "./pages/GenerateStudyPage";
 import GeneratedStudiesListPage from "./pages/GeneratedStudiesListPage";
 import GeneratedStudyDetailsPage from "./pages/GeneratedStudyDetailsPage";
+import StudyDetailsPage from "./pages/StudyDetailsPage";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -27,6 +28,7 @@ function Router() {
       <Route path={"/history"} component={History} />
       <Route path={"/onboarding"} component={Onboarding} />
       <Route path={"/studies"} component={Studies} />
+      <Route path={"/studies/:id"} component={StudyDetailsPage} />
       <Route path={"/studies/new"} component={NewStudy} />
       <Route path={"/settings"} component={Settings} />
       <Route path={"/analysis"} component={AnalysisDashboard} />

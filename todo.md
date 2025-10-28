@@ -529,3 +529,14 @@
   - Componente GeneratedStudyDetailsPage carrega dados corretamente
   - Fluxo completo testado e funcional
 
+
+
+
+## Bugs Reportados (28/10/2025 - Sessão 5 - Nova Issue)
+- [x] Rota /studies/90002?from_webdev=1 retorna 404 error (RESOLVIDO ✅)
+  - Criado componente StudyDetailsPage.tsx
+  - Adicionada rota /studies/:id no App.tsx
+  - Endpoint studies.get já existia no servidor
+  - Testado com sucesso: /studies/90002 carrega estudo "Viabilidade academia"
+  - Fluxo completo funcional
+
