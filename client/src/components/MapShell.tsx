@@ -318,28 +318,6 @@ export default function MapShell({ tenantId, loading = false }: MapShellProps) {
             setSearchAddress("");
           }}
         >
-          {circleData && (
-            <Source id="circle-source" type="geojson" data={circleData}>
-              <Layer
-                id="circle-fill"
-                type="fill"
-                paint={{
-                  "fill-color": spaceDataThemeConstants.PRIMARY_GLOW,
-                  "fill-opacity": 0.12,
-                }}
-              />
-              <Layer
-                id="circle-stroke"
-                type="line"
-                paint={{
-                  "line-color": spaceDataThemeConstants.SECONDARY_GLOW,
-                  "line-width": 2.2,
-                  "line-opacity": 0.9,
-                }}
-              />
-            </Source>
-          )}
-
           {marker && (
             <Marker longitude={marker.lng} latitude={marker.lat} anchor="bottom">
               <div className="relative">
