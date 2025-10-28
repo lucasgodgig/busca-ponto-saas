@@ -617,3 +617,9 @@
 - [x] Implementar gráfico padrão com categorias fixas: Consumo Total, Alimentos, Vestuário, Transporte, Higiene, Saúde, Educação - CONCLUÍDO (ConsumptionCategoriesChart criado)
 - [x] Adicionar categorias específicas por segmento: Farmácia (Remédios), Academia (Recreação e esportes), etc - CONCLUÍDO (segmentCategoryMap implementado)
 
+
+
+
+## Bugs Críticos (28/10/2025 - Sessão 14)
+- [x] Dados de consumo por item (cons_1_food, cons_3_clothing, etc) não estão sendo puxados da Space API - valores zerados no gráfico - CORRIGIDO (acessar dados do array categorias)
+
