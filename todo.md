@@ -261,3 +261,13 @@
 - [x] Círculo geodésico não aparece no mapa (CORRIGIDO - turf.circle() com upsertAnalysisCircle() funcionando)
 - [x] Mapa está com estilo muito escuro (modo noturno) com linhas azuis fortes - precisa de estilo mais claro (CORRIGIDO - tema claro implementado)
 
+
+
+
+## Novas Features Solicitadas (28/10/2025 - Sessão 5)
+- [x] Deletar todos os logins do banco de dados (CONCLUIDO)
+- [x] Implementar sistema de código de convite único para controlar acesso (CONCLUIDO - código: 'convitedeacesso')
+- [x] Criar página de validação de código antes do login/onboarding (CONCLUIDO)
+- [x] Bloquear acesso sem código válido (CONCLUIDO - redireciona para /invite)
+- [ ] Permitir gerar novos códigos de convite (admin) - TODO
+

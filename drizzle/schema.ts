@@ -164,6 +164,21 @@ export const billingCustomers = mysqlTable("billingCustomers", {
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
 
+/**
+ * InviteCode - codigos de convite para controlar acesso
+ */
+export const inviteCodes = mysqlTable("inviteCodes", {
+  id: int("id").autoincrement().primaryKey(),
+  code: varchar("code", { length: 255 }).notNull().unique(),
+  createdBy: int("createdBy").notNull(),
+  usedBy: int("usedBy"),
+  usedAt: timestamp("usedAt"),
+  expiresAt: timestamp("expiresAt"),
+  isActive: boolean("isActive").default(true).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   memberships: many(memberships),
@@ -273,6 +288,13 @@ export const billingCustomersRelations = relations(billingCustomers, ({ one }) =
   }),
 }));
 
+export const inviteCodesRelations = relations(inviteCodes, ({ one }) => ({
+  creator: one(users, {
+    fields: [inviteCodes.createdBy],
+    references: [users.id],
+  }),
+}));
+
 // Type exports
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
@@ -294,4 +316,6 @@ export type AuditLog = typeof auditLogs.$inferSelect;
 export type InsertAuditLog = typeof auditLogs.$inferInsert;
 export type BillingCustomer = typeof billingCustomers.$inferSelect;
 export type InsertBillingCustomer = typeof billingCustomers.$inferInsert;
+export type InviteCode = typeof inviteCodes.$inferSelect;
+export type InsertInviteCode = typeof inviteCodes.$inferInsert;
 

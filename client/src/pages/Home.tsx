@@ -10,11 +10,18 @@ export default function Home() {
   const [, setLocation] = useLocation();
 
   // Redirecionar para dashboard se já estiver autenticado
+  // Redirecionar para validacao de codigo se nao estiver autenticado
   useEffect(() => {
     if (isAuthenticated && user) {
       setLocation("/app");
+    } else if (!loading && !isAuthenticated) {
+      // Verificar se o codigo foi validado
+      const codeValidated = sessionStorage.getItem("inviteCodeValidated");
+      if (!codeValidated) {
+        setLocation("/invite");
+      }
     }
-  }, [isAuthenticated, user, setLocation]);
+  }, [isAuthenticated, user, loading, setLocation]);
 
   if (loading) {
     return (

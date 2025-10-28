@@ -29,6 +29,34 @@ export const appRouter = router({
         })),
       };
     }),
+    validateInviteCode: publicProcedure
+      .input(z.object({ code: z.string().min(1) }))
+      .mutation(async ({ input }) => {
+        const dbInstance = await db.getDb();
+        if (!dbInstance) {
+          throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database nao disponivel" });
+        }
+
+        const { inviteCodes } = await import("../drizzle/schema");
+        const { eq, and, or, isNull, gt } = await import("drizzle-orm");
+        
+        const code = await dbInstance
+          .select()
+          .from(inviteCodes)
+          .where(
+            and(
+              eq(inviteCodes.code, input.code),
+              eq(inviteCodes.isActive, true),
+              or(
+                isNull(inviteCodes.expiresAt),
+                gt(inviteCodes.expiresAt, new Date())
+              )
+            )
+          )
+          .limit(1);
+
+        return { valid: code.length > 0 };
+      }),
     logout: publicProcedure.mutation(({ ctx }) => {
       const cookieOptions = getSessionCookieOptions(ctx.req);
       ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });

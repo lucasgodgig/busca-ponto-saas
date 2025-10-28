@@ -11,12 +11,14 @@ import Onboarding from "./pages/Onboarding";
 import Studies from "./pages/Studies";
 import NewStudy from "./pages/NewStudy";
 import Settings from "./pages/Settings";
+import InviteCodeValidation from "./pages/InviteCodeValidation";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
   return (
     <Switch>
       <Route path={"/"} component={Home} />
+      <Route path={"/invite"} component={InviteCodeValidation} />
       <Route path={"/app"} component={Dashboard} />
       <Route path={"/history"} component={History} />
       <Route path={"/onboarding"} component={Onboarding} />
