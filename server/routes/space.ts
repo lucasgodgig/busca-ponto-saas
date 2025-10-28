@@ -9,10 +9,20 @@ function num(v: any, d = 0) {
   return Number.isFinite(n) ? n : d;
 }
 
+// Função auxiliar para pegar valor com fallbacks
+function pick(obj: any, names: string[], d = 0) {
+  for (const k of names) {
+    if (obj && obj[k] != null && Number.isFinite(+obj[k])) {
+      return +obj[k];
+    }
+  }
+  return d;
+}
+
 function normalize(raw: any) {
-  const people = num(raw?.people, 0);
-  const income = num(raw?.income, 0);
-  const consumer = num(raw?.consumer ?? raw?.cons_a_total, 0);
+  const people = pick(raw, ['people', 'population', 'habitantes', 'pop_total'], 0);
+  const income = pick(raw, ['income', 'renda', 'avg_income', 'renda_per_capita'], 0);
+  const consumer = pick(raw, ['consumer', 'cons_a_total', 'consumo_total'], 0);
 
   const classes = [
     ["A1", "class_a1"],
@@ -22,7 +32,7 @@ function normalize(raw: any) {
     ["C", "class_c"],
     ["D", "class_d"],
     ["E", "class_e"],
-  ].map(([sigla, key]) => ({ sigla, domicilios: num(raw?.[key], 0) }));
+  ].map(([sigla, key]) => ({ sigla, domicilios: pick(raw, [key], 0) }));
   const totalDom = classes.reduce((s, c) => s + c.domicilios, 0);
   classes.forEach(
     (c) =>
@@ -47,7 +57,7 @@ function normalize(raw: any) {
     chave: String(k),
     rotulo,
     ordem: ord,
-    valor: num(raw?.[k], 0),
+    valor: pick(raw, [k], 0),
   }));
 
   // opcional: faixa etária se existir
@@ -62,14 +72,54 @@ function normalize(raw: any) {
   return {
     head: { people, income, consumer },
     totals: {
-      consumo_total: num(raw?.cons_a_total, 0),
-      consumo_corrente: num(raw?.cons_b_current, 0),
-      despesas: num(raw?.cons_c_expenditure, 0),
+      consumo_total: pick(raw, ['cons_a_total', 'consumo_total'], 0),
+      consumo_corrente: pick(raw, ['cons_b_current', 'consumo_corrente'], 0),
+      despesas: pick(raw, ['cons_c_expenditure', 'despesas'], 0),
     },
     categorias,
     classes,
     faixas: ages,
   };
+}
+
+// Rota de debug para inspecionar retorno real da Space API
+export async function handleSpaceDebug(req: Request, res: Response) {
+  try {
+    const lat = num(req.query.lat);
+    const lng = num(req.query.lng);
+    const radius = Math.min(num(req.query.radius, 0), MAXR);
+
+    if (!Number.isFinite(lat) || !Number.isFinite(lng) || radius <= 0) {
+      return res.status(400).json({
+        error: 'INVALID_PARAMS',
+        lat,
+        lng,
+        radius,
+      });
+    }
+
+    const url = `${BASE}?lat=${lat}&lng=${lng}&radius=${radius}&key=${KEY}`;
+    const r = await fetch(url, { cache: 'no-store' });
+    const raw = await r.json().catch(() => null);
+    const keys = raw ? Object.keys(raw).slice(0, 50) : [];
+    const sample = Object.fromEntries(
+      keys.map((k) => [k, raw?.[k]])
+    );
+
+    return res.json({
+      ok: r.ok,
+      status: r.status,
+      forwarded: url.replace(KEY, '***'),
+      keys,
+      sample,
+    });
+  } catch (e: any) {
+    console.error('[Space Debug Error]', e?.message);
+    return res.status(500).json({
+      error: 'UNEXPECTED',
+      message: e?.message,
+    });
+  }
 }
 
 export async function handleSpaceQuery(req: Request, res: Response) {
@@ -79,22 +129,28 @@ export async function handleSpaceQuery(req: Request, res: Response) {
     const radius = Math.min(num(req.query.radius, 0), MAXR);
 
     if (!Number.isFinite(lat) || !Number.isFinite(lng) || radius <= 0) {
-      return res.status(400).json({ error: "INVALID_PARAMS" });
+      return res.status(400).json({
+        error: 'INVALID_PARAMS',
+        received: { lat, lng, radius },
+      });
     }
 
     const url = `${BASE}?lat=${lat}&lng=${lng}&radius=${radius}&key=${KEY}`;
-    const r = await fetch(url, { cache: "no-store" });
-    if (!r.ok)
-      return res.status(502).json({ error: "SPACE_DOWN", status: r.status });
+    const r = await fetch(url, { cache: 'no-store' });
+    if (!r.ok) {
+      const text = await r.text().catch(() => '');
+      console.error('[SPACE_ERROR]', { lat, lng, radius, status: r.status, text: text.slice(0, 200) });
+      return res.status(502).json({ error: 'SPACE_DOWN', status: r.status });
+    }
 
     const raw = await r.json();
     const data = normalize(raw);
     return res.json({ ok: true, data });
   } catch (e: any) {
-    console.error("[Space API Error]", e?.message);
+    console.error('[Space API Error]', e?.message);
     return res
       .status(500)
-      .json({ error: "UNEXPECTED", message: e?.message });
+      .json({ error: 'UNEXPECTED', message: e?.message });
   }
 }
 

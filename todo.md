@@ -540,3 +540,14 @@
   - Testado com sucesso: /studies/90002 carrega estudo "Viabilidade academia"
   - Fluxo completo funcional
 
+
+
+
+## Bugs Reportados (28/10/2025 - Sessão 5 - Análise de Localização)
+- [ ] Consulta rápida "Análise de Localização" exibe 0/0/0 (dados zerados)
+  - Possível causa 1: Front não está disparando a consulta /api/space
+  - Possível causa 2: Server chama Space mas campos do normalize não existem (nomes diferentes)
+  - Possível causa 3: lat/lng/radius chegam undefined/string e endpoint corta como inválido
+  - Solução: Implementar /api/space/debug, melhorar normalizeSpace com fallbacks, garantir disparo do fetch
+  - Checklist: Verificar Network, confirmar /api/space com 200, ajustar mapeamento de nomes
+

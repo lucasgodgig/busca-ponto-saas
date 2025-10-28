@@ -257,16 +257,30 @@ export const appRouter = router({
           return Number.isFinite(n) ? n : d;
         };
 
+        // Função auxiliar para pegar valor com fallbacks de nomes
+        const pick = (obj: any, names: string[], d = 0) => {
+          for (const k of names) {
+            if (obj && obj[k] != null && Number.isFinite(+obj[k])) {
+              return +obj[k];
+            }
+          }
+          return d;
+        };
+
         const result = await querySpaceApiWithCache({
           lat: input.lat,
           lng: input.lng,
           radius: input.radius,
         });
 
+        console.log('[space.normalize] Resultado:', { ok: result.ok, people: result.data?.people, income: result.data?.income });
+        
         const raw = result.data || {};
-        const people = num(raw?.people, 0);
-        const income = num(raw?.income, 0);
-        const consumer = num(raw?.consumer ?? raw?.cons_a_total, 0);
+        const people = pick(raw, ['people', 'population', 'habitantes', 'pop_total'], 0);
+        const income = pick(raw, ['income', 'renda', 'avg_income', 'renda_per_capita'], 0);
+        const consumer = pick(raw, ['consumer', 'cons_a_total', 'consumo_total'], 0);
+        
+        console.log('[space.normalize] Valores:', { people, income, consumer });
 
         const classes = [
           ["A1", "class_a1"],
@@ -276,7 +290,7 @@ export const appRouter = router({
           ["C", "class_c"],
           ["D", "class_d"],
           ["E", "class_e"],
-        ].map(([sigla, key]: any) => ({ sigla, domicilios: num(raw?.[key], 0) }));
+        ].map(([sigla, key]: any) => ({ sigla, domicilios: pick(raw, [key], 0) }));
         const totalDom = classes.reduce((s, c) => s + c.domicilios, 0);
         classes.forEach(
           (c: any) =>
@@ -301,7 +315,7 @@ export const appRouter = router({
           chave: String(k),
           rotulo,
           ordem: ord,
-          valor: num(raw?.[k], 0),
+          valor: pick(raw, [k], 0),
         }));
 
         const ages = Object.entries(raw || {})
@@ -317,9 +331,9 @@ export const appRouter = router({
           data: {
             head: { people, income, consumer },
             totals: {
-              consumo_total: num(raw?.cons_a_total, 0),
-              consumo_corrente: num(raw?.cons_b_current, 0),
-              despesas: num(raw?.cons_c_expenditure, 0),
+              consumo_total: pick(raw, ['cons_a_total', 'consumo_total'], 0),
+              consumo_corrente: pick(raw, ['cons_b_current', 'consumo_corrente'], 0),
+              despesas: pick(raw, ['cons_c_expenditure', 'despesas'], 0),
             },
             categorias,
             classes,

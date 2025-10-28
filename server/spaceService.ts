@@ -42,8 +42,8 @@ function normalizeSpaceApiResponse(data: any) {
     ...data,
     people: parseNumber(data.people),
     income: parseNumber(data.income),
-    // Potencial de consumo em milhões (dividir por 1000 para ter em milhares)
-    consumer: parseNumber(data.consumer) / 1000,
+    // Potencial de consumo (não dividir, já vem em milhões)
+    consumer: parseNumber(data.consumer),
     cons_a_total: parseNumber(data.cons_a_total),
     cons_b_current: parseNumber(data.cons_b_current),
     cons_c_expenditure: parseNumber(data.cons_c_expenditure),
