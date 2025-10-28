@@ -1,6 +1,5 @@
-import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, DollarSign, Home, TrendingUp } from "lucide-react";
+import { Users, DollarSign, TrendingUp } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 
 interface SpaceDataHead {
@@ -16,10 +15,20 @@ interface SpaceDataCategory {
   valor: number;
 }
 
+interface SpaceDataClass {
+  sigla: string;
+  domicilios: number;
+  pct: number;
+}
+
+interface SpaceDataAge {
+  chave: string;
+  rotulo: string;
+  valor: number;
+}
+
 interface SpaceDataTotals {
   consumo_total: number;
-  consumo_corrente: number;
-  despesas: number;
 }
 
 interface DataPanelProps {
@@ -27,20 +36,26 @@ interface DataPanelProps {
     head: SpaceDataHead;
     totals: SpaceDataTotals;
     categorias: SpaceDataCategory[];
+    classes?: SpaceDataClass[];
+    faixas?: SpaceDataAge[];
   } | null;
   loading?: boolean;
 }
 
-const CONSUMPTION_COLORS = [
-  "#ff6b6b",
-  "#4ecdc4",
-  "#45b7d1",
-  "#f9ca24",
-  "#6c5ce7",
-  "#a29bfe",
-  "#fd79a8",
-  "#fdcb6e",
-];
+const CLASS_COLORS = ["#ff6b6b", "#ee5a6f", "#f78fb3", "#ffa502", "#ffd93d", "#6bcf7f", "#4d96ff"];
+const AGE_COLORS = ["#ff6b6b", "#4ecdc4", "#45b7d1", "#f9ca24", "#6c5ce7", "#a29bfe", "#fd79a8", "#fdcb6e"];
+
+// Tradução de faixas etárias
+const ageLabels: { [key: string]: string } = {
+  age_babies: "Bebês (0-3)",
+  age_kids: "Crianças (4-11)",
+  age_teens: "Adolescentes (12-17)",
+  age_young_adults: "Jovens Adultos (18-34)",
+  age_adults: "Adultos (35-49)",
+  age_middle_age: "Meia Idade (50-64)",
+  age_young_eldery: "Idosos Jovens (65-74)",
+  age_eldery: "Idosos (75+)",
+};
 
 export default function DataPanel({ data, loading }: DataPanelProps) {
   if (loading) {
@@ -60,19 +75,24 @@ export default function DataPanel({ data, loading }: DataPanelProps) {
     );
   }
 
-  const { head, totals, categorias } = data;
-
-  // Preparar dados para gráfico de consumo
-  const consumptionData = categorias
-    .slice(0, 8)
-    .map((cat) => ({
-      name: cat.rotulo,
-      value: cat.valor,
-    }));
+  const { head, totals, classes, faixas } = data;
 
   // Calcular densidade populacional (head.people já está em milhares, converter para habitantes)
   const inhabitants = head.people * 1000; // Converter de milhares para habitantes
   const density = inhabitants > 0 ? (inhabitants / 1.5).toFixed(2) : "0";
+
+  // Preparar dados para gráfico de classe social
+  const classData = (classes || []).map((cls) => ({
+    name: cls.sigla,
+    value: cls.domicilios,
+    pct: cls.pct,
+  }));
+
+  // Preparar dados para gráfico de faixa etária
+  const ageData = (faixas || []).map((age) => ({
+    name: ageLabels[age.chave] || age.rotulo,
+    value: age.valor,
+  }));
 
   return (
     <div className="space-y-4">
@@ -135,66 +155,65 @@ export default function DataPanel({ data, loading }: DataPanelProps) {
         </Card>
       </div>
 
-      {/* Gráfico de Consumo por Categoria */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Consumo por Categoria</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={consumptionData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis
-                dataKey="name"
-                angle={-45}
-                textAnchor="end"
-                height={100}
-                tick={{ fontSize: 12 }}
-              />
-              <YAxis
-                tick={{ fontSize: 12 }}
-                tickFormatter={(value) =>
-                  `R$ ${(value / 1000000).toFixed(0)}M`
-                }
-              />
-              <Tooltip
-                formatter={(value) =>
-                  `R$ ${(value as number).toLocaleString("pt-BR", {
-                    maximumFractionDigits: 0,
-                  })}`
-                }
-              />
-              <Bar dataKey="value" fill="#3b82f6" radius={[8, 8, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </CardContent>
-      </Card>
-
-      {/* Resumo de Consumo */}
+      {/* Gráficos de Classe Social e Faixa Etária */}
       <div className="grid grid-cols-2 gap-4">
+        {/* Gráfico de Classe Social */}
         <Card>
-          <CardContent className="pt-6">
-            <p className="text-sm text-gray-600 mb-2">Consumo Corrente</p>
-            <p className="text-2xl font-bold text-gray-900">
-              R$ {(totals.consumo_corrente / 1000000).toLocaleString("pt-BR", {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              })}
-              M
-            </p>
+          <CardHeader>
+            <CardTitle className="text-lg">Distribuição por Classe Social</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={classData}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={({ name, pct }) => `${name} ${pct.toFixed(1)}%`}
+                  outerRadius={80}
+                  fill="#8884d8"
+                  dataKey="value"
+                >
+                  {classData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={CLASS_COLORS[index % CLASS_COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip
+                  formatter={(value) =>
+                    `${(value as number).toLocaleString("pt-BR")} domicílios`
+                  }
+                />
+              </PieChart>
+            </ResponsiveContainer>
           </CardContent>
         </Card>
 
+        {/* Gráfico de Faixa Etária */}
         <Card>
-          <CardContent className="pt-6">
-            <p className="text-sm text-gray-600 mb-2">Despesas</p>
-            <p className="text-2xl font-bold text-gray-900">
-              R$ {(totals.despesas / 1000000).toLocaleString("pt-BR", {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              })}
-              M
-            </p>
+          <CardHeader>
+            <CardTitle className="text-lg">Distribuição por Faixa Etária</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={ageData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis
+                  dataKey="name"
+                  angle={-45}
+                  textAnchor="end"
+                  height={100}
+                  tick={{ fontSize: 11 }}
+                />
+                <YAxis tick={{ fontSize: 12 }} />
+                <Tooltip
+                  formatter={(value) =>
+                    `${(value as number).toLocaleString("pt-BR")} pessoas`
+                  }
+                />
+                <Bar dataKey="value" fill="#3b82f6" radius={[8, 8, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
           </CardContent>
         </Card>
       </div>
