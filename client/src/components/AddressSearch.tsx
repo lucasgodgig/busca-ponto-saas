@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState, useCallback, useTransition } from "react";
+import React, { useRef, useEffect, useState, useCallback, useTransition, useLayoutEffect } from "react";
 import { Search, Loader2, MapPin, AlertCircle, X } from "lucide-react";
 
 interface AddressSearchProps {
@@ -25,7 +25,6 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
   const suggestionsRef = useRef<Suggestion[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [selectedAddress, setSelectedAddress] = useState<string>("");
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -34,6 +33,15 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
   const sessionTokenRef = useRef<any>(null);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const isSelectingSuggestionRef = useRef(false);
+  const shouldFocusRef = useRef(false);
+
+  // Restaurar foco ANTES da renderização
+  useLayoutEffect(() => {
+    if (shouldFocusRef.current && inputRef.current) {
+      inputRef.current.focus();
+      shouldFocusRef.current = false;
+    }
+  });
 
   // Inicializar Google Places API uma única vez
   useEffect(() => {
@@ -57,8 +65,20 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
     }
   }, []);
 
+  // Limpar input quando o componente é desmontado
+  useEffect(() => {
+    return () => {
+      if (inputRef.current) {
+        inputRef.current.value = "";
+      }
+    };
+  }, []);
+
   // Handler para input com debounce
   const handleInputChange = useCallback((value: string) => {
+    // Sempre manter foco no input
+    shouldFocusRef.current = true;
+
     // Limpar timer anterior
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
@@ -108,6 +128,7 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
             setError("Erro ao buscar sugestões");
           }
           setIsLoading(false);
+          shouldFocusRef.current = true;
         }
       );
     }, 300);
@@ -190,7 +211,6 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
           const address = place.formatted_address;
 
           console.log('[AddressSearch] Coordenadas obtidas:', { lat, lng, address });
-          setSelectedAddress(address);
           setError(null);
           
           startTransition(() => {
@@ -223,7 +243,6 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
     if (inputRef.current) {
       inputRef.current.value = "";
       inputRef.current.focus();
-      setSelectedAddress("");
       setError(null);
       startTransition(() => {
         setSuggestions([]);
@@ -283,17 +302,6 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
           </div>
         )}
 
-        {/* Mensagem de sucesso */}
-        {selectedAddress && !error && (
-          <div className="mt-2 p-3 bg-green-50 border border-green-200 rounded-lg flex items-start gap-2">
-            <MapPin className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-green-900">Localização selecionada</p>
-              <p className="text-sm text-green-700 truncate">{selectedAddress}</p>
-            </div>
-          </div>
-        )}
-
         {/* Mensagem de erro */}
         {error && (
           <div className="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2">
@@ -306,7 +314,7 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
         )}
 
         {/* Dica de uso */}
-        {!selectedAddress && !error && (
+        {!error && (
           <p className="mt-2 text-xs text-gray-500">
             Digite um endereço, bairro, CEP, cidade ou local específico (Terminal de Ônibus, Estação, etc) para buscar
           </p>

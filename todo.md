@@ -587,3 +587,18 @@
 - [x] Remover "Busca Ponto" do painel azul esquerdo, deixar apenas "Mapa Interativo" - CORRIGIDO
 - [x] AddressSearch bloqueia quando encontra sugestões durante a digitação (precisa clicar novamente no input) - CORRIGIDO com isSelectingSuggestionRef
 
+
+
+
+## Bugs/Melhorias Reportados (28/10/2025 - Sessão 10)
+- [ ] Input ainda sai do foco ao digitar "Terminal Rodoviário" (sai ao final da primeira palavra)
+- [ ] Remover campo "Localização selecionada" (redundante com a barra de pesquisa)
+- [ ] Fazer o botão "Busca Ponto" (no topo) ir para home igual o "Mapa Interativo"
+
+
+
+
+## Bugs Reportados (28/10/2025 - Sessão 11)
+- [x] AddressSearch não mostra as sugestões (pesquisa sai muito rápido) - CORRIGIDO (as sugestões aparecem normalmente)
+- [x] Quando volta para home, a pesquisa anterior continua na caixa de busca (precisa limpar) - CORRIGIDO com useEffect de cleanup
+
