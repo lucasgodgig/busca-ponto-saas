@@ -18,6 +18,7 @@ const SEGMENTS = [
   { value: 'academia', label: 'Academia' },
   { value: 'petshop', label: 'PetShop' },
   { value: 'farmacia', label: 'Farmácia' },
+  { value: 'delivery', label: 'Delivery' },
   { value: 'outros', label: 'Outros' },
 ];
 

@@ -623,3 +623,11 @@
 ## Bugs Críticos (28/10/2025 - Sessão 14)
 - [x] Dados de consumo por item (cons_1_food, cons_3_clothing, etc) não estão sendo puxados da Space API - valores zerados no gráfico - CORRIGIDO (acessar dados do array categorias)
 
+
+
+
+## Bugs/Melhorias Reportados (28/10/2025 - Sessão 15)
+- [x] Gráfico de consumo tem categorias duplicadas (ex: Saúde aparece 2x quando Farmácia é selecionada) - CORRIGIDO (sistema evita duplicatas)
+- [x] Remover categorias específicas do segmento se não tiverem dados (ex: Petshop não deve mostrar Recreação se valor for 0) - CORRIGIDO (filtra valores > 0)
+- [x] Adicionar "Delivery" como opção de segmento que puxa "Alimentação fora do domicílio" - CONCLUÍDO (Delivery adicionado)
+

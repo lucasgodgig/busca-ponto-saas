@@ -21,7 +21,7 @@ const segmentCategoryMap: Record<string, { chave: string; rotulo: string; color:
     { chave: "cons_8_recreation", rotulo: "Recreação e Esportes", color: "#f59e0b" },
   ],
   farmacia: [
-    { chave: "cons_6_health", rotulo: "Saúde", color: "#ef4444" },
+    { chave: "cons_6_health", rotulo: "Remédios", color: "#ef4444" },
   ],
   restaurante: [
     { chave: "cons_1_food", rotulo: "Alimentos", color: "#8b5cf6" },
@@ -31,6 +31,9 @@ const segmentCategoryMap: Record<string, { chave: string; rotulo: string; color:
   ],
   salao: [
     { chave: "cons_5_hygiene_care", rotulo: "Higiene e Cuidados", color: "#06b6d4" },
+  ],
+  delivery: [
+    { chave: "cons_1_food", rotulo: "Alimentação fora do domicílio", color: "#8b5cf6" },
   ],
 };
 
@@ -54,41 +57,46 @@ export default function ConsumptionCategoriesChart({
   }
 
   // Preparar dados com categorias padrão
+  const standardKeys = [
+    "cons_a_total",
+    "cons_1_food",
+    "cons_3_clothing",
+    "cons_4_transport",
+    "cons_5_hygiene_care",
+    "cons_6_health",
+    "cons_7_education",
+  ];
+
   const chartData = data.categorias
-    .filter(cat => {
-      // Incluir categorias padrão
-      const standardKeys = [
-        "cons_a_total",
-        "cons_1_food",
-        "cons_3_clothing",
-        "cons_4_transport",
-        "cons_5_hygiene_care",
-        "cons_6_health",
-        "cons_7_education",
-      ];
-      return standardKeys.includes(cat.chave);
-    })
+    .filter(cat => standardKeys.includes(cat.chave) && cat.valor > 0)
     .map(cat => ({
       name: cat.rotulo,
       valor: cat.valor || 0,
       fill: CATEGORY_COLORS[cat.chave] || "#3b82f6",
+      chave: cat.chave,
     }));
 
-  // Adicionar categoria específica do segmento se existir
+  // Adicionar categoria específica do segmento se existir e não for duplicata
   const segmentCategories = segmentCategoryMap[segment.toLowerCase()] || [];
   for (const category of segmentCategories) {
     const existingCategory = data.categorias.find(c => c.chave === category.chave);
-    if (existingCategory && existingCategory.valor > 0) {
+    
+    // Verificar se já existe na lista padrão
+    const alreadyExists = chartData.some(d => d.chave === category.chave);
+    
+    // Adicionar apenas se existir, tiver valor > 0 e não for duplicata
+    if (existingCategory && existingCategory.valor > 0 && !alreadyExists) {
       chartData.push({
         name: category.rotulo,
         valor: existingCategory.valor,
         fill: category.color,
+        chave: category.chave,
       });
     }
   }
 
   // Se não há dados, retornar null
-  if (chartData.length === 0 || chartData.every(d => d.valor === 0)) {
+  if (chartData.length === 0) {
     return null;
   }
 
@@ -102,14 +110,14 @@ export default function ConsumptionCategoriesChart({
           <BarChart data={chartData} layout="vertical">
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis type="number" />
-            <YAxis dataKey="name" type="category" width={150} tick={{ fontSize: 12 }} />
+            <YAxis dataKey="name" type="category" width={200} tick={{ fontSize: 12 }} />
             <Tooltip
               formatter={(value) => {
                 const millions = (value as number) / 1000000;
                 return `R$ ${millions.toFixed(1)}M`;
               }}
             />
-            <Bar dataKey="valor" radius={[0, 8, 8, 0]}>
+            <Bar dataKey="valor" fill="#3b82f6" radius={[0, 8, 8, 0]}>
               {chartData.map((entry, index) => (
                 <Bar
                   key={`bar-${index}`}
