@@ -573,3 +573,10 @@
 ## Bugs Reportados (28/10/2025 - Sessão 8)
 - [x] AddressSearch perde foco quando sugestões aparecem durante a digitação (pausa a digitação) - CORRIGIDO removendo suggestions da dependência do useEffect
 
+
+
+
+## Bugs/Melhorias Reportados (28/10/2025 - Sessão 8 Continuação)
+- [x] Trocar "Análise de Localização" por "Mapa Interativo" no painel esquerdo (LeftPanel) - CORRIGIDO
+- [x] AddressSearch ainda pausa a digitação quando sugestões aparecem (problema persiste) - CORRIGIDO com useTransition
+

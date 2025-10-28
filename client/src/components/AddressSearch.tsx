@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState, useCallback } from "react";
+import React, { useRef, useEffect, useState, useCallback, useTransition } from "react";
 import { Search, Loader2, MapPin, AlertCircle, X } from "lucide-react";
 
 interface AddressSearchProps {
@@ -28,6 +28,7 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
   const [selectedAddress, setSelectedAddress] = useState<string>("");
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const autocompleteServiceRef = useRef<any>(null);
   const placesServiceRef = useRef<any>(null);
   const sessionTokenRef = useRef<any>(null);
@@ -63,9 +64,12 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
     }
 
     if (value.length < 2) {
-      setSuggestions([]);
+      // Usar startTransition para não bloquear a digitação
+      startTransition(() => {
+        setSuggestions([]);
+        setShowSuggestions(false);
+      });
       suggestionsRef.current = [];
-      setShowSuggestions(false);
       return;
     }
 
@@ -91,14 +95,14 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
               placeId: prediction.place_id,
             }));
             suggestionsRef.current = newSuggestions;
-            setSuggestions(newSuggestions);
-            setShowSuggestions(true);
-            setError(null);
             
-            // Restaurar foco no input após atualizar as sugestões
-            if (inputRef.current) {
-              inputRef.current.focus();
-            }
+            // Usar startTransition para não bloquear a digitação
+            startTransition(() => {
+              setSuggestions(newSuggestions);
+              setShowSuggestions(true);
+            });
+            
+            setError(null);
           } else if (status !== window.google.maps.places.PlacesServiceStatus.ZERO_RESULTS) {
             setError("Erro ao buscar sugestões");
           }
@@ -177,7 +181,10 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
           console.log('[AddressSearch] Coordenadas obtidas:', { lat, lng, address });
           setSelectedAddress(address);
           setError(null);
-          setSuggestions([]);
+          
+          startTransition(() => {
+            setSuggestions([]);
+          });
           suggestionsRef.current = [];
           
           if (inputRef.current) {
@@ -206,7 +213,9 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
       inputRef.current.focus();
       setSelectedAddress("");
       setError(null);
-      setSuggestions([]);
+      startTransition(() => {
+        setSuggestions([]);
+      });
       suggestionsRef.current = [];
       setShowSuggestions(false);
     }
