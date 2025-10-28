@@ -175,6 +175,7 @@ export default function Dashboard() {
       {selectedTenant && (
         <MapShell
           tenantId={selectedTenant}
+          onNavigateHome={() => setLocation("/")}
         />
       )}
     </div>

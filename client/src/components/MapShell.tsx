@@ -12,9 +12,10 @@ import type { SpaceData } from "@/services/spaceClient";
 interface MapShellProps {
   tenantId: number;
   loading?: boolean;
+  onNavigateHome?: () => void;
 }
 
-export default function MapShell({ tenantId, loading = false }: MapShellProps) {
+export default function MapShell({ tenantId, loading = false, onNavigateHome }: MapShellProps) {
   const mapRef = useRef<MapRef>(null);
   const themeCleanupRef = useRef<(() => void) | null>(null);
 
@@ -145,6 +146,7 @@ export default function MapShell({ tenantId, loading = false }: MapShellProps) {
         onSegmentChange={setSegment}
         loading={spaceLoading}
         onReset={handleReset}
+        onNavigateHome={onNavigateHome}
       />
 
       {/* Map Container */}

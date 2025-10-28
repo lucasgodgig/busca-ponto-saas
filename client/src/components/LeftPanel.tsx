@@ -11,6 +11,7 @@ interface LeftPanelProps {
   onSegmentChange: (value: string) => void;
   loading?: boolean;
   onReset?: () => void;
+  onNavigateHome?: () => void;
 }
 
 const SEGMENTS = [
@@ -27,13 +28,24 @@ export default function LeftPanel({
   onSegmentChange,
   loading = false,
   onReset,
+  onNavigateHome,
 }: LeftPanelProps) {
   return (
     <div className="w-80 bg-white shadow-lg flex flex-col h-full overflow-y-auto">
       {/* Header */}
       <button
-        onClick={onReset}
-        className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 border-b hover:from-blue-700 hover:to-blue-800 transition text-left"
+        onClick={() => {
+          // Limpar input
+          const input = document.querySelector('input[placeholder*="Buscar endereço"]') as HTMLInputElement;
+          if (input) {
+            input.value = "";
+          }
+          // Chamar callback para navegar para home
+          if (onNavigateHome) {
+            onNavigateHome();
+          }
+        }}
+        className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 border-b hover:from-blue-700 hover:to-blue-800 transition text-left cursor-pointer"
       >
         <p className="text-sm text-blue-100">Mapa Interativo</p>
       </button>

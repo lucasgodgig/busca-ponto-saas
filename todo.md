@@ -602,3 +602,10 @@
 - [x] AddressSearch não mostra as sugestões (pesquisa sai muito rápido) - CORRIGIDO (as sugestões aparecem normalmente)
 - [x] Quando volta para home, a pesquisa anterior continua na caixa de busca (precisa limpar) - CORRIGIDO com useEffect de cleanup
 
+
+
+
+## Bugs Reportados (28/10/2025 - Sessão 12)
+- [x] Quando clica em "Mapa Interativo" para voltar para home, o input não é limpo - CORRIGIDO (agora limpa e usa navegação local)
+- [ ] Implementar dados específicos por segmento (ex: Academia = Recreação e esportes + padrão) - EM PROGRESSO (arquivo segmentConfig.ts criado)
+
