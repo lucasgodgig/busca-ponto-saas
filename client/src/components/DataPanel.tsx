@@ -1,6 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, DollarSign, TrendingUp } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+import { getConsumptionKey, getConsumptionLabel } from "@/lib/segmentConfig";
+import SegmentConsumptionChart from "./SegmentConsumptionChart";
 
 interface SpaceDataHead {
   people: number;
@@ -38,8 +40,10 @@ interface DataPanelProps {
     categorias: SpaceDataCategory[];
     classes?: SpaceDataClass[];
     faixas?: SpaceDataAge[];
+    [key: string]: any; // Para acessar campos dinâmicos como cons_8_recreation
   } | null;
   loading?: boolean;
+  segment?: string; // Segmento selecionado
 }
 
 const CLASS_COLORS = ["#ff6b6b", "#ee5a6f", "#f78fb3", "#ffa502", "#ffd93d", "#6bcf7f", "#4d96ff"];
@@ -57,7 +61,7 @@ const ageLabels: { [key: string]: string } = {
   age_eldery: "Idosos (75+)",
 };
 
-export default function DataPanel({ data, loading }: DataPanelProps) {
+export default function DataPanel({ data, loading, segment }: DataPanelProps) {
   if (loading) {
     return (
       <div className="p-4 text-center text-gray-500">
@@ -214,6 +218,21 @@ export default function DataPanel({ data, loading }: DataPanelProps) {
           </CardContent>
         </Card>
       </div>
+
+      {/* Gráfico de Potencial de Consumo por Segmento */}
+      {segment && (() => {
+        const consumptionKey = getConsumptionKey(segment);
+        const segmentConsumption = consumptionKey ? data[consumptionKey] : 0;
+        console.log('[DataPanel] Segment:', segment, 'Key:', consumptionKey, 'Value:', segmentConsumption);
+        return (
+          <SegmentConsumptionChart
+            segment={segment}
+            totalConsumption={totals.consumo_total}
+            segmentConsumption={segmentConsumption || 0}
+            segmentLabel={getConsumptionLabel(segment) || 'Segmento'}
+          />
+        );
+      })()}
     </div>
   );
 }

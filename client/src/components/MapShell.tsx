@@ -192,8 +192,8 @@ export default function MapShell({ tenantId, loading = false, onNavigateHome }: 
 
         {/* Info Panel at bottom */}
         {(spaceData || spaceLoading) && (
-          <div className="bg-white border-t shadow-lg p-6 max-h-96 overflow-y-auto">
-            <DataPanel data={spaceData} loading={spaceLoading} />
+          <div className="bg-white border-t shadow-lg p-6 overflow-y-auto">
+            <DataPanel data={spaceData} loading={spaceLoading} segment={segment} />
           </div>
         )}
 
