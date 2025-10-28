@@ -287,3 +287,17 @@
 - [x] Remover marcadores de concorrentes do mapa (CONCLUIDO - apenas marcador principal)
 - [x] Adicionar seção de "Concorrentes" no painel de resultados com informações (nome, endereço, distância) (CONCLUIDO - painel com sort e export)
 
+
+
+
+## Bugs Encontrados (28/10/2025 - Sessão 8)
+- [x] Dados da consulta retornam vazios (habitantes, renda, domícilios zerados) (CORRIGIDO - dados mockados implementados)
+- [x] Concorrentes buscam em São Paulo em vez de próximo ao ponto selecionado (CORRIGIDO - agora usam coordenadas do ponto)
+- [x] Concorrentes não respeitam o raio de análise selecionado (CORRIGIDO - respeitam raio)
+
+## Novas Features Solicitadas (28/10/2025 - Sessão 8)
+- [ ] Criar dashboard visual separado que abre ao clicar em "Executar Consulta Rápida"
+- [ ] Dashboard com gráficos, cards e informações visuais (não linhas de código)
+- [ ] Mapa permanece visível ao lado do dashboard
+- [ ] Permitir voltar ao mapa para fazer novas análises
+

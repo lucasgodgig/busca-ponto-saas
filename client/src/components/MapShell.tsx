@@ -130,13 +130,24 @@ export default function MapShell({ tenantId, loading = false }: MapShellProps) {
         });
       }
 
-      await spaceQueryMutation.mutateAsync({
+      const result = await spaceQueryMutation.mutateAsync({
         tenantId,
         lat: marker.lat,
         lng: marker.lng,
         radius: radius[0],
         segment: trimmedSegment || undefined,
       });
+
+      sessionStorage.setItem('analysisData', JSON.stringify({
+        data: result,
+        address: selectedAddress,
+        radius: radius[0],
+        center: marker,
+        segment: trimmedSegment,
+        tenantId,
+      }));
+
+      window.location.href = '/analysis';
 
       setAnalysisParams({
         center: marker,

@@ -19,7 +19,7 @@ export interface SpaceApiResponse {
  * Normalizar resposta da Space API que vem com valores como strings
  */
 function normalizeSpaceApiResponse(data: any) {
-  console.log("[normalizeSpaceApiResponse] Iniciando normalização...");
+  console.log("[normalizeSpaceApiResponse] Iniciando normalizacao...");
   
   const parseNumber = (val: any): number => {
     if (typeof val === 'number') return val;
@@ -65,7 +65,7 @@ function normalizeSpaceApiResponse(data: any) {
     income_rate: parseNumber(data.income_rate),
   };
 
-  console.log("[normalizeSpaceApiResponse] Normalização concluída:", {
+  console.log("[normalizeSpaceApiResponse] Normalizacao concluida:", {
     people: normalized.people,
     income: normalized.income,
     consumer: normalized.consumer,
@@ -75,68 +75,83 @@ function normalizeSpaceApiResponse(data: any) {
 }
 
 /**
- * Gerar dados mockados da Space API baseados na documentação real
+ * Gerar dados mockados da Space API baseados na documentacao real
  */
 function generateMockSpaceData(lat: number, lng: number, radius: number, segment?: string) {
   console.log("[generateMockSpaceData] Gerando dados mockados...");
+  
+  // Calcular area em hectares (raio em metros)
+  const radiusKm = radius / 1000;
+  const areaHectares = Math.PI * radiusKm * radiusKm * 100;
+  
+  // Densidade media para SP: ~7500 hab/hectare
+  const densityPerHectare = 7500;
+  const people = Math.floor(areaHectares * densityPerHectare);
+  
+  // Renda media em SP: ~R$ 3000-4000
+  const income = Math.floor(Math.random() * 1500) + 3000;
+  
+  // Potencial de consumo: renda * populacao * 0.7 (70% disponivel)
+  const consumer = Math.floor(people * income * 0.7);
+  
   return {
-    muni: "São Paulo",
-    people: Math.floor(Math.random() * 50000) + 10000,
-    income: Math.floor(Math.random() * 5000) + 2000,
-    density: Math.floor(Math.random() * 5000) + 1000,
-    consumer: Math.floor(Math.random() * 10000000) + 5000000,
+    muni: "Localizacao Analisada",
+    people,
+    income,
+    density: densityPerHectare,
+    consumer,
     
-    // Potencial de consumo por categoria
-    cons_a_total: Math.floor(Math.random() * 1000000) + 500000,
-    cons_b_current: Math.floor(Math.random() * 800000) + 400000,
-    cons_c_expenditure: Math.floor(Math.random() * 600000) + 300000,
-    cons_1_food: Math.floor(Math.random() * 500000) + 200000,
-    cons_2_housing: Math.floor(Math.random() * 400000) + 150000,
-    cons_3_clothing: Math.floor(Math.random() * 200000) + 80000,
-    cons_4_transport: Math.floor(Math.random() * 300000) + 120000,
-    cons_5_hygiene_care: Math.floor(Math.random() * 150000) + 60000,
-    cons_6_health: Math.floor(Math.random() * 250000) + 100000,
-    cons_7_education: Math.floor(Math.random() * 180000) + 70000,
-    cons_8_recreation: Math.floor(Math.random() * 120000) + 50000,
-    cons_9_tobacco: Math.floor(Math.random() * 50000) + 20000,
-    cons_10_personal_services: Math.floor(Math.random() * 100000) + 40000,
-    cons_12_others: Math.floor(Math.random() * 80000) + 30000,
+    // Potencial de consumo por categoria (distribuicao realista)
+    cons_a_total: Math.floor(consumer * 0.25),
+    cons_b_current: Math.floor(consumer * 0.35),
+    cons_c_expenditure: Math.floor(consumer * 0.40),
+    cons_1_food: Math.floor(consumer * 0.25),
+    cons_2_housing: Math.floor(consumer * 0.20),
+    cons_3_clothing: Math.floor(consumer * 0.08),
+    cons_4_transport: Math.floor(consumer * 0.12),
+    cons_5_hygiene_care: Math.floor(consumer * 0.06),
+    cons_6_health: Math.floor(consumer * 0.10),
+    cons_7_education: Math.floor(consumer * 0.07),
+    cons_8_recreation: Math.floor(consumer * 0.05),
+    cons_9_tobacco: Math.floor(consumer * 0.02),
+    cons_10_personal_services: Math.floor(consumer * 0.04),
+    cons_12_others: Math.floor(consumer * 0.03),
     
-    // Classes sociais (quantidade de pessoas)
-    class_a1: Math.floor(Math.random() * 1000) + 200,
-    class_a2: Math.floor(Math.random() * 2000) + 500,
-    class_b1: Math.floor(Math.random() * 5000) + 1500,
-    class_b2: Math.floor(Math.random() * 8000) + 2500,
-    class_c: Math.floor(Math.random() * 15000) + 5000,
-    class_d: Math.floor(Math.random() * 10000) + 3000,
-    class_e: Math.floor(Math.random() * 5000) + 1000,
+    // Classes sociais (distribuicao realista do Brasil)
+    class_a1: Math.floor(people * 0.01),
+    class_a2: Math.floor(people * 0.02),
+    class_b1: Math.floor(people * 0.08),
+    class_b2: Math.floor(people * 0.12),
+    class_c: Math.floor(people * 0.35),
+    class_d: Math.floor(people * 0.30),
+    class_e: Math.floor(people * 0.12),
     
-    // Faixas etárias
-    age_babies: Math.floor(Math.random() * 2000) + 500,
-    age_kids: Math.floor(Math.random() * 3000) + 800,
-    age_teens: Math.floor(Math.random() * 3500) + 1000,
-    age_young_adults: Math.floor(Math.random() * 8000) + 2500,
-    age_adults: Math.floor(Math.random() * 12000) + 4000,
-    age_middle_age: Math.floor(Math.random() * 10000) + 3000,
-    age_young_elderly: Math.floor(Math.random() * 5000) + 1500,
-    age_elderly: Math.floor(Math.random() * 3000) + 800,
+    // Faixas etarias (distribuicao realista)
+    age_babies: Math.floor(people * 0.06),
+    age_kids: Math.floor(people * 0.10),
+    age_teens: Math.floor(people * 0.10),
+    age_young_adults: Math.floor(people * 0.18),
+    age_adults: Math.floor(people * 0.25),
+    age_middle_age: Math.floor(people * 0.20),
+    age_young_elderly: Math.floor(people * 0.08),
+    age_elderly: Math.floor(people * 0.03),
     
-    // Indicadores demográficos
-    pop_active: (Math.random() * 20 + 50).toFixed(1),
-    pop_youngness: (Math.random() * 10 + 15).toFixed(1),
-    pop_oldness: (Math.random() * 10 + 10).toFixed(1),
+    // Indicadores demograficos
+    pop_active: "65.5",
+    pop_youngness: "25.3",
+    pop_oldness: "12.8",
     
-    // Dados históricos
-    people2022: Math.floor(Math.random() * 48000) + 9500,
-    census_change: (Math.random() * 10 + 2).toFixed(1),
-    income_2022: Math.floor(Math.random() * 4800) + 1900,
-    income_2010: Math.floor(Math.random() * 3500) + 1500,
-    income_rate: (Math.random() * 15 + 5).toFixed(1),
+    // Dados historicos
+    people2022: Math.floor(people * 0.95),
+    census_change: "2.5",
+    income_2022: Math.floor(income * 0.92),
+    income_2010: Math.floor(income * 0.75),
+    income_rate: "8.3",
     
-    // Atividades econômicas
-    clu_N_nome: "Comércio Varejista",
-    clu_N_atv: Math.floor(Math.random() * 500) + 100,
-    clu_N_pct_over_avg: (Math.random() * 50 + 80).toFixed(1),
+    // Atividades economicas
+    clu_N_nome: "Comercio Varejista",
+    clu_N_atv: Math.floor(people * 0.02),
+    clu_N_pct_over_avg: "95.5",
     
     // ID para cache
     areaid: `${lat.toFixed(5)}_${lng.toFixed(5)}_${radius}`,
@@ -147,7 +162,7 @@ function generateMockSpaceData(lat: number, lng: number, radius: number, segment
 }
 
 /**
- * Wrapper para chamadas à API Space
+ * Wrapper para chamadas a API Space
  * NUNCA expor a chave da API no frontend
  */
 export async function querySpaceApi(params: SpaceQueryParams): Promise<SpaceApiResponse> {
@@ -159,13 +174,13 @@ export async function querySpaceApi(params: SpaceQueryParams): Promise<SpaceApiR
   if (radius > ENV.spaceMaxRadius) {
     throw new TRPCError({
       code: "BAD_REQUEST",
-      message: `Raio máximo permitido: ${ENV.spaceMaxRadius}m`,
+      message: `Raio maximo permitido: ${ENV.spaceMaxRadius}m`,
     });
   }
 
-  // Se a Space API não estiver configurada, retornar dados mockados
+  // Se a Space API nao estiver configurada, retornar dados mockados
   if (!ENV.spaceApiBaseUrl || !ENV.spaceApiKey) {
-    console.warn("[Space API] Credenciais não configuradas, retornando dados mockados");
+    console.warn("[Space API] Credenciais nao configuradas, retornando dados mockados");
     return {
       ok: true,
       data: generateMockSpaceData(lat, lng, radius, segment),
@@ -201,7 +216,7 @@ export async function querySpaceApi(params: SpaceQueryParams): Promise<SpaceApiR
       tipo_income: typeof rawData.income,
     });
 
-    // Normalizar dados da API que vêm como strings
+    // Normalizar dados da API que vem como strings
     const data = normalizeSpaceApiResponse(rawData);
 
     console.log(`[Space API] Sucesso! Retornando dados reais. Habitantes: ${data.people}, Renda: ${data.income}`);
@@ -211,9 +226,9 @@ export async function querySpaceApi(params: SpaceQueryParams): Promise<SpaceApiR
       data,
     };
   } catch (error: any) {
-    console.error("[Space API] Erro na requisição:", error);
+    console.error("[Space API] Erro na requisicao:", error);
     
-    console.warn("[Space API] Erro de conexão, usando dados mockados como fallback");
+    console.warn("[Space API] Erro de conexao, usando dados mockados como fallback");
     return {
       ok: true,
       data: generateMockSpaceData(lat, lng, radius, segment),
@@ -222,7 +237,7 @@ export async function querySpaceApi(params: SpaceQueryParams): Promise<SpaceApiR
 }
 
 /**
- * Cache simples em memória para consultas recentes
+ * Cache simples em memoria para consultas recentes
  */
 const queryCache = new Map<string, { data: any; timestamp: number }>();
 const CACHE_TTL = 20 * 60 * 1000; // 20 minutos
@@ -240,7 +255,7 @@ export async function querySpaceApiWithCache(params: SpaceQueryParams): Promise<
 
   console.log(`[querySpaceApiWithCache] NODE_ENV=${process.env.NODE_ENV}, ignoreCache=${ignoreCache}, cacheExists=${!!cached}`);
 
-  // Verificar se há cache válido
+  // Verificar se ha cache valido
   if (!ignoreCache && cached && Date.now() - cached.timestamp < CACHE_TTL) {
     console.log("[Space API] Cache hit:", cacheKey);
     return {
@@ -254,7 +269,7 @@ export async function querySpaceApiWithCache(params: SpaceQueryParams): Promise<
     console.log("[Space API] Cache ignorado em desenvolvimento");
   }
 
-  // Fazer requisição
+  // Fazer requisicao
   console.log("[querySpaceApiWithCache] Chamando querySpaceApi...");
   const result = await querySpaceApi(params);
   console.log("[querySpaceApiWithCache] Resultado recebido:", { ok: result.ok, people: result.data?.people });
@@ -265,7 +280,7 @@ export async function querySpaceApiWithCache(params: SpaceQueryParams): Promise<
     timestamp: Date.now(),
   });
 
-  // Limpar cache antigo (manter apenas últimas 100 consultas)
+  // Limpar cache antigo (manter apenas ultimas 100 consultas)
   if (queryCache.size > 100) {
     const oldestKey = queryCache.keys().next().value;
     if (oldestKey) {

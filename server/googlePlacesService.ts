@@ -85,7 +85,7 @@ export async function searchCompetitors({
 
   if (!ENV.googlePlacesApiKey) {
     console.warn("[Google Places] API key não configurada, retornando dados mockados");
-    return { results: generateMockCompetitors(keyword) };
+    return { results: generateMockCompetitors(keyword, lat, lng, radius) };
   }
 
   try {
@@ -98,6 +98,7 @@ export async function searchCompetitors({
     } else {
       url.searchParams.set("location", `${lat},${lng}`);
       url.searchParams.set("radius", String(radius));
+      console.log(`[Google Places] Buscando concorrentes em: lat=${lat}, lng=${lng}, radius=${radius}m`);
 
       if (types.length) {
         url.searchParams.set("type", types[0]);
@@ -147,14 +148,14 @@ export async function searchCompetitors({
     return await fetchWithRetry();
   } catch (error) {
     console.error("[Google Places] Erro ao buscar concorrentes:", error);
-    return { results: generateMockCompetitors(keyword) };
+    return { results: generateMockCompetitors(keyword, lat, lng, radius) };
   }
 }
 
 /**
  * Gera dados mockados de concorrentes quando a API não está disponível
  */
-function generateMockCompetitors(businessType: string): CompetitorResult[] {
+function generateMockCompetitors(businessType: string, lat?: number, lng?: number, radius?: number): CompetitorResult[] {
   const mockNames = [
     `${businessType} Central`,
     `${businessType} Premium`,
@@ -163,11 +164,20 @@ function generateMockCompetitors(businessType: string): CompetitorResult[] {
     `${businessType} da Praça`,
   ];
 
+  // Usar coordenadas passadas ou padrão de SP
+  const baseLat = lat ?? -23.55052;
+  const baseLng = lng ?? -46.633308;
+  const searchRadius = radius ?? 1500;
+
+  // Converter raio de metros para graus aproximados (1 grau ≈ 111km)
+  const radiusInDegrees = searchRadius / 111000;
+
   return mockNames.map((name, index) => ({
     name,
-    address: `Rua Exemplo, ${100 + index * 50} - São Paulo, SP`,
-    lat: -23.55052 + (Math.random() - 0.5) * 0.01,
-    lng: -46.633308 + (Math.random() - 0.5) * 0.01,
+    address: `Rua Exemplo, ${100 + index * 50} - Próximo ao ponto de análise`,
+    // Gerar coordenadas dentro do raio de busca
+    lat: baseLat + (Math.random() - 0.5) * radiusInDegrees,
+    lng: baseLng + (Math.random() - 0.5) * radiusInDegrees,
     rating: 3.5 + Math.random() * 1.5,
     userRatingsTotal: Math.floor(Math.random() * 500) + 50,
     placeId: `mock_place_${index}`,
