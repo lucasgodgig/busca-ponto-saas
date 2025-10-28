@@ -244,14 +244,14 @@ export const appRouter = router({
 
   // Space API e Quick Queries
   space: router({
-    // Normalizar dados da Space API
-    normalize: protectedProcedure
-      .input(z.object({
-        lat: z.number().min(-90).max(90),
-        lng: z.number().min(-180).max(180),
-        radius: z.number().int().positive().max(ENV.spaceMaxRadius),
-      }))
-      .query(async ({ input }) => {
+    //    space: router({
+      normalize: publicProcedure
+        .input(z.object({
+          lat: z.number().min(-90).max(90),
+          lng: z.number().min(-180).max(180),
+          radius: z.number().int().positive().max(ENV.spaceMaxRadius),
+        }))
+        .mutation(async ({ input }) => {
         const num = (v: any, d = 0) => {
           const n = Number(v);
           return Number.isFinite(n) ? n : d;
@@ -273,14 +273,19 @@ export const appRouter = router({
           radius: input.radius,
         });
 
-        console.log('[space.normalize] Resultado:', { ok: result.ok, people: result.data?.people, income: result.data?.income });
+        if (!result.ok || !result.data) {
+          throw new Error('Falha ao buscar dados da Space API');
+        }
+
+        // querySpaceApiWithCache já retorna dados normalizados
+        const raw = result.data;
+        console.log('[space.normalize] Raw data recebido:', { keys: Object.keys(raw).slice(0, 20), people: raw.people, income: raw.income, consumer: raw.consumer });
         
-        const raw = result.data || {};
-        const people = pick(raw, ['people', 'population', 'habitantes', 'pop_total'], 0);
-        const income = pick(raw, ['income', 'renda', 'avg_income', 'renda_per_capita'], 0);
-        const consumer = pick(raw, ['consumer', 'cons_a_total', 'consumo_total'], 0);
+        const people = num(raw.people, 0);
+        const income = num(raw.income, 0);
+        const consumer = num(raw.consumer, 0);
         
-        console.log('[space.normalize] Valores:', { people, income, consumer });
+        console.log('[space.normalize] Valores normalizados:', { people, income, consumer });
 
         const classes = [
           ["A1", "class_a1"],

@@ -1,36 +1,16 @@
-"use client";
-
-import { useRef, useState, useCallback, useEffect, useMemo } from "react";
+import { useRef, useState, useCallback, useEffect } from "react";
 import Map, { MapRef, Marker, Source, Layer } from "react-map-gl/maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { upsertAnalysisCircle, clearAnalysisCircle } from "@/lib/mapCircle";
-
-import { Slider } from "@/components/ui/slider";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { Loader2, MapPin, ArrowLeft, Zap } from "lucide-react";
+import { Loader2, MapPin } from "lucide-react";
 import { toast } from "sonner";
 import { trpc } from "@/lib/trpc";
-import SidePanelSpace from "@/components/SidePanelSpace";
-import { setupSpaceDataTheme, spaceDataThemeConstants } from "@/lib/spaceDataTheme";
-import LocationSearch from "@/components/LocationSearch";
-import CompetitorsPanel from "@/components/CompetitorsPanel";
-import { GoogleBoundsLiteral } from "@/lib/google";
+import LeftPanel from "@/components/LeftPanel";
+import { upsertAnalysisCircle, clearAnalysisCircle } from "@/lib/mapCircle";
 import type { SpaceData } from "@/services/spaceClient";
 
 interface MapShellProps {
   tenantId: number;
   loading?: boolean;
-}
-
-interface AnalysisParams {
-  center: { lat: number; lng: number };
-  radius: number;
-  segment: string;
-  address?: string;
 }
 
 export default function MapShell({ tenantId, loading = false }: MapShellProps) {
@@ -45,86 +25,59 @@ export default function MapShell({ tenantId, loading = false }: MapShellProps) {
 
   const [marker, setMarker] = useState<{ lat: number; lng: number } | null>(null);
   const [radius, setRadius] = useState([1500]);
-
-  const [searchAddress, setSearchAddress] = useState("");
-  const [selectedAddress, setSelectedAddress] = useState("");
-  const [businessSegment, setBusinessSegment] = useState("");
-  const [searching, setSearching] = useState(false);
-  const [autocompleteBounds, setAutocompleteBounds] = useState<GoogleBoundsLiteral | null>(null);
-
-  const mapStyleUrl = "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json";
-  const panelCardClass = "border border-white/60 bg-white/85 backdrop-blur-sm shadow-[0_20px_50px_-35px_rgba(13,31,79,0.45)]";
-
-  const [layers, setLayers] = useState({
-    demografia: true,
-    renda: true,
-    fluxo: true,
-    concorrencia: true,
-  });
-
-  const [queryResult, setQueryResult] = useState<any>(null);
-  const [analysisParams, setAnalysisParams] = useState<AnalysisParams | null>(null);
-  const [spaceData, setSpaceData] = useState<SpaceData | null>(null);
+  const [segment, setSegment] = useState("academia");
   const [spaceLoading, setSpaceLoading] = useState(false);
+  const [spaceData, setSpaceData] = useState<SpaceData | null>(null);
   const [spaceError, setSpaceError] = useState<string | null>(null);
 
+  // Handle map click
+  const handleMapClick = useCallback(
+    async (e: any) => {
+      const { lngLat } = e;
+      const newMarker = { lat: lngLat.lat, lng: lngLat.lng };
+      setMarker(newMarker);
 
+      // Update circle on map
+      const map = mapRef.current?.getMap();
+      if (map) {
+        upsertAnalysisCircle({
+          map,
+          center: [newMarker.lng, newMarker.lat],
+          radiusMeters: radius[0],
+        });
+      }
 
-  const updateAutocompleteBounds = useCallback(() => {
-    const mapInstance = mapRef.current?.getMap();
-    if (!mapInstance) return;
-    const bounds = mapInstance.getBounds();
-    if (!bounds) return;
-    const ne = bounds.getNorthEast();
-    const sw = bounds.getSouthWest();
-    setAutocompleteBounds({
-      north: ne.lat,
-      east: ne.lng,
-      south: sw.lat,
-      west: sw.lng,
-    });
-  }, [mapRef]);
-
-  const handleLocationSelect = useCallback(
-    ({ lat, lng, address }: { lat: number; lng: number; address: string }) => {
-      setMarker({ lat, lng });
-      setViewport((prev) => ({ ...prev, latitude: lat, longitude: lng, zoom: Math.max(prev.zoom, 15) }));
-      setSelectedAddress(address);
-      setSearchAddress(address);
-
-      mapRef.current?.flyTo({
-        center: [lng, lat],
-        zoom: 15,
-        duration: 1000,
-      });
-
-      toast.success("Localização atualizada!");
+      // Fetch space data
+      setSpaceLoading(true);
+      setSpaceError(null);
+      
+      try {
+        const result = await trpc.space.normalize.mutate({
+          lat: newMarker.lat,
+          lng: newMarker.lng,
+          radius: radius[0],
+        });
+        
+        if (result.ok && result.data) {
+          setSpaceData(result.data);
+        } else {
+          setSpaceError("Erro ao buscar dados");
+          toast.error("Erro ao buscar dados da localização");
+        }
+      } catch (err: any) {
+        console.error("Erro ao buscar dados:", err);
+        setSpaceError(err?.message || "Erro ao buscar dados");
+        toast.error("Erro ao buscar dados");
+      } finally {
+        setSpaceLoading(false);
+      }
     },
-    [mapRef]
+    [radius]
   );
 
-  const spaceQueryMutation = trpc.space.query.useMutation({
-    onSuccess: (result) => {
-      setQueryResult(result);
-      toast.success("Análise concluída!");
-    },
-    onError: (error) => {
-      console.error("Erro na consulta:", error);
-      toast.error("Erro ao executar análise");
-    },
-  });
-
-  const handleQuickQuery = useCallback(async () => {
-    if (!marker) {
-      toast.error("Selecione uma localização no mapa");
-      return;
-    }
-
-    setSearching(true);
-    const trimmedSegment = businessSegment.trim();
-
-    try {
-      // Desenhar o círculo no mapa
+  // Update circle when radius changes
+  useEffect(() => {
+    if (marker) {
       const map = mapRef.current?.getMap();
       if (map) {
         upsertAnalysisCircle({
@@ -133,287 +86,101 @@ export default function MapShell({ tenantId, loading = false }: MapShellProps) {
           radiusMeters: radius[0],
         });
       }
-
-      // Buscar dados normalizados
-      setSpaceLoading(true);
-      setSpaceError(null);
-      let normalizedData = null;
-      
-      try {
-        const result = await trpc.space.normalize.query({
-          lat: marker.lat,
-          lng: marker.lng,
-          radius: radius[0],
-        });
-        if (result.ok) {
-          normalizedData = result.data;
-          setSpaceData(normalizedData);
-        } else {
-          throw new Error(result.error || 'Erro ao buscar dados');
-        }
-      } catch (err: any) {
-        console.error('Erro ao buscar dados:', err);
-        setSpaceError(err?.message || 'Erro ao buscar dados');
-      } finally {
-        setSpaceLoading(false);
-      }
-
-      const result = await spaceQueryMutation.mutateAsync({
-        tenantId,
-        lat: marker.lat,
-        lng: marker.lng,
-        radius: radius[0],
-        segment: trimmedSegment || undefined,
-      });
-
-      console.log('[MapShell] Resultado da API:', result);
-
-      sessionStorage.setItem('analysisData', JSON.stringify({
-        data: normalizedData || result,
-        address: selectedAddress,
-        radius: radius[0],
-        center: marker,
-        segment: trimmedSegment,
-        tenantId,
-      }));
-
-      window.location.href = '/analysis';
-
-      setAnalysisParams({
-        center: marker,
-        radius: radius[0],
-        segment: trimmedSegment,
-        address: selectedAddress,
-      });
-    } catch (error) {
-      console.error("Erro ao executar consulta:", error);
-    } finally {
-      setSearching(false);
     }
-  }, [marker, radius, businessSegment, selectedAddress, tenantId, spaceQueryMutation]);
-
-  const handleBack = useCallback(() => {
-    setQueryResult(null);
-    setAnalysisParams(null);
-  }, []);
-
-  const handleMapLoad = useCallback(() => {
-    if (themeCleanupRef.current) {
-      themeCleanupRef.current();
-    }
-    const map = mapRef.current?.getMap();
-    if (map) {
-      themeCleanupRef.current = setupSpaceDataTheme(map);
-    }
-  }, []);
-
-  // Cleanup do círculo quando o componente é desmontado
-  useEffect(() => {
-    return () => {
-      const map = mapRef.current?.getMap();
-      if (map) {
-        clearAnalysisCircle(map);
-      }
-    };
-  }, []);
-
-  const renderSidePanel = () => {
-    if (queryResult) {
-      return (
-        <div className="space-y-4">
-          <SidePanelSpace
-            data={queryResult}
-            center={marker}
-            segment={businessSegment}
-            radius={radius[0]}
-          />
-        </div>
-      );
-    }
-
-    return (
-      <div className="space-y-4 overflow-y-auto h-full pb-4">
-        {!marker && (
-          <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-center">
-            <p className="text-sm text-blue-700 font-medium">Clique no mapa para selecionar uma localização</p>
-          </div>
-        )}
-
-        {marker && (
-          <div className="p-3 bg-green-50 border border-green-200 rounded-lg text-center">
-            <p className="text-sm text-green-700 font-medium">Ponto selecionado: {marker.lat.toFixed(4)}, {marker.lng.toFixed(4)}</p>
-          </div>
-        )}
-
-        <Card className={panelCardClass}>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base font-semibold">Buscar Localização</CardTitle>
-            <CardDescription className="text-xs">Digite um endereço ou CEP</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <LocationSearch
-              value={searchAddress}
-              onChange={setSearchAddress}
-              onSelect={handleLocationSelect}
-              bounds={autocompleteBounds}
-            />
-          </CardContent>
-        </Card>
-
-        {marker && (
-          <>
-            <Card className={panelCardClass}>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base font-semibold">Raio de Análise</CardTitle>
-                <CardDescription className="text-xs">{radius[0]}m ({(radius[0] / 1000).toFixed(2)}km)</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                <Slider
-                  value={radius}
-                  onValueChange={(newRadius) => {
-                    setRadius(newRadius);
-                    // Atualizar círculo no mapa
-                    const map = mapRef.current?.getMap();
-                    if (map && marker) {
-                      upsertAnalysisCircle({
-                        map,
-                        center: [marker.lng, marker.lat],
-                        radiusMeters: newRadius[0],
-                      });
-                    }
-                  }}
-                  min={500}
-                  max={5000}
-                  step={100}
-                  className="w-full"
-                />
-                <div className="flex justify-between text-xs text-gray-500">
-                  <span>500m</span>
-                  <span>5km</span>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className={panelCardClass}>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base font-semibold">Segmento do Negócio</CardTitle>
-                <CardDescription className="text-xs">Informe o segmento para buscar concorrentes</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                <Input
-                  type="text"
-                  placeholder="Ex: academias, farmácias, petshops"
-                  value={businessSegment}
-                  onChange={(e) => setBusinessSegment(e.target.value)}
-                  className="border-sky-200 focus:border-sky-500 focus:ring-sky-500"
-                />
-                <p className="text-xs text-yellow-600">⚠️ Usado para listar concorrentes via Google Places</p>
-              </CardContent>
-            </Card>
-
-            <Card className={panelCardClass}>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base font-semibold">Camadas de Dados</CardTitle>
-                <CardDescription className="text-xs">Selecione as informações a visualizar</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {Object.entries(layers).map(([key, value]) => (
-                  <div key={key} className="flex items-center justify-between">
-                    <Label className="capitalize cursor-pointer text-sm">{key.replace("_", " ")}</Label>
-                    <Switch
-                      checked={value}
-                      onCheckedChange={(checked) =>
-                        setLayers({
-                          ...layers,
-                          [key]: checked,
-                        })
-                      }
-                    />
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-
-            <Button
-              onClick={handleQuickQuery}
-              disabled={searching}
-              className="w-full h-11 text-base font-semibold bg-gradient-to-r from-sky-500 via-sky-600 to-indigo-600 hover:from-sky-600 hover:via-sky-700 hover:to-indigo-700 text-white rounded-xl shadow-[0_15px_35px_rgba(56,131,255,0.45)]"
-            >
-              {searching ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Executando...
-                </>
-              ) : (
-                <>
-                  <Zap className="w-4 h-4 mr-2" />
-                  Executar Consulta Rápida
-                </>
-              )}
-            </Button>
-          </>
-        )}
-      </div>
-    );
-  };
+  }, [radius, marker]);
 
   return (
-    <div className="flex h-full gap-4 bg-[#040617]">
-      <div className="relative flex-1 rounded-3xl overflow-hidden shadow-[0_40px_120px_-45px_rgba(79,199,255,0.65)] border border-white/5">
-        <Map
-          ref={mapRef}
-          initialViewState={viewport}
-          style={{ width: "100%", height: "100%" }}
-          mapStyle={mapStyleUrl}
-          onLoad={handleMapLoad}
-          onMove={(evt) => {
-            setViewport(evt.viewState);
-            updateAutocompleteBounds();
-          }}
-          onClick={(e) => {
-            const { lng, lat } = e.lngLat;
-            setMarker({ lat, lng });
-            setSelectedAddress("");
-            setSearchAddress("");
-          }}
-        >
+    <div className="flex h-screen w-full bg-gray-100">
+      {/* Left Panel */}
+      <LeftPanel
+        radius={radius}
+        onRadiusChange={setRadius}
+        segment={segment}
+        onSegmentChange={setSegment}
+        loading={spaceLoading}
+      />
+
+      {/* Map Container */}
+      <div className="flex-1 flex flex-col relative">
+        {/* Header with Busca Ponto branding */}
+        <div className="bg-white border-b shadow-sm px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <MapPin className="w-6 h-6 text-blue-600" />
+            <h1 className="text-2xl font-bold text-gray-900">Busca Ponto</h1>
+          </div>
           {marker && (
-            <>
-              <Marker longitude={marker.lng} latitude={marker.lat} anchor="bottom">
-                <div className="relative">
-                  <div className="absolute inset-1 rounded-full bg-[radial-gradient(circle_at_30%_30%,rgba(138,245,255,0.9),rgba(23,133,255,0.4))] blur-sm opacity-80" />
-                  <div className="w-11 h-11 bg-gradient-to-br from-cyan-300 via-sky-500 to-blue-600 rounded-full border border-white/40 shadow-[0_15px_45px_rgba(79,199,255,0.5)] flex items-center justify-center cursor-move transform hover:scale-110 transition-transform relative">
-                    <MapPin className="w-5 h-5 text-white drop-shadow" />
-                  </div>
-                </div>
-              </Marker>
-
-            </>
+            <div className="text-sm text-gray-600">
+              Ponto selecionado: {marker.lat.toFixed(4)}, {marker.lng.toFixed(4)}
+            </div>
           )}
-        </Map>
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(79,199,255,0.25),transparent_55%)]" />
-        <div
-          className="pointer-events-none absolute inset-0 opacity-80 mix-blend-screen"
-          style={{ background: "linear-gradient(140deg, rgba(9,18,56,0.85) 0%, rgba(15,42,122,0.55) 45%, rgba(14,95,128,0.35) 100%)" }}
-        />
-        <div className="pointer-events-none absolute inset-0 border border-white/10 rounded-3xl" />
-      </div>
-
-      <div className="w-96 bg-white/95 backdrop-blur rounded-3xl shadow-[0_35px_120px_-45px_rgba(13,31,79,0.8)] overflow-hidden flex flex-col border border-white/60">
-        <div className="bg-gradient-to-r from-sky-100 via-cyan-100 to-transparent border-b border-white/60 p-4 flex items-center justify-between">
-          {queryResult && (
-            <Button variant="ghost" size="sm" onClick={handleBack} className="flex items-center gap-2 text-sky-700 hover:text-sky-800">
-              <ArrowLeft className="w-4 h-4" />
-              Voltar
-            </Button>
-          )}
-          <h2 className="text-lg font-bold text-gray-800">
-            {queryResult ? "Resultados da Análise" : "Análise de Localização"}
-          </h2>
-          <div className="w-10" />
         </div>
 
-        <div className="flex-1 overflow-y-auto p-4">{renderSidePanel()}</div>
+        {/* Map */}
+        <div className="flex-1 relative">
+          <Map
+            ref={mapRef}
+            initialViewState={viewport}
+            onMove={(evt) => setViewport(evt.viewState)}
+            onClick={handleMapClick}
+            style={{ width: "100%", height: "100%" }}
+            mapStyle="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
+          >
+            {marker && (
+              <Marker
+                longitude={marker.lng}
+                latitude={marker.lat}
+                anchor="bottom"
+              >
+                <div className="w-8 h-8 bg-blue-600 rounded-full border-4 border-white shadow-lg flex items-center justify-center">
+                  <MapPin className="w-4 h-4 text-white" />
+                </div>
+              </Marker>
+            )}
+          </Map>
+
+          {/* Loading overlay */}
+          {spaceLoading && (
+            <div className="absolute inset-0 bg-black/20 flex items-center justify-center rounded-lg">
+              <div className="bg-white rounded-lg p-6 shadow-xl flex flex-col items-center gap-3">
+                <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+                <p className="text-sm font-medium">Carregando dados...</p>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Info Panel at bottom */}
+        {spaceData && !spaceLoading && (
+          <div className="bg-white border-t shadow-lg p-6">
+            <div className="grid grid-cols-3 gap-6">
+              <div className="text-center">
+                <p className="text-sm text-gray-600">Habitantes</p>
+                <p className="text-2xl font-bold text-blue-600">
+                  {spaceData.head?.people?.toLocaleString() || "0"}
+                </p>
+              </div>
+              <div className="text-center">
+                <p className="text-sm text-gray-600">Renda Média</p>
+                <p className="text-2xl font-bold text-green-600">
+                  R$ {spaceData.head?.income?.toLocaleString() || "0"}
+                </p>
+              </div>
+              <div className="text-center">
+                <p className="text-sm text-gray-600">Potencial de Consumo</p>
+                <p className="text-2xl font-bold text-purple-600">
+                  R$ {spaceData.head?.consumer?.toLocaleString() || "0"}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Error message */}
+        {spaceError && !spaceLoading && (
+          <div className="bg-red-50 border-t border-red-200 p-4 text-red-700">
+            {spaceError}
+          </div>
+        )}
       </div>
     </div>
   );
