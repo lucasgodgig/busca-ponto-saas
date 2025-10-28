@@ -35,7 +35,6 @@ export default function LeftPanel({
         onClick={onReset}
         className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 border-b hover:from-blue-700 hover:to-blue-800 transition text-left"
       >
-        <h1 className="text-2xl font-bold">Busca Ponto</h1>
         <p className="text-sm text-blue-100">Mapa Interativo</p>
       </button>
 

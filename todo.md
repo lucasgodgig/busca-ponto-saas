@@ -580,3 +580,10 @@
 - [x] Trocar "Análise de Localização" por "Mapa Interativo" no painel esquerdo (LeftPanel) - CORRIGIDO
 - [x] AddressSearch ainda pausa a digitação quando sugestões aparecem (problema persiste) - CORRIGIDO com useTransition
 
+
+
+
+## Bugs/Melhorias Reportados (28/10/2025 - Sessão 9)
+- [x] Remover "Busca Ponto" do painel azul esquerdo, deixar apenas "Mapa Interativo" - CORRIGIDO
+- [x] AddressSearch bloqueia quando encontra sugestões durante a digitação (precisa clicar novamente no input) - CORRIGIDO com isSelectingSuggestionRef
+

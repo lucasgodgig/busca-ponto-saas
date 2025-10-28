@@ -33,6 +33,7 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
   const placesServiceRef = useRef<any>(null);
   const sessionTokenRef = useRef<any>(null);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const isSelectingSuggestionRef = useRef(false);
 
   // Inicializar Google Places API uma única vez
   useEffect(() => {
@@ -129,6 +130,15 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
     };
 
     const handleBlur = (e: FocusEvent) => {
+      // Se estamos selecionando uma sugestão, não fechar o dropdown
+      if (isSelectingSuggestionRef.current) {
+        // Restaurar foco no input
+        setTimeout(() => {
+          input.focus();
+        }, 0);
+        return;
+      }
+
       // Verificar se o foco saiu para um elemento fora do componente
       // Usar setTimeout para permitir que o clique na sugestão seja processado
       setTimeout(() => {
@@ -161,6 +171,7 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
       return;
     }
 
+    isSelectingSuggestionRef.current = true;
     setIsLoading(true);
     setShowSuggestions(false);
 
@@ -202,6 +213,7 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
           setError("Erro ao obter detalhes do local");
         }
         setIsLoading(false);
+        isSelectingSuggestionRef.current = false;
       }
     );
   }, [onAddressSelect]);
