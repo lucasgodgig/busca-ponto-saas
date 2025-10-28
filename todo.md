@@ -305,3 +305,18 @@
 - [ ] Dados do dashboard retornam zerados (habitantes, renda, domicílios, classes sociais, faixas etárias)
 - [ ] Dados mockados não estão sendo gerados com valores realistas
 
+
+
+
+## Novas Features - Fluxo "Gerar Estudo" (28/10/2025 - Sessão 10)
+- [ ] Configurar variáveis de ambiente (SPACE_API_KEY, GOOGLE_PLACES_API_KEY)
+- [ ] Criar tabela de estudos no banco de dados
+- [ ] Implementar serviço Space API com normalização
+- [ ] Implementar serviço Google Places para concorrentes/sinergias
+- [ ] Implementar cálculo de potencial por segmento
+- [ ] Criar sistema de fila para processar estudos
+- [ ] Implementar geração de PDF com template Busca Ponto
+- [ ] Criar endpoints TRPC para criar e consultar estudos
+- [ ] Implementar interface de usuário para criar estudos
+- [ ] Testar fluxo completo
+

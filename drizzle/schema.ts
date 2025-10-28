@@ -295,6 +295,27 @@ export const inviteCodesRelations = relations(inviteCodes, ({ one }) => ({
   }),
 }));
 
+/**
+ * GeneratedStudy - Estudos gerados automaticamente com dados da Space API
+ */
+export const generatedStudies = mysqlTable('generatedStudies', {
+  id: int('id').autoincrement().primaryKey(),
+  title: varchar('title', { length: 255 }).notNull(),
+  segment: varchar('segment', { length: 255 }).notNull(),
+  lat: varchar('lat', { length: 50 }).notNull(),
+  lng: varchar('lng', { length: 50 }).notNull(),
+  radiusM: int('radiusM').notNull(),
+  notes: text('notes'),
+  status: mysqlEnum('status', ['queued', 'processing', 'done', 'error']).default('queued').notNull(),
+  resultJsonUrl: text('resultJsonUrl'),
+  pdfUrl: text('pdfUrl'),
+  errorMessage: text('errorMessage'),
+  createdAt: timestamp('createdAt').defaultNow().notNull(),
+  updatedAt: timestamp('updatedAt').defaultNow().onUpdateNow().notNull(),
+});
+
+export const generatedStudiesRelations = relations(generatedStudies, ({ one }) => ({}));
+
 // Type exports
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
@@ -318,4 +339,6 @@ export type BillingCustomer = typeof billingCustomers.$inferSelect;
 export type InsertBillingCustomer = typeof billingCustomers.$inferInsert;
 export type InviteCode = typeof inviteCodes.$inferSelect;
 export type InsertInviteCode = typeof inviteCodes.$inferInsert;
+export type GeneratedStudy = typeof generatedStudies.$inferSelect;
+export type InsertGeneratedStudy = typeof generatedStudies.$inferInsert;
 
