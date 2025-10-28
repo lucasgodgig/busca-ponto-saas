@@ -32,8 +32,8 @@ export default function InviteCodeValidation() {
         sessionStorage.setItem("inviteCode", code.trim());
         toast.success("Código validado com sucesso!");
         
-        // Redirecionar para login
-        setLocation("/login");
+        // Redirecionar para home
+        setLocation("/");
       } else {
         toast.error("Código de convite inválido ou expirado");
       }

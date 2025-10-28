@@ -8,10 +8,23 @@ import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useLocation } from "wouter";
+import { useEffect } from "react";
+
+// Funcao para verificar se codigo foi validado
+function isCodeValidated() {
+  return sessionStorage.getItem("inviteCodeValidated") === "true";
+}
 
 export default function Onboarding() {
   const { user, loading: authLoading } = useAuth();
   const [, setLocation] = useLocation();
+
+  // Verificar se codigo foi validado
+  useEffect(() => {
+    if (!isCodeValidated()) {
+      setLocation("/invite");
+    }
+  }, [setLocation]);
   const [formData, setFormData] = useState({
     name: "",
     slug: "",

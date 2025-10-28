@@ -271,3 +271,11 @@
 - [x] Bloquear acesso sem código válido (CONCLUIDO - redireciona para /invite)
 - [ ] Permitir gerar novos códigos de convite (admin) - TODO
 
+
+
+
+## Bugs Encontrados (28/10/2025 - Sessão 6)
+- [x] Sistema de código de convite não está sendo enforçado - usuários conseguem criar conta sem validar código (CORRIGIDO)
+- [x] Página de validação de código retorna "inválido" mesmo com código correto (CORRIGIDO - redirecionamento para home funcionando)
+- [x] Usuários conseguem acessar /app e /onboarding sem validar código primeiro (CORRIGIDO - bloqueio implementado em ambas as páginas)
+

@@ -5,19 +5,26 @@ import { APP_LOGO, APP_TITLE, getLoginUrl } from "@/const";
 import { useLocation } from "wouter";
 import { useEffect } from "react";
 
+// Funcao para verificar se codigo foi validado
+function isCodeValidated() {
+  return sessionStorage.getItem("inviteCodeValidated") === "true";
+}
+
+// Exportar funcao para uso em outras paginas
+export { isCodeValidated };
+
 export default function Home() {
   const { user, loading, isAuthenticated, logout } = useAuth();
   const [, setLocation] = useLocation();
 
-  // Redirecionar para dashboard se já estiver autenticado
+  // Redirecionar para dashboard se ja estiver autenticado
   // Redirecionar para validacao de codigo se nao estiver autenticado
   useEffect(() => {
     if (isAuthenticated && user) {
       setLocation("/app");
     } else if (!loading && !isAuthenticated) {
       // Verificar se o codigo foi validado
-      const codeValidated = sessionStorage.getItem("inviteCodeValidated");
-      if (!codeValidated) {
+      if (!isCodeValidated()) {
         setLocation("/invite");
       }
     }
