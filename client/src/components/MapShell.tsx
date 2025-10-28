@@ -52,8 +52,12 @@ export default function MapShell({ tenantId, loading = false }: MapShellProps) {
       setSpaceError(null);
       fetch(`/api/space?lat=${lat}&lng=${lng}&radius=${radius[0]}`)
         .then((res) => res.json())
-        .then((data) => {
-          setSpaceData(data);
+        .then((response) => {
+          if (response.ok && response.data) {
+            setSpaceData(response.data);
+          } else {
+            setSpaceError(response.error || 'Erro ao buscar dados');
+          }
           setSpaceLoading(false);
         })
         .catch((err) => {
