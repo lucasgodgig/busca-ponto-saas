@@ -642,4 +642,5 @@
 
 ## Bugs Reportados (28/10/2025 - Sessão 17)
 - [x] Layout mobile desajustado - painel esquerdo ocupando muito espaço, mapa pequeno, busca desalinhada - CORRIGIDO (flex-col md:flex-row, responsive grid, responsive text sizes)
+- [x] MapShell não era responsivo em mobile - CORRIGIDO (flex-col md:flex-row, painel 40vh em mobile, mapa 60vh em mobile)
 

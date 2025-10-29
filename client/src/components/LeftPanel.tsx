@@ -32,7 +32,7 @@ export default function LeftPanel({
   onNavigateHome,
 }: LeftPanelProps) {
   return (
-    <div className="w-80 bg-white shadow-lg flex flex-col h-full overflow-y-auto">
+    <div className="w-full md:w-80 bg-white shadow-lg flex flex-col h-full overflow-y-auto">
       {/* Header */}
       <button
         onClick={() => {
@@ -52,7 +52,7 @@ export default function LeftPanel({
       </button>
 
       {/* Content */}
-      <div className="flex-1 p-4 space-y-6">
+      <div className="flex-1 p-2 md:p-4 space-y-3 md:space-y-6">
         {/* Raio de Análise */}
         <Card>
           <CardHeader className="pb-3">

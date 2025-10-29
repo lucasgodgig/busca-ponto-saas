@@ -140,22 +140,24 @@ export default function MapShell({ tenantId, loading = false, onNavigateHome }: 
   }, []);
 
   return (
-    <div className="flex h-screen w-full bg-gray-100">
+    <div className="flex flex-col md:flex-row h-screen w-full bg-gray-100">
       {/* Left Panel */}
-      <LeftPanel
-        radius={radius}
-        onRadiusChange={setRadius}
-        segment={segment}
-        onSegmentChange={setSegment}
-        loading={spaceLoading}
-        onReset={handleReset}
-        onNavigateHome={onNavigateHome}
-      />
+      <div className="w-full md:w-64 md:border-r border-b md:border-b-0 border-gray-200 h-[40vh] md:h-auto overflow-y-auto">
+        <LeftPanel
+          radius={radius}
+          onRadiusChange={setRadius}
+          segment={segment}
+          onSegmentChange={setSegment}
+          loading={spaceLoading}
+          onReset={handleReset}
+          onNavigateHome={onNavigateHome}
+        />
+      </div>
 
       {/* Map Container */}
-      <div className="flex-1 flex flex-col relative">
+      <div className="flex-1 flex flex-col relative h-[60vh] md:h-auto">
         {/* Header with search */}
-        <div className="flex flex-col gap-3 bg-white border-b p-4">
+        <div className="flex flex-col gap-2 md:gap-3 bg-white border-b p-2 md:p-4">
           <AddressSearch onAddressSelect={handleAddressSelect} loading={spaceLoading} />
         </div>
 
