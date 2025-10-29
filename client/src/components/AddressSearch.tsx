@@ -1,7 +1,7 @@
 "use client";
 
 import { Search, Loader2, MapPin, AlertCircle, X } from "lucide-react";
-import { useRef, useState, useEffect, useCallback, useLayoutEffect, useTransition } from "react";
+import { useRef, useState, useEffect, useCallback, useTransition } from "react";
 
 interface AddressSearchProps {
   onAddressSelect: (lat: number, lng: number, address: string) => void;
@@ -24,10 +24,7 @@ declare global {
 
 export default function AddressSearch({ onAddressSelect, loading }: AddressSearchProps) {
   const inputRef = useRef<HTMLInputElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
   const suggestionsRef = useRef<Suggestion[]>([]);
-  const isMouseOverDropdownRef = useRef(false);
-  const blurTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -37,7 +34,7 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
   const autocompleteServiceRef = useRef<any>(null);
   const placesServiceRef = useRef<any>(null);
   const sessionTokenRef = useRef<any>(null);
-  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const blurTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Limpar timeout ao desmontar
   useEffect(() => {
@@ -67,62 +64,51 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
     }
   }, []);
 
-  // Handler para input com debounce
+  // Handler para input - apenas atualiza o valor
   const handleInputChange = useCallback((value: string) => {
     setInputValue(value);
+  }, []);
 
-    // Limpar timer anterior
-    if (debounceTimerRef.current) {
-      clearTimeout(debounceTimerRef.current);
-    }
-
-    // Se vazio, limpar sugestões
-    if (!value.trim()) {
-      setSuggestions([]);
-      suggestionsRef.current = [];
-      setShowSuggestions(false);
+  // Handler para buscar (Enter ou botão)
+  const handleSearch = useCallback(async () => {
+    if (!inputValue.trim()) {
+      setError("Digite um endereço");
       return;
     }
 
-    // Debounce a busca
-    debounceTimerRef.current = setTimeout(
-      async () => {
-        if (!autocompleteServiceRef.current) return;
+    if (!autocompleteServiceRef.current) return;
 
-        try {
-          setIsLoading(true);
-          const predictions = await autocompleteServiceRef.current.getPlacePredictions({
-            input: value,
-            sessionToken: sessionTokenRef.current,
-            componentRestrictions: { country: "br" },
-          });
+    try {
+      setIsLoading(true);
+      const predictions = await autocompleteServiceRef.current.getPlacePredictions({
+        input: inputValue,
+        sessionToken: sessionTokenRef.current,
+        componentRestrictions: { country: "br" },
+      });
 
-          const formattedSuggestions: Suggestion[] = (predictions.predictions || []).map(
-            (prediction: any) => ({
-              id: prediction.place_id,
-              description: prediction.description,
-              placeId: prediction.place_id,
-            })
-          );
+      const formattedSuggestions: Suggestion[] = (predictions.predictions || []).map(
+        (prediction: any) => ({
+          id: prediction.place_id,
+          description: prediction.description,
+          placeId: prediction.place_id,
+        })
+      );
 
-          suggestionsRef.current = formattedSuggestions;
-          startTransition(() => {
-            setSuggestions(formattedSuggestions);
-            setShowSuggestions(true);
-          });
-          setError(null);
-        } catch (err) {
-          console.error("Erro ao buscar sugestões:", err);
-          setError("Erro ao buscar endereços");
-          setSuggestions([]);
-          suggestionsRef.current = [];
-        } finally {
-          setIsLoading(false);
-        }
-      },
-      300
-    );
-  }, []);
+      suggestionsRef.current = formattedSuggestions;
+      startTransition(() => {
+        setSuggestions(formattedSuggestions);
+        setShowSuggestions(true);
+      });
+      setError(null);
+    } catch (err) {
+      console.error("Erro ao buscar sugestões:", err);
+      setError("Erro ao buscar endereços");
+      setSuggestions([]);
+      suggestionsRef.current = [];
+    } finally {
+      setIsLoading(false);
+    }
+  }, [inputValue]);
 
   // Handler para selecionar uma sugestão
   const handleSelectSuggestion = useCallback((suggestion: Suggestion) => {
@@ -185,8 +171,16 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
     }
   }, []);
 
+  // Handler para Enter
+  const handleKeyPress = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleSearch();
+    }
+  }, [handleSearch]);
+
   return (
-    <div ref={containerRef} className="w-full relative">
+    <div className="w-full relative">
       <div className="relative">
         {/* Input com ícone */}
         <div className="relative">
@@ -198,6 +192,7 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
             disabled={loading || isLoading}
             value={inputValue}
             onChange={(e) => handleInputChange(e.target.value)}
+            onKeyPress={handleKeyPress}
             onFocus={() => {
               if (suggestions.length > 0) {
                 setShowSuggestions(true);
@@ -217,15 +212,23 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
           {inputValue && (
             <button
               onClick={handleClear}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+              className="absolute right-10 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
           )}
-          {/* Loading spinner */}
-          {(loading || isLoading) && (
-            <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-blue-500 animate-spin" />
-          )}
+          {/* Botão de pesquisar */}
+          <button
+            onClick={handleSearch}
+            disabled={loading || isLoading || !inputValue.trim()}
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-blue-500 hover:text-blue-600 disabled:text-gray-300 transition-colors"
+          >
+            {isLoading ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+              <Search className="w-5 h-5" />
+            )}
+          </button>
         </div>
 
         {/* Dropdown de sugestões */}

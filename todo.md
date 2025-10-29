@@ -689,3 +689,7 @@
 
 - [x] Pesquisa com endereços maiores - dropdown grande causa cliques acidentais e sai da pesquisa - CORRIGIDO (removido click-outside detection, usando apenas onBlur com delay de 150ms)
 
+
+
+- [x] Mudar AddressSearch para buscar apenas ao pressionar Enter ou clicar em botão Pesquisar - CORRIGIDO (removido debounce, adicionado handleSearch, Enter key handler, botão de pesquisar)
+
