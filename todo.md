@@ -668,3 +668,7 @@
 
 - [x] AddressSearch perde foco a cada letra digitada - input fecha e precisa clicar denovo - CORRIGIDO (removido event listener duplicado, usando apenas onChange, handleBlur otimizado para mobile, adicionado onTouchStart para mobile, autoFocus, useEffect para manter foco)
 
+
+
+- [x] CRÍTICO: AddressSearch em mobile não funciona - teclado some a cada 2 letras, precisa reescrever com modal/overlay fixo - CORRIGIDO (reescrito com modal fixo no topo, overlay semi-transparente, sem re-renders que perdem foco)
+

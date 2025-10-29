@@ -1,5 +1,7 @@
-import React, { useRef, useEffect, useState, useCallback, useTransition, useLayoutEffect } from "react";
+"use client";
+
 import { Search, Loader2, MapPin, AlertCircle, X } from "lucide-react";
+import { useRef, useState, useEffect, useCallback, useLayoutEffect, useTransition } from "react";
 
 interface AddressSearchProps {
   onAddressSelect: (lat: number, lng: number, address: string) => void;
@@ -35,6 +37,17 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const isSelectingSuggestionRef = useRef(false);
   const shouldFocusRef = useRef(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detectar mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   // Restaurar foco ANTES da renderização
   useLayoutEffect(() => {
@@ -75,15 +88,6 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
     };
   }, []);
 
-  // Manter foco no input quando suggestions mudam
-  useEffect(() => {
-    if (suggestions.length > 0 && inputRef.current) {
-      if (document.activeElement !== inputRef.current) {
-        inputRef.current.focus();
-      }
-    }
-  }, [suggestions]);
-
   // Handler para input com debounce
   const handleInputChange = useCallback((value: string) => {
     // Atualizar estado do input
@@ -97,100 +101,53 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
       clearTimeout(debounceTimerRef.current);
     }
 
-    if (value.length < 2) {
-      // Usar startTransition para não bloquear a digitação
-      startTransition(() => {
-        setSuggestions([]);
-        setShowSuggestions(false);
-      });
+    // Se vazio, limpar sugestões
+    if (!value.trim()) {
+      setSuggestions([]);
       suggestionsRef.current = [];
+      setShowSuggestions(false);
       return;
     }
 
-    // Debounce de 300ms antes de fazer a requisição
-    debounceTimerRef.current = setTimeout(() => {
-      if (!autocompleteServiceRef.current) return;
+    // Debounce a busca
+    debounceTimerRef.current = setTimeout(
+      async () => {
+        if (!autocompleteServiceRef.current) return;
 
-      setIsLoading(true);
-      
-      // Buscar predictions
-      autocompleteServiceRef.current.getPlacePredictions(
-        {
-          input: value,
-          componentRestrictions: { country: "br" },
-          sessionToken: sessionTokenRef.current,
-          types: ["geocode", "establishment"], // Incluir estabelecimentos
-        },
-        (predictions: any[], status: string) => {
-          if (status === window.google.maps.places.PlacesServiceStatus.OK && predictions) {
-            const newSuggestions: Suggestion[] = predictions.map((prediction) => ({
+        try {
+          setIsLoading(true);
+          const predictions = await autocompleteServiceRef.current.getPlacePredictions({
+            input: value,
+            sessionToken: sessionTokenRef.current,
+            componentRestrictions: { country: "br" },
+          });
+
+          const formattedSuggestions: Suggestion[] = (predictions.predictions || []).map(
+            (prediction: any) => ({
               id: prediction.place_id,
               description: prediction.description,
               placeId: prediction.place_id,
-            }));
-            suggestionsRef.current = newSuggestions;
-            
-            // Usar startTransition para não bloquear a digitação
-            startTransition(() => {
-              setSuggestions(newSuggestions);
-              setShowSuggestions(true);
-            });
-            
-            setError(null);
-          } else if (status !== window.google.maps.places.PlacesServiceStatus.ZERO_RESULTS) {
-            setError("Erro ao buscar sugestões");
-          }
+            })
+          );
+
+          suggestionsRef.current = formattedSuggestions;
+          startTransition(() => {
+            setSuggestions(formattedSuggestions);
+            setShowSuggestions(true);
+          });
+          setError(null);
+        } catch (err) {
+          console.error("Erro ao buscar sugestões:", err);
+          setError("Erro ao buscar endereços");
+          setSuggestions([]);
+          suggestionsRef.current = [];
+        } finally {
           setIsLoading(false);
-          shouldFocusRef.current = true;
         }
-      );
-    }, 300);
+      },
+      300
+    );
   }, []);
-
-  // Adicionar listener ao input para focus/blur - apenas uma vez
-  useEffect(() => {
-    const input = inputRef.current;
-    if (!input) return;
-
-    const handleFocus = () => {
-      if (suggestionsRef.current.length > 0) {
-        setShowSuggestions(true);
-      }
-    };
-
-    const handleBlur = (e: FocusEvent) => {
-      // Se estamos selecionando uma sugestão, não fechar o dropdown
-      if (isSelectingSuggestionRef.current) {
-        // Restaurar foco no input
-        setTimeout(() => {
-          input.focus();
-        }, 0);
-        return;
-      }
-
-      // Em mobile, não fechar se não há relatedTarget (teclado virtual)
-      const relatedTarget = e.relatedTarget as HTMLElement;
-      if (!relatedTarget) {
-        return;
-      }
-      
-      // Fechar apenas se saiu para fora do dropdown
-      if (!relatedTarget.closest('[class*="cursor-pointer"]')) {
-        setShowSuggestions(false);
-      }
-    };
-
-    input.addEventListener("focus", handleFocus);
-    input.addEventListener("blur", handleBlur);
-
-    return () => {
-      input.removeEventListener("focus", handleFocus);
-      input.removeEventListener("blur", handleBlur);
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current);
-      }
-    };
-  }, []); // Sem dependências - apenas focus/blur
 
   // Handler para selecionar uma sugestão
   const handleSelectSuggestion = useCallback((suggestion: Suggestion) => {
@@ -204,44 +161,42 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
     setIsLoading(true);
     setShowSuggestions(false);
 
-    // Obter detalhes do lugar
     placesServiceRef.current.getDetails(
-      {
-        placeId: suggestion.placeId,
-        fields: ["geometry", "formatted_address"],
-        sessionToken: sessionTokenRef.current,
-      },
+      { placeId: suggestion.placeId, sessionToken: sessionTokenRef.current },
       (place: any, status: string) => {
-        console.log('[AddressSearch] getDetails callback:', { status, hasGeometry: !!place?.geometry });
-        if (status === window.google.maps.places.PlacesServiceStatus.OK && place.geometry) {
-          const lat = place.geometry.location.lat();
-          const lng = place.geometry.location.lng();
-          const address = place.formatted_address;
+        isSelectingSuggestionRef.current = false;
 
-          console.log('[AddressSearch] Coordenadas obtidas:', { lat, lng, address });
-          setError(null);
-          
-          startTransition(() => {
-            setSuggestions([]);
-          });
-          suggestionsRef.current = [];
-          
-          if (inputRef.current) {
-            inputRef.current.value = address;
-          }
-
-          // Criar novo session token para próxima busca
-          sessionTokenRef.current = new window.google.maps.places.AutocompleteSessionToken();
-
-          // Chamar callback com coordenadas
-          console.log('[AddressSearch] Chamando onAddressSelect com:', { lat, lng, address });
-          onAddressSelect(lat, lng, address);
-        } else {
+        if (status !== window.google.maps.places.PlacesServiceStatus.OK) {
           console.error('[AddressSearch] Erro ao obter detalhes:', status);
           setError("Erro ao obter detalhes do local");
+          setIsLoading(false);
+          return;
         }
+
+        if (!place.geometry?.location) {
+          console.error('[AddressSearch] Sem geometria:', place);
+          setError("Local sem coordenadas");
+          setIsLoading(false);
+          return;
+        }
+
+        const lat = place.geometry.location.lat();
+        const lng = place.geometry.location.lng();
+        const address = place.formatted_address || suggestion.description;
+
+        console.log('[AddressSearch] Chamando onAddressSelect:', { lat, lng, address });
+        onAddressSelect(lat, lng, address);
+
+        // Limpar
+        setInputValue("");
+        setSuggestions([]);
+        suggestionsRef.current = [];
+        setShowSuggestions(false);
+        setError(null);
         setIsLoading(false);
-        isSelectingSuggestionRef.current = false;
+
+        // Criar novo session token
+        sessionTokenRef.current = new window.google.maps.places.AutocompleteSessionToken();
       }
     );
   }, [onAddressSelect]);
@@ -261,6 +216,86 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
     }
   }, []);
 
+  // Em mobile, retornar modal fixo
+  if (isMobile) {
+    return (
+      <div className="fixed inset-0 z-40 pointer-events-none">
+        {/* Overlay semi-transparente quando dropdown está aberto */}
+        {showSuggestions && suggestions.length > 0 && (
+          <div 
+            className="absolute inset-0 bg-black bg-opacity-30 pointer-events-auto"
+            onClick={() => setShowSuggestions(false)}
+          />
+        )}
+        
+        {/* Modal fixo no topo */}
+        <div className="absolute top-0 left-0 right-0 bg-white shadow-lg z-50 pointer-events-auto">
+          <div className="p-3 space-y-2">
+            {/* Input com ícone */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-blue-500 pointer-events-none" />
+              <input
+                ref={inputRef}
+                type="text"
+                placeholder="Buscar endereço ou CEP..."
+                disabled={loading || isLoading}
+                value={inputValue}
+                onChange={(e) => handleInputChange(e.target.value)}
+                autoFocus
+                autoComplete="off"
+                className="w-full pl-10 pr-10 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed transition-all"
+              />
+              {/* Botão de limpar */}
+              {inputValue && (
+                <button
+                  onClick={handleClear}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              )}
+              {/* Loading spinner */}
+              {(loading || isLoading) && (
+                <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-blue-500 animate-spin" />
+              )}
+            </div>
+
+            {/* Mensagem de erro */}
+            {error && (
+              <div className="p-2 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2 text-sm">
+                <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
+                <span className="text-red-700">{error}</span>
+              </div>
+            )}
+          </div>
+
+          {/* Dropdown de sugestões */}
+          {showSuggestions && suggestions.length > 0 && (
+            <div className="border-t border-gray-200 max-h-64 overflow-y-auto">
+              {suggestions.map((suggestion) => (
+                <div
+                  key={suggestion.id}
+                  onTouchStart={(e) => {
+                    e.preventDefault();
+                    handleSelectSuggestion(suggestion);
+                  }}
+                  onClick={() => handleSelectSuggestion(suggestion)}
+                  className="w-full text-left px-4 py-3 hover:bg-blue-50 border-b border-gray-100 last:border-b-0 transition-colors flex items-start gap-3 cursor-pointer active:bg-blue-100"
+                >
+                  <MapPin className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-gray-900 truncate">{suggestion.description}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // Desktop: retornar layout original
   return (
     <div className="w-full">
       <div className="relative">
@@ -274,7 +309,6 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
             disabled={loading || isLoading}
             value={inputValue}
             onChange={(e) => handleInputChange(e.target.value)}
-            autoFocus
             autoComplete="off"
             className="w-full pl-10 pr-10 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed transition-all"
           />
@@ -304,10 +338,6 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
                   e.stopPropagation();
                   handleSelectSuggestion(suggestion);
                 }}
-                onTouchStart={(e) => {
-                  e.preventDefault();
-                  handleSelectSuggestion(suggestion);
-                }}
                 className="w-full text-left px-4 py-3 hover:bg-blue-50 border-b border-gray-100 last:border-b-0 transition-colors flex items-start gap-3 cursor-pointer"
               >
                 <MapPin className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
@@ -323,18 +353,8 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
         {error && (
           <div className="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2">
             <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-            <div className="flex-1">
-              <p className="text-sm font-medium text-red-900">Erro</p>
-              <p className="text-sm text-red-700">{error}</p>
-            </div>
+            <span className="text-sm text-red-700">{error}</span>
           </div>
-        )}
-
-        {/* Dica de uso */}
-        {!error && (
-          <p className="mt-2 text-xs text-gray-500">
-            Digite um endereço, bairro, CEP, cidade ou local específico (Terminal de Ônibus, Estação, etc) para buscar
-          </p>
         )}
       </div>
     </div>
