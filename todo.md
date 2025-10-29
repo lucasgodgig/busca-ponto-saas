@@ -702,3 +702,7 @@
 
 - [x] Gráfico de Faixa Etária ficou menor que o de Classe Social - aumentar altura - CORRIGIDO (aumentado de 200 para 320px)
 
+
+
+- [x] PDF Report - dados demográficos mostrando 0, classes sociais undefined, falta gráficos visuais - CORRIGIDO (acessando propriedades corretas do spaceData, formatando corretamente)
+
