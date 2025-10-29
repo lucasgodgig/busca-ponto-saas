@@ -185,7 +185,9 @@ export function PDFReport({ address, segment, data }: PDFReportProps) {
 
       // Remover elemento após impressão
       setTimeout(() => {
-        document.body.removeChild(element);
+        if (element.parentNode === document.body) {
+          document.body.removeChild(element);
+        }
       }, 100);
     }, 100);
   };

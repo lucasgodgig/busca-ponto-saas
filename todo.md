@@ -710,3 +710,7 @@
 
 - [x] Criar novo código de acesso "comunidadesaas" para convidar amigos - CRIADO (código ativo no banco de dados)
 
+
+
+- [x] Erro NotFoundError ao exportar PDF - removeChild falhando - CORRIGIDO (adicionado verificação se elemento ainda está no DOM)
+
