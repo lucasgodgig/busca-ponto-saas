@@ -685,3 +685,7 @@
 
 - [x] Pesquisa travando ao digitar 2 letras - foco saindo do input quando dropdown aparece - CORRIGIDO (removido onBlur, adicionado click-outside detection com useEffect)
 
+
+
+- [x] Pesquisa com endereços maiores - dropdown grande causa cliques acidentais e sai da pesquisa - CORRIGIDO (removido click-outside detection, usando apenas onBlur com delay de 150ms)
+

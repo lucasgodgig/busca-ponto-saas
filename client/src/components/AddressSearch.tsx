@@ -39,15 +39,13 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
   const sessionTokenRef = useRef<any>(null);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Detectar cliques fora
+  // Limpar timeout ao desmontar
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-        setShowSuggestions(false);
+    return () => {
+      if (blurTimeoutRef.current) {
+        clearTimeout(blurTimeoutRef.current);
       }
     };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   // Inicializar Google Places API uma única vez
@@ -205,6 +203,13 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
                 setShowSuggestions(true);
               }
             }}
+            onBlur={() => {
+              // Fechar dropdown com delay para permitir clique na sugestão
+              if (blurTimeoutRef.current) clearTimeout(blurTimeoutRef.current);
+              blurTimeoutRef.current = setTimeout(() => {
+                setShowSuggestions(false);
+              }, 150);
+            }}
             autoComplete="off"
             className="w-full pl-10 pr-10 py-2 md:py-3 text-sm md:text-base border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed transition-all"
           />
@@ -225,15 +230,7 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
 
         {/* Dropdown de sugestões */}
         {showSuggestions && suggestions.length > 0 && (
-          <div 
-            className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-48 md:max-h-64 overflow-y-auto"
-            onMouseEnter={() => {
-              isMouseOverDropdownRef.current = true;
-            }}
-            onMouseLeave={() => {
-              isMouseOverDropdownRef.current = false;
-            }}
-          >
+          <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-48 md:max-h-64 overflow-y-auto">
             {suggestions.map((suggestion) => (
               <div
                 key={suggestion.id}
