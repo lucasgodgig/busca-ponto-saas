@@ -677,3 +677,7 @@
 - [x] Modal de pesquisa em mobile está atrás do menu fixo - aumentar z-index - CORRIGIDO (z-[9999])
 - [x] Modal ainda está perdendo foco em mobile - simplificar lógica - CORRIGIDO (fixed em vez de absolute)
 
+
+
+- [x] CRÍTICO: Pesquisa em mobile ainda atrás do menu e perdendo foco - mover para dentro do header fixo - CORRIGIDO (reescrito AddressSearch simples, sem modal, dropdown dentro do header)
+

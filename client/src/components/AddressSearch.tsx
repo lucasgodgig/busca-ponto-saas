@@ -35,27 +35,6 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
   const placesServiceRef = useRef<any>(null);
   const sessionTokenRef = useRef<any>(null);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const isSelectingSuggestionRef = useRef(false);
-  const shouldFocusRef = useRef(false);
-  const [isMobile, setIsMobile] = useState(false);
-
-  // Detectar mobile
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
-  }, []);
-
-  // Restaurar foco ANTES da renderização
-  useLayoutEffect(() => {
-    if (shouldFocusRef.current && inputRef.current) {
-      inputRef.current.focus();
-      shouldFocusRef.current = false;
-    }
-  });
 
   // Inicializar Google Places API uma única vez
   useEffect(() => {
@@ -65,10 +44,7 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
     }
 
     try {
-      // Criar novo session token para cada busca
       sessionTokenRef.current = new window.google.maps.places.AutocompleteSessionToken();
-      
-      // Inicializar serviços
       autocompleteServiceRef.current = new window.google.maps.places.AutocompleteService();
       placesServiceRef.current = new window.google.maps.places.PlacesService(
         document.createElement("div")
@@ -79,22 +55,9 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
     }
   }, []);
 
-  // Limpar input quando o componente é desmontado
-  useEffect(() => {
-    return () => {
-      if (inputRef.current) {
-        inputRef.current.value = "";
-      }
-    };
-  }, []);
-
   // Handler para input com debounce
   const handleInputChange = useCallback((value: string) => {
-    // Atualizar estado do input
     setInputValue(value);
-    
-    // Sempre manter foco no input
-    shouldFocusRef.current = true;
 
     // Limpar timer anterior
     if (debounceTimerRef.current) {
@@ -151,21 +114,16 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
 
   // Handler para selecionar uma sugestão
   const handleSelectSuggestion = useCallback((suggestion: Suggestion) => {
-    console.log('[AddressSearch] handleSelectSuggestion chamado com:', suggestion);
     if (!placesServiceRef.current) {
-      console.error('[AddressSearch] placesServiceRef.current é null');
       return;
     }
 
-    isSelectingSuggestionRef.current = true;
     setIsLoading(true);
     setShowSuggestions(false);
 
     placesServiceRef.current.getDetails(
       { placeId: suggestion.placeId, sessionToken: sessionTokenRef.current },
       (place: any, status: string) => {
-        isSelectingSuggestionRef.current = false;
-
         if (status !== window.google.maps.places.PlacesServiceStatus.OK) {
           console.error('[AddressSearch] Erro ao obter detalhes:', status);
           setError("Erro ao obter detalhes do local");
@@ -184,7 +142,6 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
         const lng = place.geometry.location.lng();
         const address = place.formatted_address || suggestion.description;
 
-        console.log('[AddressSearch] Chamando onAddressSelect:', { lat, lng, address });
         onAddressSelect(lat, lng, address);
 
         // Limpar
@@ -216,88 +173,8 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
     }
   }, []);
 
-  // Em mobile, retornar modal fixo
-  if (isMobile) {
-    return (
-      <div className="fixed inset-0 z-[9999] pointer-events-none">
-        {/* Overlay semi-transparente quando dropdown está aberto */}
-        {showSuggestions && suggestions.length > 0 && (
-          <div 
-            className="fixed inset-0 bg-black bg-opacity-30 pointer-events-auto"
-            onClick={() => setShowSuggestions(false)}
-          />
-        )}
-        
-        {/* Modal fixo no topo */}
-        <div className="fixed top-0 left-0 right-0 bg-white shadow-lg z-[9999] pointer-events-auto">
-          <div className="p-3 space-y-2">
-            {/* Input com ícone */}
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-blue-500 pointer-events-none" />
-              <input
-                ref={inputRef}
-                type="text"
-                placeholder="Buscar endereço ou CEP..."
-                disabled={loading || isLoading}
-                value={inputValue}
-                onChange={(e) => handleInputChange(e.target.value)}
-                autoFocus
-                autoComplete="off"
-                className="w-full pl-10 pr-10 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed transition-all"
-              />
-              {/* Botão de limpar */}
-              {inputValue && (
-                <button
-                  onClick={handleClear}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              )}
-              {/* Loading spinner */}
-              {(loading || isLoading) && (
-                <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-blue-500 animate-spin" />
-              )}
-            </div>
-
-            {/* Mensagem de erro */}
-            {error && (
-              <div className="p-2 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2 text-sm">
-                <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
-                <span className="text-red-700">{error}</span>
-              </div>
-            )}
-          </div>
-
-          {/* Dropdown de sugestões */}
-          {showSuggestions && suggestions.length > 0 && (
-            <div className="border-t border-gray-200 max-h-56 overflow-y-auto">
-              {suggestions.map((suggestion) => (
-                <div
-                  key={suggestion.id}
-                  onTouchStart={(e) => {
-                    e.preventDefault();
-                    handleSelectSuggestion(suggestion);
-                  }}
-                  onClick={() => handleSelectSuggestion(suggestion)}
-                  className="w-full text-left px-4 py-3 hover:bg-blue-50 border-b border-gray-100 last:border-b-0 transition-colors flex items-start gap-3 cursor-pointer active:bg-blue-100"
-                >
-                  <MapPin className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm text-gray-900 truncate">{suggestion.description}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  }
-
-  // Desktop: retornar layout original
   return (
-    <div className="w-full">
+    <div className="w-full relative">
       <div className="relative">
         {/* Input com ícone */}
         <div className="relative">
@@ -309,8 +186,19 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
             disabled={loading || isLoading}
             value={inputValue}
             onChange={(e) => handleInputChange(e.target.value)}
+            onFocus={() => {
+              if (suggestions.length > 0) {
+                setShowSuggestions(true);
+              }
+            }}
+            onBlur={() => {
+              // Delay para permitir clique na sugestão
+              setTimeout(() => {
+                setShowSuggestions(false);
+              }, 200);
+            }}
             autoComplete="off"
-            className="w-full pl-10 pr-10 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed transition-all"
+            className="w-full pl-10 pr-10 py-2 md:py-3 text-sm md:text-base border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed transition-all"
           />
           {/* Botão de limpar */}
           {inputValue && (
@@ -329,7 +217,7 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
 
         {/* Dropdown de sugestões */}
         {showSuggestions && suggestions.length > 0 && (
-          <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-64 overflow-y-auto pointer-events-auto">
+          <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-48 md:max-h-64 overflow-y-auto">
             {suggestions.map((suggestion) => (
               <div
                 key={suggestion.id}
@@ -338,11 +226,12 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
                   e.stopPropagation();
                   handleSelectSuggestion(suggestion);
                 }}
-                className="w-full text-left px-4 py-3 hover:bg-blue-50 border-b border-gray-100 last:border-b-0 transition-colors flex items-start gap-3 cursor-pointer"
+                onClick={() => handleSelectSuggestion(suggestion)}
+                className="w-full text-left px-4 py-2 md:py-3 hover:bg-blue-50 border-b border-gray-100 last:border-b-0 transition-colors flex items-start gap-3 cursor-pointer text-sm md:text-base"
               >
                 <MapPin className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm text-gray-900 truncate">{suggestion.description}</p>
+                  <p className="text-gray-900 truncate">{suggestion.description}</p>
                 </div>
               </div>
             ))}
@@ -351,9 +240,9 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
 
         {/* Mensagem de erro */}
         {error && (
-          <div className="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2">
-            <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-            <span className="text-sm text-red-700">{error}</span>
+          <div className="mt-1 p-2 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2 text-xs md:text-sm">
+            <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
+            <span className="text-red-700">{error}</span>
           </div>
         )}
       </div>
