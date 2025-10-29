@@ -23,6 +23,7 @@ declare global {
 export default function AddressSearch({ onAddressSelect, loading }: AddressSearchProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const suggestionsRef = useRef<Suggestion[]>([]);
+  const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
@@ -76,6 +77,9 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
 
   // Handler para input com debounce
   const handleInputChange = useCallback((value: string) => {
+    // Atualizar estado do input
+    setInputValue(value);
+    
     // Sempre manter foco no input
     shouldFocusRef.current = true;
 
@@ -240,6 +244,7 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
 
   // Handler para limpar input
   const handleClear = useCallback(() => {
+    setInputValue("");
     if (inputRef.current) {
       inputRef.current.value = "";
       inputRef.current.focus();
@@ -263,10 +268,12 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
             type="text"
             placeholder="Buscar endereço ou CEP..."
             disabled={loading || isLoading}
+            value={inputValue}
+            onChange={(e) => handleInputChange(e.target.value)}
             className="w-full pl-10 pr-10 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed transition-all"
           />
           {/* Botão de limpar */}
-          {inputRef.current?.value && (
+          {inputValue && (
             <button
               onClick={handleClear}
               className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"

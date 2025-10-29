@@ -664,3 +664,7 @@
 - [x] Controles de segmento e raio ocupam muito espaço em mobile - saem da tela - CORRIGIDO (compactados com gap-0.5, p-1.5)
 - [x] Conteúdo não cabe no viewport em mobile - precisa compactar - CORRIGIDO (header responsivo, labels reduzidas)
 
+
+
+- [x] AddressSearch perde foco a cada letra digitada - input fecha e precisa clicar denovo - CORRIGIDO (adicionado estado inputValue para rastrear valor sem re-renderizar)
+
