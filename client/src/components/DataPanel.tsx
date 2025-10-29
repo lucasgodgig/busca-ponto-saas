@@ -101,9 +101,9 @@ export default function DataPanel({ data, loading, segment }: DataPanelProps) {
   }));
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2 md:space-y-4 p-2 md:p-4">
       {/* Cards de Informações Principais */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 md:gap-4">
         <Card className="bg-gradient-to-br from-orange-50 to-orange-100">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
@@ -159,14 +159,14 @@ export default function DataPanel({ data, loading, segment }: DataPanelProps) {
       </div>
 
       {/* Gráficos de Classe Social e Faixa Etária */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 md:gap-4">
         {/* Gráfico de Classe Social */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Distribuição por Classe Social</CardTitle>
+            <CardTitle className="text-sm md:text-lg">Distribuição por Classe Social</CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
+            <ResponsiveContainer width="100%" height={200}>
               <PieChart>
                 <Pie
                   data={classData}
@@ -174,7 +174,7 @@ export default function DataPanel({ data, loading, segment }: DataPanelProps) {
                   cy="50%"
                   labelLine={false}
                   label={({ name, pct }) => `${name} ${pct.toFixed(1)}%`}
-                  outerRadius={80}
+                  outerRadius={50}
                   fill="#8884d8"
                   dataKey="value"
                 >
@@ -195,20 +195,20 @@ export default function DataPanel({ data, loading, segment }: DataPanelProps) {
         {/* Gráfico de Faixa Etária */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Distribuição por Faixa Etária</CardTitle>
+            <CardTitle className="text-sm md:text-lg">Distribuição por Faixa Etária</CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
+            <ResponsiveContainer width="100%" height={200}>
               <BarChart data={ageData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis
                   dataKey="name"
                   angle={-45}
                   textAnchor="end"
-                  height={100}
-                  tick={{ fontSize: 11 }}
+                  height={80}
+                  tick={{ fontSize: 9 }}
                 />
-                <YAxis tick={{ fontSize: 12 }} />
+                <YAxis tick={{ fontSize: 10 }} />
                 <Tooltip
                   formatter={(value) =>
                     `${(value as number).toLocaleString("pt-BR")} pessoas`
@@ -223,10 +223,12 @@ export default function DataPanel({ data, loading, segment }: DataPanelProps) {
 
       {/* Gráfico de Categorias de Consumo */}
       {data && (
-        <ConsumptionCategoriesChart
-          data={data as SpaceData}
-          segment={segment || 'outros'}
-        />
+        <div className="overflow-x-auto">
+          <ConsumptionCategoriesChart
+            data={data as SpaceData}
+            segment={segment || 'outros'}
+          />
+        </div>
       )}
     </div>
   );

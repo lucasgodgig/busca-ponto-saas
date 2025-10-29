@@ -103,14 +103,14 @@ export default function ConsumptionCategoriesChart({
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg">Potencial de Consumo por Categoria</CardTitle>
+        <CardTitle className="text-sm md:text-lg">Potencial de Consumo por Categoria</CardTitle>
       </CardHeader>
       <CardContent>
-        <ResponsiveContainer width="100%" height={400}>
+        <ResponsiveContainer width="100%" height={250}>
           <BarChart data={chartData} layout="vertical">
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis type="number" />
-            <YAxis dataKey="name" type="category" width={200} tick={{ fontSize: 12 }} />
+            <XAxis type="number" tick={{ fontSize: 10 }} />
+            <YAxis dataKey="name" type="category" width={120} tick={{ fontSize: 10 }} />
             <Tooltip
               formatter={(value) => {
                 const millions = (value as number) / 1000000;
@@ -129,14 +129,14 @@ export default function ConsumptionCategoriesChart({
             </Bar>
           </BarChart>
         </ResponsiveContainer>
-        <div className="mt-4 grid grid-cols-2 gap-2 text-xs">
+        <div className="mt-2 md:mt-4 grid grid-cols-2 md:grid-cols-3 gap-1 md:gap-2 text-xs">
           {chartData.map((category, index) => (
-            <div key={index} className="flex items-center gap-2">
+            <div key={index} className="flex items-center gap-1">
               <div
-                className="w-3 h-3 rounded"
+                className="w-2 h-2 md:w-3 md:h-3 rounded"
                 style={{ backgroundColor: category.fill }}
               />
-              <span className="text-gray-600">{category.name}</span>
+              <span className="text-gray-600 truncate">{category.name}</span>
             </div>
           ))}
         </div>

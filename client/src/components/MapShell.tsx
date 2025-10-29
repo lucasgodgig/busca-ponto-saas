@@ -141,8 +141,8 @@ export default function MapShell({ tenantId, loading = false, onNavigateHome }: 
 
   return (
     <div className="flex flex-col md:flex-row h-screen w-full bg-gray-100">
-      {/* Left Panel */}
-      <div className="w-full md:w-64 md:border-r border-b md:border-b-0 border-gray-200 h-[40vh] md:h-auto overflow-y-auto">
+      {/* Left Panel - Hidden on mobile, visible on desktop */}
+      <div className="hidden md:flex md:w-64 md:border-r border-gray-200 h-auto overflow-y-auto">
         <LeftPanel
           radius={radius}
           onRadiusChange={setRadius}
@@ -154,10 +154,25 @@ export default function MapShell({ tenantId, loading = false, onNavigateHome }: 
         />
       </div>
 
-      {/* Map Container */}
-      <div className="flex-1 flex flex-col relative h-[60vh] md:h-auto">
-        {/* Header with search */}
-        <div className="flex flex-col gap-2 md:gap-3 bg-white border-b p-2 md:p-4">
+      {/* Map Container - Full screen on mobile */}
+      <div className="flex-1 flex flex-col relative h-screen md:h-auto">
+        {/* Header with search and mobile controls */}
+        <div className="flex flex-col gap-1 md:gap-3 bg-white border-b p-2 md:p-4">
+          {/* Mobile segment selector */}
+          <div className="md:hidden">
+            <select
+              value={segment}
+              onChange={(e) => setSegment(e.target.value)}
+              disabled={spaceLoading}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+            >
+              <option value="academia">Academia</option>
+              <option value="petshop">PetShop</option>
+              <option value="farmacia">Farmácia</option>
+              <option value="delivery">Delivery</option>
+              <option value="outros">Outros</option>
+            </select>
+          </div>
           <AddressSearch onAddressSelect={handleAddressSelect} loading={spaceLoading} />
         </div>
 

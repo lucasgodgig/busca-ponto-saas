@@ -644,3 +644,13 @@
 - [x] Layout mobile desajustado - painel esquerdo ocupando muito espaço, mapa pequeno, busca desalinhada - CORRIGIDO (flex-col md:flex-row, responsive grid, responsive text sizes)
 - [x] MapShell não era responsivo em mobile - CORRIGIDO (flex-col md:flex-row, painel 40vh em mobile, mapa 60vh em mobile)
 
+
+
+
+## Bugs Reportados (28/10/2025 - Sessão 18)
+- [x] Painel esquerdo ocupa muito espaço em mobile - precisa ser colápsável ou minimizado - CORRIGIDO (hidden md:flex)
+- [x] Mapa não é visível em mobile - painel esquerdo está em destaque - CORRIGIDO (painel agora ocupa tela inteira em mobile)
+- [x] Gráficos lado a lado em mobile - devem ficar um embaixo do outro - CORRIGIDO (grid-cols-1 lg:grid-cols-2)
+- [x] Texto dos gráficos muito pequeno em mobile - CORRIGIDO (text-sm md:text-lg, font sizes ajustados)
+- [x] Cards de dados demográficos não aparecem em mobile - CORRIGIDO (grid-cols-1 sm:grid-cols-3)
+
