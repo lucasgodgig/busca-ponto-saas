@@ -166,15 +166,15 @@ export default function DataPanel({ data, loading, segment }: DataPanelProps) {
             <CardTitle className="text-sm md:text-lg">Distribuição por Classe Social</CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={200}>
+            <ResponsiveContainer width="100%" height={280}>
               <PieChart>
                 <Pie
                   data={classData}
                   cx="50%"
                   cy="50%"
-                  labelLine={false}
+                  labelLine={true}
                   label={({ name, pct }) => `${name} ${pct.toFixed(1)}%`}
-                  outerRadius={50}
+                  outerRadius={60}
                   fill="#8884d8"
                   dataKey="value"
                 >

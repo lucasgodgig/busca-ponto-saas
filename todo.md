@@ -693,3 +693,7 @@
 
 - [x] Mudar AddressSearch para buscar apenas ao pressionar Enter ou clicar em botão Pesquisar - CORRIGIDO (removido debounce, adicionado handleSearch, Enter key handler, botão de pesquisar)
 
+
+
+- [x] Gráfico pizza - labels se sobrepõem em porcentagens pequenas - CORRIGIDO (aumentado outerRadius de 50 para 60, altura de 200 para 280, adicionado labelLine=true)
+
