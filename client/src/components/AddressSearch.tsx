@@ -284,13 +284,17 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
 
         {/* Dropdown de sugestões */}
         {showSuggestions && suggestions.length > 0 && (
-          <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-64 overflow-y-auto">
+          <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-64 overflow-y-auto pointer-events-auto">
             {suggestions.map((suggestion) => (
               <div
                 key={suggestion.id}
                 onMouseDown={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
+                  handleSelectSuggestion(suggestion);
+                }}
+                onTouchStart={(e) => {
+                  e.preventDefault();
                   handleSelectSuggestion(suggestion);
                 }}
                 className="w-full text-left px-4 py-3 hover:bg-blue-50 border-b border-gray-100 last:border-b-0 transition-colors flex items-start gap-3 cursor-pointer"
