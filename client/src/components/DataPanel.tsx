@@ -166,14 +166,14 @@ export default function DataPanel({ data, loading, segment }: DataPanelProps) {
             <CardTitle className="text-sm md:text-lg">Distribuição por Classe Social</CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={280}>
+            <ResponsiveContainer width="100%" height={320}>
               <PieChart>
                 <Pie
                   data={classData}
-                  cx="50%"
+                  cx="40%"
                   cy="50%"
                   labelLine={true}
-                  label={({ name, pct }) => `${name} ${pct.toFixed(1)}%`}
+                  label={({ name, pct }) => pct >= 5 ? `${name} ${pct.toFixed(1)}%` : ""}
                   outerRadius={60}
                   fill="#8884d8"
                   dataKey="value"
@@ -186,6 +186,15 @@ export default function DataPanel({ data, loading, segment }: DataPanelProps) {
                   formatter={(value) =>
                     `${(value as number).toLocaleString("pt-BR")} domicílios`
                   }
+                />
+                <Legend 
+                  layout="vertical" 
+                  align="right" 
+                  verticalAlign="middle"
+                  formatter={(value, entry) => {
+                    const pct = ((entry.payload.value / classData.reduce((sum, d) => sum + d.value, 0)) * 100).toFixed(1);
+                    return `${value} ${pct}%`;
+                  }}
                 />
               </PieChart>
             </ResponsiveContainer>

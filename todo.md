@@ -696,4 +696,5 @@
 
 
 - [x] Gráfico pizza - labels se sobrepõem em porcentagens pequenas - CORRIGIDO (aumentado outerRadius de 50 para 60, altura de 200 para 280, adicionado labelLine=true)
+- [x] Gráfico pizza - porcentagens muito pequenas (< 1%) ainda se sobrepõem - precisa legend customizada - CORRIGIDO (adicionado Legend vertical, labels diretos apenas para >= 5%, cx ajustado para 40%)
 
