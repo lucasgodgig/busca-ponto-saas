@@ -39,6 +39,17 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
   const sessionTokenRef = useRef<any>(null);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Detectar cliques fora
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setShowSuggestions(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   // Inicializar Google Places API uma única vez
   useEffect(() => {
     if (!window.google) {
@@ -177,7 +188,7 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
   }, []);
 
   return (
-    <div className="w-full relative">
+    <div ref={containerRef} className="w-full relative">
       <div className="relative">
         {/* Input com ícone */}
         <div className="relative">
@@ -193,17 +204,6 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
               if (suggestions.length > 0) {
                 setShowSuggestions(true);
               }
-            }}
-            onBlur={() => {
-              // Delay para permitir clique na sugestão
-              if (blurTimeoutRef.current) {
-                clearTimeout(blurTimeoutRef.current);
-              }
-              blurTimeoutRef.current = setTimeout(() => {
-                if (!isMouseOverDropdownRef.current) {
-                  setShowSuggestions(false);
-                }
-              }, 100);
             }}
             autoComplete="off"
             className="w-full pl-10 pr-10 py-2 md:py-3 text-sm md:text-base border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed transition-all"

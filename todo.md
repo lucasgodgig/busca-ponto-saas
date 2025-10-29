@@ -683,5 +683,5 @@
 
 
 
-- [x] Pesquisa travando ao digitar 2 letras - foco saindo do input quando dropdown aparece - CORRIGIDO (adicionado isMouseOverDropdownRef para rastrear mouse sobre dropdown)
+- [x] Pesquisa travando ao digitar 2 letras - foco saindo do input quando dropdown aparece - CORRIGIDO (removido onBlur, adicionado click-outside detection com useEffect)
 
