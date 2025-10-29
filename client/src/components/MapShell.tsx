@@ -8,6 +8,7 @@ import DataPanel from "@/components/DataPanel";
 import AddressSearch from "@/components/AddressSearch";
 import { PDFReport } from "@/components/PDFReport";
 import { upsertAnalysisCircle, clearAnalysisCircle } from "@/lib/mapCircle";
+import { Slider } from "@/components/ui/slider";
 import type { SpaceData } from "@/services/spaceClient";
 
 interface MapShellProps {
@@ -172,6 +173,22 @@ export default function MapShell({ tenantId, loading = false, onNavigateHome }: 
               <option value="delivery">Delivery</option>
               <option value="outros">Outros</option>
             </select>
+          </div>
+          {/* Mobile radius slider */}
+          <div className="md:hidden">
+            <div className="flex items-center justify-between mb-1">
+              <label className="text-xs font-medium text-gray-700">Raio de Análise</label>
+              <span className="text-xs text-gray-600">{radius[0]}m ({(radius[0] / 1000).toFixed(2)}km)</span>
+            </div>
+            <Slider
+              value={radius}
+              onValueChange={setRadius}
+              min={500}
+              max={5000}
+              step={100}
+              disabled={spaceLoading}
+              className="w-full"
+            />
           </div>
           <AddressSearch onAddressSelect={handleAddressSelect} loading={spaceLoading} />
         </div>

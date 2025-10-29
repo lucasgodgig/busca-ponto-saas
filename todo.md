@@ -654,3 +654,7 @@
 - [x] Texto dos gráficos muito pequeno em mobile - CORRIGIDO (text-sm md:text-lg, font sizes ajustados)
 - [x] Cards de dados demográficos não aparecem em mobile - CORRIGIDO (grid-cols-1 sm:grid-cols-3)
 
+
+
+- [x] Slider de raio não aparece em mobile - precisa ser adicionado ao header mobile - CORRIGIDO (adicionado slider ao header mobile)
+
