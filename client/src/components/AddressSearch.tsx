@@ -138,15 +138,10 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
     }, 300);
   }, []);
 
-  // Adicionar listener ao input - apenas uma vez
+  // Adicionar listener ao input para focus/blur - apenas uma vez
   useEffect(() => {
     const input = inputRef.current;
     if (!input) return;
-
-    const handleInput = (e: Event) => {
-      const value = (e.target as HTMLInputElement).value;
-      handleInputChange(value);
-    };
 
     const handleFocus = () => {
       if (suggestionsRef.current.length > 0) {
@@ -174,19 +169,17 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
       }, 100);
     };
 
-    input.addEventListener("input", handleInput);
     input.addEventListener("focus", handleFocus);
     input.addEventListener("blur", handleBlur);
 
     return () => {
-      input.removeEventListener("input", handleInput);
       input.removeEventListener("focus", handleFocus);
       input.removeEventListener("blur", handleBlur);
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
       }
     };
-  }, [handleInputChange]); // Apenas handleInputChange como dependência
+  }, []); // Sem dependências - apenas focus/blur
 
   // Handler para selecionar uma sugestão
   const handleSelectSuggestion = useCallback((suggestion: Suggestion) => {
