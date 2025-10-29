@@ -672,3 +672,8 @@
 
 - [x] CRÍTICO: AddressSearch em mobile não funciona - teclado some a cada 2 letras, precisa reescrever com modal/overlay fixo - CORRIGIDO (reescrito com modal fixo no topo, overlay semi-transparente, sem re-renders que perdem foco)
 
+
+
+- [x] Modal de pesquisa em mobile está atrás do menu fixo - aumentar z-index - CORRIGIDO (z-[9999])
+- [x] Modal ainda está perdendo foco em mobile - simplificar lógica - CORRIGIDO (fixed em vez de absolute)
+

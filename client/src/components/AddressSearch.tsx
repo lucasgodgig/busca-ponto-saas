@@ -219,17 +219,17 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
   // Em mobile, retornar modal fixo
   if (isMobile) {
     return (
-      <div className="fixed inset-0 z-40 pointer-events-none">
+      <div className="fixed inset-0 z-[9999] pointer-events-none">
         {/* Overlay semi-transparente quando dropdown está aberto */}
         {showSuggestions && suggestions.length > 0 && (
           <div 
-            className="absolute inset-0 bg-black bg-opacity-30 pointer-events-auto"
+            className="fixed inset-0 bg-black bg-opacity-30 pointer-events-auto"
             onClick={() => setShowSuggestions(false)}
           />
         )}
         
         {/* Modal fixo no topo */}
-        <div className="absolute top-0 left-0 right-0 bg-white shadow-lg z-50 pointer-events-auto">
+        <div className="fixed top-0 left-0 right-0 bg-white shadow-lg z-[9999] pointer-events-auto">
           <div className="p-3 space-y-2">
             {/* Input com ícone */}
             <div className="relative">
@@ -271,7 +271,7 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
 
           {/* Dropdown de sugestões */}
           {showSuggestions && suggestions.length > 0 && (
-            <div className="border-t border-gray-200 max-h-64 overflow-y-auto">
+            <div className="border-t border-gray-200 max-h-56 overflow-y-auto">
               {suggestions.map((suggestion) => (
                 <div
                   key={suggestion.id}
