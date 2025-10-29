@@ -159,14 +159,16 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
         return;
       }
 
-      // Verificar se o foco saiu para um elemento fora do componente
-      // Usar setTimeout para permitir que o clique na sugestão seja processado
-      setTimeout(() => {
-        const relatedTarget = e.relatedTarget as HTMLElement;
-        if (!relatedTarget || !relatedTarget.closest('[class*="cursor-pointer"]')) {
-          setShowSuggestions(false);
-        }
-      }, 100);
+      // Em mobile, não fechar se não há relatedTarget (teclado virtual)
+      const relatedTarget = e.relatedTarget as HTMLElement;
+      if (!relatedTarget) {
+        return;
+      }
+      
+      // Fechar apenas se saiu para fora do dropdown
+      if (!relatedTarget.closest('[class*="cursor-pointer"]')) {
+        setShowSuggestions(false);
+      }
     };
 
     input.addEventListener("focus", handleFocus);

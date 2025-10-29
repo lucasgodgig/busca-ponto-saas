@@ -666,5 +666,5 @@
 
 
 
-- [x] AddressSearch perde foco a cada letra digitada - input fecha e precisa clicar denovo - CORRIGIDO (removido event listener duplicado, usando apenas onChange)
+- [x] AddressSearch perde foco a cada letra digitada - input fecha e precisa clicar denovo - CORRIGIDO (removido event listener duplicado, usando apenas onChange, handleBlur otimizado para mobile)
 
