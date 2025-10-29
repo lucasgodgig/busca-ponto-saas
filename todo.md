@@ -637,3 +637,9 @@
 ## Features Solicitadas (28/10/2025 - Sessão 16)
 - [x] Adicionar botão para imprimir/exportar em PDF com endereço, segmento e todas as informações - CONCLUÍDO (componente PDFReport com window.print())
 
+
+
+
+## Bugs Reportados (28/10/2025 - Sessão 17)
+- [x] Layout mobile desajustado - painel esquerdo ocupando muito espaço, mapa pequeno, busca desalinhada - CORRIGIDO (flex-col md:flex-row, responsive grid, responsive text sizes)
+

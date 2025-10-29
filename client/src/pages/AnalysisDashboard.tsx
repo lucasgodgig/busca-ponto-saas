@@ -152,20 +152,20 @@ export default function AnalysisDashboard() {
   const totalAgePopulation = ageGroupData.reduce((sum, item) => sum + item.value, 0);
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex flex-col md:flex-row h-screen bg-gray-50">
       {/* Mapa à esquerda */}
-      <div className="flex-1 border-r border-gray-200 relative">
+      <div className="w-full md:flex-1 md:border-r border-b md:border-b-0 border-gray-200 relative h-[50vh] md:h-auto">
         <MapShell tenantId={data?.tenantId || ""} />
       </div>
 
       {/* Dashboard à direita */}
-      <div className="w-[500px] overflow-y-auto">
-        <div className="p-6 space-y-6">
+      <div className="w-full md:w-[500px] overflow-y-auto h-[50vh] md:h-auto">
+        <div className="p-4 md:p-6 space-y-4 md:space-y-6">
           {/* Header */}
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Mapa Interativo</h1>
-              <p className="text-sm text-gray-600 mt-1">Dashboard de dados demográficos e de mercado</p>
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Mapa Interativo</h1>
+              <p className="text-xs md:text-sm text-gray-600 mt-1">Dashboard de dados demográficos e de mercado</p>
             </div>
 
           </div>
@@ -178,11 +178,11 @@ export default function AnalysisDashboard() {
           </div>
 
           {/* Cards principais */}
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200">
-              <CardContent className="p-4">
+              <CardContent className="p-3 md:p-4">
                 <div className="flex items-start justify-between mb-2">
-                  <Users className="w-5 h-5 text-orange-600" />
+                  <Users className="w-4 md:w-5 h-4 md:h-5 text-orange-600" />
                   {data.census_change && (
                     <div className={`flex items-center gap-1 text-xs font-medium ${data.census_change > 0 ? "text-green-600" : "text-red-600"}`}>
                       {data.census_change > 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
@@ -190,16 +190,16 @@ export default function AnalysisDashboard() {
                     </div>
                   )}
                 </div>
-                <div className="text-3xl font-bold text-orange-900">{formatNumber(data.people)}</div>
+                <div className="text-2xl md:text-3xl font-bold text-orange-900">{formatNumber(data.people)}</div>
                 <div className="text-xs text-orange-700 font-medium mt-1">Habitantes</div>
                 <div className="text-xs text-orange-600 mt-2">{data.density.toFixed(0)} hab/hectare</div>
               </CardContent>
             </Card>
 
             <Card className="bg-gradient-to-br from-teal-50 to-teal-100 border-teal-200">
-              <CardContent className="p-4">
+              <CardContent className="p-3 md:p-4">
                 <div className="flex items-start justify-between mb-2">
-                  <DollarSign className="w-5 h-5 text-teal-600" />
+                  <DollarSign className="w-4 md:w-5 h-4 md:h-5 text-teal-600" />
                   {data.income_rate && (
                     <div className={`flex items-center gap-1 text-xs font-medium ${data.income_rate > 0 ? "text-green-600" : "text-red-600"}`}>
                       {data.income_rate > 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
@@ -207,36 +207,36 @@ export default function AnalysisDashboard() {
                     </div>
                   )}
                 </div>
-                <div className="text-3xl font-bold text-teal-900">{formatCurrency(data.income)}</div>
+                <div className="text-2xl md:text-3xl font-bold text-teal-900">{formatCurrency(data.income)}</div>
                 <div className="text-xs text-teal-700 font-medium mt-1">Renda Média</div>
                 <div className="text-xs text-teal-600 mt-2">Renda per capita</div>
               </CardContent>
             </Card>
 
             <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
-              <CardContent className="p-4">
+              <CardContent className="p-3 md:p-4">
                 <div className="flex items-start justify-between mb-2">
-                  <Home className="w-5 h-5 text-blue-600" />
+                  <Home className="w-4 md:w-5 h-4 md:h-5 text-blue-600" />
                 </div>
-                <div className="text-3xl font-bold text-blue-900">{formatNumber(Math.round(data.people / 2.8))}</div>
-                <div className="text-xs text-blue-700 font-medium mt-1">Domicílios</div>
+                <div className="text-2xl md:text-3xl font-bold text-blue-900">{formatNumber(Math.round(data.people / 2.8))}</div>
+                <div className="text-xs text-blue-700 font-medium mt-1">Domícílios</div>
                 <div className="text-xs text-blue-600 mt-2">Estimados na área</div>
               </CardContent>
             </Card>
           </div>
 
           {/* Gráficos */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {/* Gráfico de Classes Sociais */}
             <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <BarChart3 className="w-5 h-5" />
+                <CardTitle className="text-base md:text-lg flex items-center gap-2">
+                  <BarChart3 className="w-4 md:w-5 h-4 md:h-5" />
                   Distribuição por Classe Social
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <ResponsiveContainer width="100%" height={250}>
+                <ResponsiveContainer width="100%" height={200}>
                   <BarChart data={socialClassData}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="name" />
@@ -255,13 +255,13 @@ export default function AnalysisDashboard() {
             {/* Gráfico de Faixas Etárias */}
             <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <BarChart3 className="w-5 h-5" />
+                <CardTitle className="text-base md:text-lg flex items-center gap-2">
+                  <BarChart3 className="w-4 md:w-5 h-4 md:h-5" />
                   Distribuição por Faixa Etária
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <ResponsiveContainer width="100%" height={250}>
+                <ResponsiveContainer width="100%" height={200}>
                   <BarChart data={ageGroupData}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} />
@@ -281,24 +281,24 @@ export default function AnalysisDashboard() {
           {/* Potencial de Consumo */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Potencial de Consumo</CardTitle>
+              <CardTitle className="text-base md:text-lg">Potencial de Consumo</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-4 gap-4">
-                <div className="text-center p-3 bg-blue-50 rounded-lg">
-                  <div className="text-2xl font-bold text-blue-900">{formatCurrency(data.consumer)}</div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+                <div className="text-center p-2 md:p-3 bg-blue-50 rounded-lg">
+                  <div className="text-lg md:text-2xl font-bold text-blue-900">{formatCurrency(data.consumer)}</div>
                   <div className="text-xs text-blue-700 mt-1">Total</div>
                 </div>
-                <div className="text-center p-3 bg-purple-50 rounded-lg">
-                  <div className="text-2xl font-bold text-purple-900">{formatCurrency(data.cons_a_total || 0)}</div>
+                <div className="text-center p-2 md:p-3 bg-purple-50 rounded-lg">
+                  <div className="text-lg md:text-2xl font-bold text-purple-900">{formatCurrency(data.cons_a_total || 0)}</div>
                   <div className="text-xs text-purple-700 mt-1">Classe A</div>
                 </div>
-                <div className="text-center p-3 bg-green-50 rounded-lg">
-                  <div className="text-2xl font-bold text-green-900">{formatCurrency(data.cons_b_current || 0)}</div>
+                <div className="text-center p-2 md:p-3 bg-green-50 rounded-lg">
+                  <div className="text-lg md:text-2xl font-bold text-green-900">{formatCurrency(data.cons_b_current || 0)}</div>
                   <div className="text-xs text-green-700 mt-1">Classe B</div>
                 </div>
-                <div className="text-center p-3 bg-yellow-50 rounded-lg">
-                  <div className="text-2xl font-bold text-yellow-900">{formatCurrency(data.cons_c_expenditure || 0)}</div>
+                <div className="text-center p-2 md:p-3 bg-yellow-50 rounded-lg">
+                  <div className="text-lg md:text-2xl font-bold text-yellow-900">{formatCurrency(data.cons_c_expenditure || 0)}</div>
                   <div className="text-xs text-yellow-700 mt-1">Classe C</div>
                 </div>
               </div>
