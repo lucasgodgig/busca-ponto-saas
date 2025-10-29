@@ -681,3 +681,7 @@
 
 - [x] CRÍTICO: Pesquisa em mobile ainda atrás do menu e perdendo foco - mover para dentro do header fixo - CORRIGIDO (reescrito AddressSearch simples, sem modal, dropdown dentro do header)
 
+
+
+- [x] Pesquisa travando ao digitar 2 letras - foco saindo do input quando dropdown aparece - CORRIGIDO (adicionado isMouseOverDropdownRef para rastrear mouse sobre dropdown)
+
