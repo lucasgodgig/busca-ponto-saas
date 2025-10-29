@@ -706,3 +706,7 @@
 
 - [x] PDF Report - dados demográficos mostrando 0, classes sociais undefined, falta gráficos visuais - CORRIGIDO (acessando propriedades corretas do spaceData, formatando corretamente)
 
+
+
+- [x] Criar novo código de acesso "comunidadesaas" para convidar amigos - CRIADO (código ativo no banco de dados)
+
