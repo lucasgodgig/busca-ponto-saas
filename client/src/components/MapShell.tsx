@@ -158,14 +158,14 @@ export default function MapShell({ tenantId, loading = false, onNavigateHome }: 
       {/* Map Container - Full screen on mobile */}
       <div className="flex-1 flex flex-col relative h-screen md:h-auto">
         {/* Header with search and mobile controls */}
-        <div className="flex flex-col gap-1 md:gap-3 bg-white border-b p-2 md:p-4">
+        <div className="flex flex-col gap-0.5 md:gap-3 bg-white border-b p-1.5 md:p-4 sticky top-0 z-40">
           {/* Mobile segment selector */}
           <div className="md:hidden">
             <select
               value={segment}
               onChange={(e) => setSegment(e.target.value)}
               disabled={spaceLoading}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+              className="w-full px-2 py-1 border border-gray-300 rounded text-xs"
             >
               <option value="academia">Academia</option>
               <option value="petshop">PetShop</option>
@@ -176,9 +176,9 @@ export default function MapShell({ tenantId, loading = false, onNavigateHome }: 
           </div>
           {/* Mobile radius slider */}
           <div className="md:hidden">
-            <div className="flex items-center justify-between mb-1">
-              <label className="text-xs font-medium text-gray-700">Raio de Análise</label>
-              <span className="text-xs text-gray-600">{radius[0]}m ({(radius[0] / 1000).toFixed(2)}km)</span>
+            <div className="flex items-center justify-between mb-0.5">
+              <label className="text-xs font-medium text-gray-700">Raio</label>
+              <span className="text-xs text-gray-600">{radius[0]}m</span>
             </div>
             <Slider
               value={radius}
