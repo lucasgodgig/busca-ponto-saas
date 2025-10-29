@@ -207,7 +207,7 @@ export default function DataPanel({ data, loading, segment }: DataPanelProps) {
             <CardTitle className="text-sm md:text-lg">Distribuição por Faixa Etária</CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={200}>
+            <ResponsiveContainer width="100%" height={320}>
               <BarChart data={ageData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis
