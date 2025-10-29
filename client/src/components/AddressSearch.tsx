@@ -75,6 +75,15 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
     };
   }, []);
 
+  // Manter foco no input quando suggestions mudam
+  useEffect(() => {
+    if (suggestions.length > 0 && inputRef.current) {
+      if (document.activeElement !== inputRef.current) {
+        inputRef.current.focus();
+      }
+    }
+  }, [suggestions]);
+
   // Handler para input com debounce
   const handleInputChange = useCallback((value: string) => {
     // Atualizar estado do input
@@ -265,6 +274,8 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
             disabled={loading || isLoading}
             value={inputValue}
             onChange={(e) => handleInputChange(e.target.value)}
+            autoFocus
+            autoComplete="off"
             className="w-full pl-10 pr-10 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed transition-all"
           />
           {/* Botão de limpar */}
