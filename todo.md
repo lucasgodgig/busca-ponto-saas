@@ -736,3 +736,7 @@
 
 - [x] Erro 404 ao tentar fazer login após preencher formulário de cadastro - rota /api/oauth/login não encontrada - CORRIGIDO (usando getLoginUrl() do const.ts)
 
+
+
+- [x] Botão "Criar Conta Grátis" no final da Home vai direto para login - deveria ir para /cadastro - CORRIGIDO (onClick para setLocation("/cadastro"))
+

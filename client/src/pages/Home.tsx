@@ -137,8 +137,8 @@ export default function Home() {
               decisões baseadas em dados.
             </p>
             {!isAuthenticated && (
-              <Button size="lg" variant="secondary" asChild>
-                <a href={getLoginUrl()}>Criar Conta Grátis</a>
+              <Button size="lg" variant="secondary" onClick={() => setLocation("/cadastro")}>
+                Criar Conta Grátis
               </Button>
             )}
           </div>
