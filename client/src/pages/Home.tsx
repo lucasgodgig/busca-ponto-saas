@@ -5,13 +5,7 @@ import { APP_LOGO, APP_TITLE, getLoginUrl } from "@/const";
 import { useLocation } from "wouter";
 import { useEffect } from "react";
 
-// Funcao para verificar se codigo foi validado
-function isCodeValidated() {
-  return sessionStorage.getItem("inviteCodeValidated") === "true";
-}
 
-// Exportar funcao para uso em outras paginas
-export { isCodeValidated };
 
 export default function Home() {
   const { user, loading, isAuthenticated, logout } = useAuth();

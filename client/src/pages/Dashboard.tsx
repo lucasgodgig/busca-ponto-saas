@@ -10,21 +10,9 @@ import { toast } from "sonner";
 import { useLocation } from "wouter";
 import { useEffect } from "react";
 
-// Funcao para verificar se codigo foi validado
-function isCodeValidated() {
-  return sessionStorage.getItem("inviteCodeValidated") === "true";
-}
-
 export default function Dashboard() {
   const { user, loading: authLoading } = useAuth();
   const [, setLocation] = useLocation();
-
-  // Verificar se codigo foi validado
-  useEffect(() => {
-    if (!isCodeValidated()) {
-      setLocation("/invite");
-    }
-  }, [setLocation]);
   const [selectedTenant, setSelectedTenant] = useState<number | null>(null);
   const [queryLoading, setQueryLoading] = useState(false);
 

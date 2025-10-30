@@ -728,3 +728,7 @@
 - [x] Remover redirecionamento automático para /invite - REMOVIDO
 - [ ] Remover sistema de código de convite (InviteCodeValidation) - OPCIONAL (mantido para uso futuro)
 
+
+
+- [x] Sistema ainda pede código de convite após login - remover validação completamente - REMOVIDO (Dashboard, Onboarding, Home)
+
