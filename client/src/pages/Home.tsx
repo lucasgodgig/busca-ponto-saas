@@ -18,15 +18,9 @@ export default function Home() {
   const [, setLocation] = useLocation();
 
   // Redirecionar para dashboard se ja estiver autenticado
-  // Redirecionar para validacao de codigo se nao estiver autenticado
   useEffect(() => {
     if (isAuthenticated && user) {
       setLocation("/app");
-    } else if (!loading && !isAuthenticated) {
-      // Verificar se o codigo foi validado
-      if (!isCodeValidated()) {
-        setLocation("/invite");
-      }
     }
   }, [isAuthenticated, user, loading, setLocation]);
 
@@ -50,7 +44,7 @@ export default function Home() {
             <h1 className="text-xl font-bold">{APP_TITLE}</h1>
           </div>
           <div>
-            {isAuthenticated ? (
+            {isAuthenticated && (
               <div className="flex items-center gap-4">
                 <span className="text-sm text-muted-foreground">
                   {user?.name}
@@ -59,10 +53,6 @@ export default function Home() {
                   Sair
                 </Button>
               </div>
-            ) : (
-              <Button asChild>
-                <a href={getLoginUrl()}>Entrar</a>
-              </Button>
             )}
           </div>
         </div>
@@ -85,8 +75,8 @@ export default function Home() {
                   Acessar Dashboard
                 </Button>
               ) : (
-                <Button size="lg" asChild>
-                  <a href={getLoginUrl()}>Começar Agora</a>
+                <Button size="lg" onClick={() => setLocation("/cadastro")}>
+                  Começar Agora
                 </Button>
               )}
             </div>

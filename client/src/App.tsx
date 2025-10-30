@@ -12,6 +12,7 @@ import Studies from "./pages/Studies";
 import NewStudy from "./pages/NewStudy";
 import Settings from "./pages/Settings";
 import InviteCodeValidation from "./pages/InviteCodeValidation";
+import Cadastro from "./pages/Cadastro";
 import AnalysisDashboard from "./pages/AnalysisDashboard";
 import GenerateStudyPage from "./pages/GenerateStudyPage";
 import GeneratedStudiesListPage from "./pages/GeneratedStudiesListPage";
@@ -23,6 +24,7 @@ function Router() {
   return (
     <Switch>
       <Route path={"/"} component={Home} />
+      <Route path={"/cadastro"} component={Cadastro} />
       <Route path={"/invite"} component={InviteCodeValidation} />
       <Route path={"/app"} component={Dashboard} />
       <Route path={"/history"} component={History} />

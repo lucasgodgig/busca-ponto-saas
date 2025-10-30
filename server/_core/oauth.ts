@@ -28,13 +28,41 @@ export function registerOAuthRoutes(app: Express) {
         return;
       }
 
-      await db.upsertUser({
+      const user = await db.upsertUser({
         openId: userInfo.openId,
         name: userInfo.name || null,
         email: userInfo.email ?? null,
         loginMethod: userInfo.loginMethod ?? userInfo.platform ?? null,
         lastSignedIn: new Date(),
       });
+
+      // Vincular lead se houver email no sessionStorage (vindo do formulário de cadastro)
+      // Nota: sessionStorage é client-side, então vamos usar cookie temporário
+      const leadEmail = req.cookies.leadEmail;
+      if (leadEmail && user.email) {
+        try {
+          const dbInstance = await db.getDb();
+          if (dbInstance) {
+            const { leads } = await import("../../drizzle/schema");
+            const { eq, isNull } = await import("drizzle-orm");
+            
+            // Atualizar lead com userId
+            await dbInstance
+              .update(leads)
+              .set({ userId: user.id })
+              .where(
+                eq(leads.email, leadEmail)
+              );
+            
+            console.log(`[OAuth] Lead vinculado: ${leadEmail} -> userId ${user.id}`);
+          }
+        } catch (error) {
+          console.error("[OAuth] Erro ao vincular lead:", error);
+        }
+        
+        // Limpar cookie
+        res.clearCookie("leadEmail");
+      }
 
       const sessionToken = await sdk.createSessionToken(userInfo.openId, {
         name: userInfo.name || "",

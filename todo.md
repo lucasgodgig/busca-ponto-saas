@@ -714,3 +714,17 @@
 
 - [x] Erro NotFoundError ao exportar PDF - removeChild falhando - CORRIGIDO (adicionado verificação se elemento ainda está no DOM)
 
+
+
+
+## Nova Feature: Landing Page com Formulário de Cadastro (30/10/2025)
+- [x] Criar tabela `leads` no banco (nome, email, telefone, empresa, cargo, createdAt) - CRIADO
+- [x] Criar página /cadastro com formulário LP style - CRIADO
+- [x] Mudar botão "Começar Agora" da home para ir para /cadastro - FEITO
+- [x] Criar rota TRPC para salvar lead - CRIADO (leadsRouter)
+- [x] Após salvar lead, redirecionar para login OAuth - IMPLEMENTADO
+- [x] Vincular lead com usuário após login OAuth - IMPLEMENTADO (via cookie)
+- [x] Remover botão "Entrar" do header da home - REMOVIDO
+- [x] Remover redirecionamento automático para /invite - REMOVIDO
+- [ ] Remover sistema de código de convite (InviteCodeValidation) - OPCIONAL (mantido para uso futuro)
+

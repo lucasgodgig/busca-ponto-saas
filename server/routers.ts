@@ -9,9 +9,11 @@ import { TRPCError } from "@trpc/server";
 import { querySpaceApiWithCache } from "./spaceService";
 import { searchAddress, searchCompetitors } from "./googlePlacesService";
 import { ENV } from "./_core/env";
+import { leadsRouter } from "./routes/leads";
 
 export const appRouter = router({
   system: systemRouter,
+  leads: leadsRouter,
 
   auth: router({
     me: publicProcedure.query(async ({ ctx }) => {

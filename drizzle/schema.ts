@@ -165,6 +165,21 @@ export const billingCustomers = mysqlTable("billingCustomers", {
 });
 
 /**
+ * Leads - cadastros da landing page antes do login
+ */
+export const leads = mysqlTable("leads", {
+  id: int("id").autoincrement().primaryKey(),
+  nome: varchar("nome", { length: 255 }).notNull(),
+  email: varchar("email", { length: 320 }).notNull(),
+  telefone: varchar("telefone", { length: 20 }),
+  empresa: varchar("empresa", { length: 255 }),
+  cargo: varchar("cargo", { length: 255 }),
+  userId: int("userId"), // Vinculado após login
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+/**
  * InviteCode - codigos de convite para controlar acesso
  */
 export const inviteCodes = mysqlTable("inviteCodes", {
