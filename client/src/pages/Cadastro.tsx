@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Loader2, Building2, User, Mail, Phone, Briefcase } from "lucide-react";
 import { toast } from "sonner";
 import { trpc } from "@/lib/trpc";
+import { getLoginUrl } from "@/const";
 
 export default function Cadastro() {
   const [, setLocation] = useLocation();
@@ -39,7 +40,7 @@ export default function Cadastro() {
 
       // Redirecionar para OAuth
       setTimeout(() => {
-        window.location.href = "/api/oauth/login";
+        window.location.href = getLoginUrl();
       }, 1000);
     } catch (error) {
       toast.error("Erro ao realizar cadastro");

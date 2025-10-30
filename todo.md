@@ -732,3 +732,7 @@
 
 - [x] Sistema ainda pede código de convite após login - remover validação completamente - REMOVIDO (Dashboard, Onboarding, Home)
 
+
+
+- [x] Erro 404 ao tentar fazer login após preencher formulário de cadastro - rota /api/oauth/login não encontrada - CORRIGIDO (usando getLoginUrl() do const.ts)
+
