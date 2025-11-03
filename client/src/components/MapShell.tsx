@@ -31,6 +31,7 @@ export default function MapShell({ tenantId, loading = false, onNavigateHome }: 
   const [marker, setMarker] = useState<{ lat: number; lng: number } | null>(null);
   const [address, setAddress] = useState<string>("");
   const [radius, setRadius] = useState([1500]);
+  const MAX_RADIUS = 5000; // 5km máximo
   const [segment, setSegment] = useState("academia");
   const [spaceLoading, setSpaceLoading] = useState(false);
   const [spaceData, setSpaceData] = useState<SpaceData | null>(null);
@@ -53,10 +54,17 @@ export default function MapShell({ tenantId, loading = false, onNavigateHome }: 
         });
       }
 
+      // Validar raio
+      const currentRadius = radius[0];
+      if (currentRadius > MAX_RADIUS) {
+        toast.error(`Raio máximo permitido: ${MAX_RADIUS}m`);
+        return;
+      }
+
       // Fetch space data
       setSpaceLoading(true);
       setSpaceError(null);
-      fetch(`/api/space?lat=${lat}&lng=${lng}&radius=${radius[0]}`)
+      fetch(`/api/space?lat=${lat}&lng=${lng}&radius=${currentRadius}`)
         .then((res) => res.json())
         .then((response) => {
           if (response.ok && response.data) {
@@ -67,7 +75,9 @@ export default function MapShell({ tenantId, loading = false, onNavigateHome }: 
           setSpaceLoading(false);
         })
         .catch((err) => {
-          setSpaceError(err.message);
+          const errorMsg = err.message || 'Erro ao buscar dados';
+          setSpaceError(errorMsg);
+          toast.error(errorMsg);
           setSpaceLoading(false);
         });
     },

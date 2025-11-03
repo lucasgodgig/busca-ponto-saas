@@ -163,7 +163,7 @@ export const appRouter = router({
         const { tenants } = await import("../drizzle/schema");
         const { eq } = await import("drizzle-orm");
 
-        const updateData: any = {};
+        const updateData: Partial<typeof tenants.$inferInsert> = {};
         if (input.name) updateData.name = input.name;
         if (input.logoUrl) updateData.logoUrl = input.logoUrl;
         if (input.colorPrimary) updateData.colorPrimary = input.colorPrimary;

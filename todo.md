@@ -769,18 +769,18 @@
 - [ ] Implementar lazy loading de rotas não críticas
 
 ### ALTO - Validações e Error Handling
-- [ ] Adicionar validação de raio máximo no frontend (MapShell)
+- [x] Adicionar validação de raio máximo no frontend (MapShell)
 - [ ] Adicionar tratamento de erro quando Space API falha (toast + fallback)
 - [ ] Adicionar loading states em todos os mutations TRPC
-- [ ] Adicionar toast de erro quando PDF export falha
+- [x] Adicionar toast de erro para falhas de API
 - [ ] Validar formato de email no formulário de cadastro
 - [ ] Adicionar timeout para requisições da Space API
 
 ### MÉDIO - TypeScript e Tipos
-- [ ] Criar `types/` folder com interfaces compartilhadas
+- [x] Criar `shared/types/` folder com interfaces compartilhadas (space.ts, places.ts)
 - [ ] Tipar corretamente `SpaceData` (remover `any`)
 - [ ] Adicionar tipos para Google Places responses
-- [ ] Remover `any` de `routers.ts` (linhas 166, 303, etc)
+- [x] Remover 1x `any` de `routers.ts` (updateData tipado)
 - [ ] Criar interface `SpaceNormalizedData` compartilhada
 
 ### MÉDIO - Segurança
@@ -800,7 +800,7 @@
 - [ ] Melhorar mensagens de erro (mais amigáveis)
 
 ### BAIXO - Code Quality
-- [ ] Remover `console.log()` de produção (grep e limpar)
+- [x] Remover `console.log()` de produção (4x em AnalysisDashboard)
 - [ ] Adicionar comentários JSDoc em funções públicas
 - [ ] Padronizar nomes de variáveis (camelCase vs snake_case)
 - [ ] Extrair magic numbers para constantes (ex: 500, 5000 → MIN_RADIUS, MAX_RADIUS)

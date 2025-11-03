@@ -62,13 +62,9 @@ export default function AnalysisDashboard() {
   useEffect(() => {
     // Extrair dados do sessionStorage
     const storedData = sessionStorage.getItem('analysisData');
-    console.log('[AnalysisDashboard] storedData:', storedData);
     const state = storedData ? JSON.parse(storedData) : null;
-    console.log('[AnalysisDashboard] state:', state);
-    console.log('[AnalysisDashboard] state.data:', state?.data);
     
     if (!state?.data) {
-      console.log('[AnalysisDashboard] Sem dados, redirecionando para /app');
       if (typeof navigate === 'function') navigate("/app");
       return;
     }
