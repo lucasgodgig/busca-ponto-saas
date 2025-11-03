@@ -773,8 +773,8 @@
 - [ ] Adicionar tratamento de erro quando Space API falha (toast + fallback)
 - [ ] Adicionar loading states em todos os mutations TRPC
 - [x] Adicionar toast de erro para falhas de API
-- [ ] Validar formato de email no formulário de cadastro
-- [ ] Adicionar timeout para requisições da Space API
+- [x] Validar formato de email no formulário de cadastro (regex)
+- [x] Adicionar timeout para requisições da Space API (15s com constante)
 
 ### MÉDIO - TypeScript e Tipos
 - [x] Criar `shared/types/` folder com interfaces compartilhadas (space.ts, places.ts)

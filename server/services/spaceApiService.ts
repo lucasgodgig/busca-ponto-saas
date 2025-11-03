@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { SPACE_API_TIMEOUT_MS } from '@shared/constants';
 
 const BASE_URL = process.env.SPACE_API_BASE_URL || 'https://gs.greatspaces.com.br/api/';
 const API_KEY = process.env.SPACE_API_KEY;
@@ -67,7 +68,7 @@ export async function fetchSpace(lat: number, lng: number, radius: number): Prom
   try {
     const url = `${BASE_URL}?lat=${lat}&lng=${lng}&radius=${radius}&key=${API_KEY}`;
     const response = await axios.get(url, {
-      timeout: 10000,
+      timeout: SPACE_API_TIMEOUT_MS,
       headers: {
         'User-Agent': 'Busca-Ponto-SaaS/1.0',
       },

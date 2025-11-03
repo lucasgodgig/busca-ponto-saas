@@ -29,6 +29,13 @@ export default function Cadastro() {
       return;
     }
 
+    // Validar formato de email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      toast.error("Por favor, insira um e-mail válido");
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       await createLeadMutation.mutateAsync(formData);

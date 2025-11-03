@@ -16,7 +16,9 @@ export interface PlaceResult {
 }
 
 /**
- * Mapeamento de segmentos para tipos de Google Places
+ * Mapeia segmento de negócio para tipos do Google Places API
+ * @param segment - Nome do segmento (Academia, Farmácia, etc)
+ * @returns Array de tipos correspondentes no Google Places API
  */
 export function mapSegmentToTypes(segment: string): string[] {
   const segmentMap: Record<string, string[]> = {
@@ -33,7 +35,8 @@ export function mapSegmentToTypes(segment: string): string[] {
 }
 
 /**
- * Tipos de sinergias (complementos)
+ * Retorna tipos de lugares que representam sinergias (complementos)
+ * @returns Array de tipos do Google Places API
  */
 export function mapSynergyTypes(): string[] {
   return [
@@ -156,6 +159,8 @@ export interface CompetitorResult {
 
 /**
  * Busca endereço usando Google Geocoding API
+ * @param query - Texto do endereço ou CEP para buscar
+ * @returns Dados do endereço encontrado ou null se não encontrado
  */
 export async function searchAddress(query: string): Promise<PlaceSearchResult | null> {
   if (!API_KEY) {
@@ -186,7 +191,14 @@ export async function searchAddress(query: string): Promise<PlaceSearchResult | 
 }
 
 /**
- * Busca concorrentes próximos
+ * Busca concorrentes próximos usando Google Places API
+ * @param params - Parâmetros da busca
+ * @param params.lat - Latitude do centro da busca
+ * @param params.lng - Longitude do centro da busca
+ * @param params.radius - Raio de busca em metros
+ * @param params.types - Tipos de lugares para buscar
+ * @param params.pageToken - Token para paginação (opcional)
+ * @returns Lista de concorrentes encontrados e token para próxima página
  */
 export async function searchCompetitors(params: {
   lat: number;
