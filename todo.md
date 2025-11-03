@@ -823,3 +823,12 @@
 - [ ] **Type coercion**: Conversão de string para number sem validação
 
 
+
+
+
+## 🐛 BUG CRÍTICO - Novo Estudo
+- [x] **Corrigir loading infinito** no formulário de novo estudo (/estudos/novo)
+  - Sintoma: Ao clicar em "Novo Estudo", fica apenas carregando e não sai da tela
+  - Prioridade: CRÍTICA
+  - Impacto: Bloqueia criação de estudos
+

@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -40,9 +40,11 @@ export default function NewStudy() {
   });
 
   // Selecionar tenant automaticamente
-  if (!authLoading && user && user.memberships && user.memberships.length > 0 && !selectedTenant) {
-    setSelectedTenant(user.memberships[0].tenant?.id || null);
-  }
+  useEffect(() => {
+    if (!authLoading && user && user.memberships && user.memberships.length > 0 && !selectedTenant) {
+      setSelectedTenant(user.memberships[0].tenant?.id || null);
+    }
+  }, [authLoading, user, selectedTenant]);
 
   // Buscar endereço
   const handleSearchAddress = useCallback(async () => {
