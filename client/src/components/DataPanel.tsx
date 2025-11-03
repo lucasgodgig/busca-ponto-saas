@@ -1,4 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { memo } from "react";
 import { Users, DollarSign, TrendingUp } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { getConsumptionKey, getConsumptionLabel } from "@/lib/segmentConfig";
@@ -63,7 +64,7 @@ const ageLabels: { [key: string]: string } = {
   age_eldery: "Idosos (75+)",
 };
 
-export default function DataPanel({ data, loading, segment }: DataPanelProps) {
+function DataPanel({ data, loading, segment }: DataPanelProps) {
   if (loading) {
     return (
       <div className="p-4 text-center text-gray-500">
@@ -242,4 +243,6 @@ export default function DataPanel({ data, loading, segment }: DataPanelProps) {
     </div>
   );
 }
+
+export default memo(DataPanel);
 

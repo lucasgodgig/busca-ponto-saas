@@ -3,6 +3,10 @@ import axios from 'axios';
 const BASE_URL = process.env.SPACE_API_BASE_URL || 'https://gs.greatspaces.com.br/api/';
 const API_KEY = process.env.SPACE_API_KEY;
 
+// Cache simples em memória (TTL 20 minutos)
+const cache = new Map<string, { data: any; timestamp: number }>();
+const CACHE_TTL = 20 * 60 * 1000; // 20 minutos
+
 export interface SpaceRawData {
   people?: number;
   income?: number;
@@ -116,5 +120,37 @@ export function normalizeSpace(raw: SpaceRawData): NormalizedSpace {
   classes.forEach((c) => ((c as any).pct = total > 0 ? (c.domicilios / total) * 100 : 0));
 
   return { head, categorias, classes };
+}
+
+/**
+ * Busca dados da Space API com cache
+ */
+export async function querySpaceApiWithCache(params: {
+  lat: number;
+  lng: number;
+  radius: number;
+}): Promise<{ ok: boolean; data?: any; error?: string }> {
+  const cacheKey = `${params.lat},${params.lng},${params.radius}`;
+  
+  // Verificar cache
+  const cached = cache.get(cacheKey);
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+    console.log('[Space API] Cache hit:', cacheKey);
+    return { ok: true, data: cached.data };
+  }
+
+  try {
+    // Buscar dados reais
+    const raw = await fetchSpace(params.lat, params.lng, params.radius);
+    const normalized = normalizeSpace(raw);
+    
+    // Salvar no cache
+    cache.set(cacheKey, { data: normalized, timestamp: Date.now() });
+    
+    return { ok: true, data: normalized };
+  } catch (error) {
+    console.error('[Space API] Erro:', error);
+    return { ok: false, error: 'Falha ao consultar Space API' };
+  }
 }
 

@@ -6,8 +6,8 @@ import { z } from "zod";
 import * as db from "./db";
 import { validateTenantAccess, requireTenantAdmin } from "./_core/tenantContext";
 import { TRPCError } from "@trpc/server";
-import { querySpaceApiWithCache } from "./spaceService";
-import { searchAddress, searchCompetitors } from "./googlePlacesService";
+import { querySpaceApiWithCache } from "./services/spaceApiService";
+import { searchAddress, searchCompetitors } from "./services/googlePlacesService";
 import { ENV } from "./_core/env";
 import { leadsRouter } from "./routes/leads";
 

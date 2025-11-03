@@ -126,3 +126,99 @@ export function calculateDistance(
   return R * c; // Distância em km
 }
 
+
+
+/**
+ * Interface para resultado de busca de endereço
+ */
+export interface PlaceSearchResult {
+  name: string;
+  address: string;
+  lat: number;
+  lng: number;
+  placeId: string;
+}
+
+/**
+ * Interface para resultado de busca de concorrentes
+ */
+export interface CompetitorResult {
+  name: string;
+  address: string;
+  lat: number;
+  lng: number;
+  rating?: number;
+  userRatingsTotal?: number;
+  placeId: string;
+  types?: string[];
+  openNow?: boolean;
+}
+
+/**
+ * Busca endereço usando Google Geocoding API
+ */
+export async function searchAddress(query: string): Promise<PlaceSearchResult | null> {
+  if (!API_KEY) {
+    console.warn('[Google Places] API_KEY não configurada');
+    return null;
+  }
+
+  try {
+    const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(query)}&key=${API_KEY}`;
+    const response = await axios.get(url, { timeout: 5000 });
+
+    if (response.data.status !== 'OK' || !response.data.results?.length) {
+      return null;
+    }
+
+    const result = response.data.results[0];
+    return {
+      name: result.formatted_address,
+      address: result.formatted_address,
+      lat: result.geometry.location.lat,
+      lng: result.geometry.location.lng,
+      placeId: result.place_id,
+    };
+  } catch (error) {
+    console.error('[Google Places] Erro ao buscar endereço:', error);
+    return null;
+  }
+}
+
+/**
+ * Busca concorrentes próximos
+ */
+export async function searchCompetitors(params: {
+  lat: number;
+  lng: number;
+  radius: number;
+  types: string[];
+  pageToken?: string;
+}): Promise<{ results: CompetitorResult[]; nextPageToken?: string }> {
+  if (!API_KEY) {
+    console.warn('[Google Places] API_KEY não configurada');
+    return { results: [] };
+  }
+
+  try {
+    const places = await fetchNearby(params.lat, params.lng, params.radius, params.types);
+    
+    const results: CompetitorResult[] = places.map((p) => ({
+      name: p.name,
+      address: p.address,
+      lat: p.location.latitude,
+      lng: p.location.longitude,
+      rating: p.rating,
+      userRatingsTotal: p.userRatingCount,
+      placeId: p.id,
+      types: params.types,
+      openNow: p.openNow,
+    }));
+
+    return { results };
+  } catch (error) {
+    console.error('[Google Places] Erro ao buscar concorrentes:', error);
+    return { results: [] };
+  }
+}
+

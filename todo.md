@@ -740,3 +740,86 @@
 
 - [x] Botão "Criar Conta Grátis" no final da Home vai direto para login - deveria ir para /cadastro - CORRIGIDO (onClick para setLocation("/cadastro"))
 
+
+
+
+---
+
+## 🔍 AUDITORIA COMPLETA MANUS 1.5 (03/11/2025)
+
+### CRÍTICO - Arquivos Duplicados e Não Utilizados
+- [x] **Remover** `server/googlePlacesService.ts` (duplicado de `server/services/googlePlacesService.ts`)
+- [x] **Remover** `server/spaceService.ts` (duplicado de `server/services/spaceApiService.ts`)
+- [x] **Atualizar** imports em `server/routers.ts` para usar apenas `/services/`
+- [x] **Remover** `client/src/components/CanvasCircleLayer.tsx` (não usado)
+- [x] **Remover** `client/src/components/CircleOverlay.tsx` (não usado)
+- [x] **Remover** `client/src/components/HTMLCircleOverlay.tsx` (não usado)
+- [x] **Remover** `client/src/components/SVGCircleOverlay.tsx` (não usado)
+- [x] **Remover** `client/src/components/LocationSearch.tsx` (substituído por AddressSearch)
+- [x] **Remover** `client/src/components/SidePanelSpace.tsx` (não usado mais)
+- [x] **Remover** `client/src/components/CompetitorsPanel.tsx` (não usado)
+- [x] **Remover** `client/src/components/SegmentConsumptionChart.tsx` (não usado)
+- [x] **Remover** `client/src/pages/ComponentShowcase.tsx` (apenas para testes)
+
+### ALTO - Performance React
+- [x] Adicionar `React.memo()` em `DataPanel.tsx`
+- [x] Adicionar `React.memo()` em `ConsumptionCategoriesChart.tsx`
+- [ ] Adicionar `useMemo()` para cálculos de gráficos em `DataPanel`
+- [ ] Adicionar `useCallback()` em handlers de `MapShell`
+- [ ] Implementar lazy loading de rotas não críticas
+
+### ALTO - Validações e Error Handling
+- [ ] Adicionar validação de raio máximo no frontend (MapShell)
+- [ ] Adicionar tratamento de erro quando Space API falha (toast + fallback)
+- [ ] Adicionar loading states em todos os mutations TRPC
+- [ ] Adicionar toast de erro quando PDF export falha
+- [ ] Validar formato de email no formulário de cadastro
+- [ ] Adicionar timeout para requisições da Space API
+
+### MÉDIO - TypeScript e Tipos
+- [ ] Criar `types/` folder com interfaces compartilhadas
+- [ ] Tipar corretamente `SpaceData` (remover `any`)
+- [ ] Adicionar tipos para Google Places responses
+- [ ] Remover `any` de `routers.ts` (linhas 166, 303, etc)
+- [ ] Criar interface `SpaceNormalizedData` compartilhada
+
+### MÉDIO - Segurança
+- [ ] Adicionar rate limiting no endpoint `/api/space`
+- [ ] Validar `tenantId` em TODAS as mutations (audit completo)
+- [ ] Sanitizar inputs de endereço antes de enviar para APIs
+- [ ] Adicionar CORS headers apropriados
+- [ ] Implementar CSP (Content Security Policy)
+- [ ] Validar origem das requisições
+
+### MÉDIO - UX/UI
+- [ ] Adicionar skeleton loader em `DataPanel` enquanto carrega
+- [ ] Adicionar empty state quando não há dados
+- [ ] Melhorar feedback visual ao arrastar marcador no mapa
+- [ ] Adicionar confirmação antes de limpar busca
+- [ ] Adicionar tooltip explicativo nos gráficos
+- [ ] Melhorar mensagens de erro (mais amigáveis)
+
+### BAIXO - Code Quality
+- [ ] Remover `console.log()` de produção (grep e limpar)
+- [ ] Adicionar comentários JSDoc em funções públicas
+- [ ] Padronizar nomes de variáveis (camelCase vs snake_case)
+- [ ] Extrair magic numbers para constantes (ex: 500, 5000 → MIN_RADIUS, MAX_RADIUS)
+- [ ] Adicionar ESLint rules mais estritas
+- [ ] Configurar Prettier para formatação consistente
+
+### BAIXO - Otimizações
+- [ ] Implementar debounce no slider de raio (300ms)
+- [ ] Cachear resultados de Google Places no cliente (sessionStorage)
+- [ ] Lazy load de páginas não críticas (Settings, History)
+- [ ] Code splitting por rota com React.lazy()
+- [ ] Otimizar bundle size (analisar com webpack-bundle-analyzer)
+- [ ] Implementar service worker para cache offline
+
+### BUGS POTENCIAIS IDENTIFICADOS
+- [ ] **Race condition**: Múltiplas consultas simultâneas podem sobrescrever dados
+- [ ] **Memory leak**: Event listeners em AddressSearch não são limpos
+- [ ] **Infinite loop**: useEffect sem dependências corretas em MapShell
+- [ ] **Null reference**: Acesso a `spaceData.data` sem verificar se existe
+- [ ] **Type coercion**: Conversão de string para number sem validação
+
+

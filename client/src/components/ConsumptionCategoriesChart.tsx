@@ -1,4 +1,5 @@
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { memo } from "react";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { SpaceData } from "@/services/spaceClient";
 
@@ -48,7 +49,7 @@ const CATEGORY_COLORS: Record<string, string> = {
   cons_8_recreation: "#f59e0b",
 };
 
-export default function ConsumptionCategoriesChart({
+function ConsumptionCategoriesChart({
   data,
   segment,
 }: ConsumptionCategoriesChartProps) {
@@ -144,4 +145,6 @@ export default function ConsumptionCategoriesChart({
     </Card>
   );
 }
+
+export default memo(ConsumptionCategoriesChart);
 
