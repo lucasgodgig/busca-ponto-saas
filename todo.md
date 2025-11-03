@@ -792,8 +792,8 @@
 - [ ] Validar origem das requisições
 
 ### MÉDIO - UX/UI
-- [ ] Adicionar skeleton loader em `DataPanel` enquanto carrega
-- [ ] Adicionar empty state quando não há dados
+- [x] Adicionar skeleton loader em `DataPanel` enquanto carrega
+- [x] Adicionar empty state quando não há dados
 - [ ] Melhorar feedback visual ao arrastar marcador no mapa
 - [ ] Adicionar confirmação antes de limpar busca
 - [ ] Adicionar tooltip explicativo nos gráficos
@@ -808,10 +808,10 @@
 - [ ] Configurar Prettier para formatação consistente
 
 ### BAIXO - Otimizações
-- [ ] Implementar debounce no slider de raio (300ms)
+- [x] Implementar debounce no slider de raio (300ms com lodash-es)
 - [ ] Cachear resultados de Google Places no cliente (sessionStorage)
-- [ ] Lazy load de páginas não críticas (Settings, History)
-- [ ] Code splitting por rota com React.lazy()
+- [x] Lazy load de 9 páginas não críticas (Settings, History, Studies, etc)
+- [x] Code splitting por rota com React.lazy() e Suspense
 - [ ] Otimizar bundle size (analisar com webpack-bundle-analyzer)
 - [ ] Implementar service worker para cache offline
 

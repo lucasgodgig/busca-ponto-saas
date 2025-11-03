@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
@@ -6,23 +7,33 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
-import History from "./pages/History";
-import Onboarding from "./pages/Onboarding";
-import Studies from "./pages/Studies";
-import NewStudy from "./pages/NewStudy";
-import Settings from "./pages/Settings";
 import InviteCodeValidation from "./pages/InviteCodeValidation";
 import Cadastro from "./pages/Cadastro";
 import AnalysisDashboard from "./pages/AnalysisDashboard";
-import GenerateStudyPage from "./pages/GenerateStudyPage";
-import GeneratedStudiesListPage from "./pages/GeneratedStudiesListPage";
-import GeneratedStudyDetailsPage from "./pages/GeneratedStudyDetailsPage";
-import StudyDetailsPage from "./pages/StudyDetailsPage";
+
+// Lazy load rotas não críticas
+const History = lazy(() => import("./pages/History"));
+const Onboarding = lazy(() => import("./pages/Onboarding"));
+const Studies = lazy(() => import("./pages/Studies"));
+const NewStudy = lazy(() => import("./pages/NewStudy"));
+const Settings = lazy(() => import("./pages/Settings"));
+const GenerateStudyPage = lazy(() => import("./pages/GenerateStudyPage"));
+const GeneratedStudiesListPage = lazy(() => import("./pages/GeneratedStudiesListPage"));
+const GeneratedStudyDetailsPage = lazy(() => import("./pages/GeneratedStudyDetailsPage"));
+const StudyDetailsPage = lazy(() => import("./pages/StudyDetailsPage"));
+
+// Loading component
+const PageLoader = () => (
+  <div className="flex items-center justify-center min-h-screen">
+    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+  </div>
+);
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
   return (
-    <Switch>
+    <Suspense fallback={<PageLoader />}>
+      <Switch>
       <Route path={"/"} component={Home} />
       <Route path={"/cadastro"} component={Cadastro} />
       <Route path={"/invite"} component={InviteCodeValidation} />
@@ -40,7 +51,8 @@ function Router() {
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
-    </Switch>
+      </Switch>
+    </Suspense>
   );
 }
 

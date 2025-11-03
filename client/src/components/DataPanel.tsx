@@ -67,17 +67,30 @@ const ageLabels: { [key: string]: string } = {
 function DataPanel({ data, loading, segment }: DataPanelProps) {
   if (loading) {
     return (
-      <div className="p-4 text-center text-gray-500">
-        <div className="animate-spin inline-block w-6 h-6 border-4 border-blue-500 border-t-transparent rounded-full"></div>
-        <p className="mt-2">Carregando dados...</p>
+      <div className="p-4 space-y-4">
+        {/* Skeleton para cards principais */}
+        <div className="grid grid-cols-3 gap-4">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="bg-gray-200 animate-pulse rounded-lg h-24"></div>
+          ))}
+        </div>
+        {/* Skeleton para gráfico */}
+        <div className="bg-gray-200 animate-pulse rounded-lg h-64"></div>
+        <div className="bg-gray-200 animate-pulse rounded-lg h-48"></div>
       </div>
     );
   }
 
   if (!data) {
     return (
-      <div className="p-4 text-center text-gray-500">
-        Clique no mapa para carregar dados
+      <div className="p-8 text-center">
+        <div className="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+          <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+          </svg>
+        </div>
+        <h3 className="text-lg font-medium text-gray-900 mb-2">Nenhum dado carregado</h3>
+        <p className="text-sm text-gray-500">Busque um endereço ou clique no mapa para visualizar dados demográficos</p>
       </div>
     );
   }
