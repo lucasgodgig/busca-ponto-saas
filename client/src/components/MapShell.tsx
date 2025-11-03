@@ -84,9 +84,13 @@ export default function MapShell({ tenantId, loading = false, onNavigateHome }: 
           setSpaceLoading(false);
         })
         .catch((err) => {
-          const errorMsg = err.message || 'Erro ao buscar dados';
+          console.error('[MapShell] Erro ao buscar dados:', err);
+          const errorMsg = err.message || 'Erro ao buscar dados da localização';
           setSpaceError(errorMsg);
-          toast.error(errorMsg);
+          toast.error(errorMsg, {
+            description: 'Verifique se as variáveis de ambiente estão configuradas em Settings → Secrets',
+            duration: 5000,
+          });
           setSpaceLoading(false);
         });
     },

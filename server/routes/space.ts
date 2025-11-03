@@ -1,8 +1,16 @@
-import type { Request, Response } from "express";
+import { Request, Response } from 'express';
 
-const BASE = process.env.SPACE_API_BASE_URL!;
-const KEY = process.env.SPACE_API_KEY!;
+const BASE = process.env.SPACE_API_BASE_URL;
+const KEY = process.env.SPACE_API_KEY;
 const MAXR = Number(process.env.SPACE_MAX_RADIUS ?? 5000);
+
+// Validar variáveis de ambiente críticas
+if (!BASE || !KEY) {
+  console.error('[SPACE API] ERRO CRÍTICO: Variáveis de ambiente não configuradas!');
+  console.error('[SPACE API] SPACE_API_BASE_URL:', BASE ? 'OK' : 'FALTANDO');
+  console.error('[SPACE API] SPACE_API_KEY:', KEY ? 'OK' : 'FALTANDO');
+  console.error('[SPACE API] Configure as variáveis em Settings → Secrets no painel de gerenciamento');
+}
 
 function num(v: any, d = 0) {
   const n = Number(v);
@@ -124,6 +132,15 @@ export async function handleSpaceDebug(req: Request, res: Response) {
 
 export async function handleSpaceQuery(req: Request, res: Response) {
   try {
+    // Verificar se as variáveis de ambiente estão configuradas
+    if (!BASE || !KEY) {
+      console.error('[SPACE API] Tentativa de uso sem configuração!');
+      return res.status(500).json({
+        error: 'CONFIG_MISSING',
+        message: 'API não configurada. Configure SPACE_API_BASE_URL e SPACE_API_KEY em Settings → Secrets',
+      });
+    }
+
     const lat = num(req.query.lat);
     const lng = num(req.query.lng);
     const radius = Math.min(num(req.query.radius, 0), MAXR);

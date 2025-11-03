@@ -832,3 +832,17 @@
   - Prioridade: CRÍTICA
   - Impacto: Bloqueia criação de estudos
 
+
+
+
+## 🐛 BUG PRODUÇÃO - Erro ao Buscar Dados no Mapa
+- [x] **Investigar e corrigir** "Erro ao Buscar Dados" no mapa em produção
+  - Sintoma: Funciona no dev/demo, mas falha em produção
+  - Prioridade: CRÍTICA
+  - Impacto: Bloqueia funcionalidade principal do mapa
+  - Possíveis causas:
+    - CORS/variáveis de ambiente
+    - API keys não configuradas em produção
+    - Timeout de API
+    - URL base incorreta
+
