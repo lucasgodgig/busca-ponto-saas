@@ -3,9 +3,12 @@ import axios from 'axios';
 const BASE_URL = process.env.SPACE_API_BASE_URL || 'https://gs.greatspaces.com.br/api/';
 const API_KEY = process.env.SPACE_API_KEY;
 
-// Cache simples em memória (TTL 20 minutos)
+/**
+ * Cache em memória para requisições da Space API
+ * TTL: 20 minutos
+ */
 const cache = new Map<string, { data: any; timestamp: number }>();
-const CACHE_TTL = 20 * 60 * 1000; // 20 minutos
+const CACHE_TTL = 20 * 60 * 1000;
 
 export interface SpaceRawData {
   people?: number;

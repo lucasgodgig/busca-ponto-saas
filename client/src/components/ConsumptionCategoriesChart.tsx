@@ -115,8 +115,16 @@ function ConsumptionCategoriesChart({
             <Tooltip
               formatter={(value) => {
                 const millions = (value as number) / 1000000;
-                return `R$ ${millions.toFixed(1)}M`;
+                return [`R$ ${millions.toFixed(1)}M`, 'Potencial'];
               }}
+              contentStyle={{
+                backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                border: '1px solid #e5e7eb',
+                borderRadius: '8px',
+                padding: '8px 12px',
+                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+              }}
+              labelStyle={{ fontWeight: 600, marginBottom: '4px' }}
             />
             <Bar dataKey="valor" fill="#3b82f6" radius={[0, 8, 8, 0]}>
               {chartData.map((entry, index) => (

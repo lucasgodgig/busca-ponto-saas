@@ -1,5 +1,6 @@
 import { useRef, useState, useCallback, useEffect, useMemo } from "react";
 import { debounce } from "lodash-es";
+import { MAX_RADIUS, DEFAULT_RADIUS, DEBOUNCE_SLIDER_MS } from "@shared/constants";
 import Map, { MapRef, Marker, Source, Layer } from "react-map-gl/maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { Loader2, MapPin } from "lucide-react";
@@ -31,14 +32,13 @@ export default function MapShell({ tenantId, loading = false, onNavigateHome }: 
 
   const [marker, setMarker] = useState<{ lat: number; lng: number } | null>(null);
   const [address, setAddress] = useState<string>("");
-  const [radius, setRadius] = useState([1500]);
-  const MAX_RADIUS = 5000; // 5km máximo
+  const [radius, setRadius] = useState([DEFAULT_RADIUS]);
 
-  // Debounced radius change handler (300ms)
+  // Debounced radius change handler
   const debouncedRadiusChange = useMemo(
     () => debounce((newRadius: number[]) => {
       setRadius(newRadius);
-    }, 300),
+    }, DEBOUNCE_SLIDER_MS),
     []
   );
   const [segment, setSegment] = useState("academia");

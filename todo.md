@@ -796,14 +796,14 @@
 - [x] Adicionar empty state quando não há dados
 - [ ] Melhorar feedback visual ao arrastar marcador no mapa
 - [ ] Adicionar confirmação antes de limpar busca
-- [ ] Adicionar tooltip explicativo nos gráficos
+- [x] Adicionar tooltip explicativo nos gráficos (ConsumptionCategoriesChart)
 - [ ] Melhorar mensagens de erro (mais amigáveis)
 
 ### BAIXO - Code Quality
 - [x] Remover `console.log()` de produção (4x em AnalysisDashboard)
-- [ ] Adicionar comentários JSDoc em funções públicas
+- [x] Adicionar comentários JSDoc em funções públicas (spaceApiService)
 - [ ] Padronizar nomes de variáveis (camelCase vs snake_case)
-- [ ] Extrair magic numbers para constantes (ex: 500, 5000 → MIN_RADIUS, MAX_RADIUS)
+- [x] Extrair magic numbers para constantes (shared/constants.ts)
 - [ ] Adicionar ESLint rules mais estritas
 - [ ] Configurar Prettier para formatação consistente
 

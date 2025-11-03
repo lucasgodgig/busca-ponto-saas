@@ -1,4 +1,5 @@
-import React from 'react';
+import { memo } from 'react';
+import { MIN_RADIUS, MAX_RADIUS } from '@shared/constants';
 import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -65,15 +66,15 @@ export default function LeftPanel({
             <Slider
               value={radius}
               onValueChange={onRadiusChange}
-              min={500}
-              max={5000}
+              min={MIN_RADIUS}
+              max={MAX_RADIUS}
               step={100}
               disabled={loading}
               className="w-full"
             />
             <div className="flex justify-between text-xs text-gray-500 mt-2">
-              <span>500m</span>
-              <span>5km</span>
+              <span>{MIN_RADIUS}m</span>
+              <span>{MAX_RADIUS / 1000}km</span>
             </div>
           </CardContent>
         </Card>
