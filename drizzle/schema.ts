@@ -1,4 +1,4 @@
-import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, json, boolean } from "drizzle-orm/mysql-core";
+import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, json, index, boolean } from "drizzle-orm/mysql-core";
 import { relations } from "drizzle-orm";
 
 /**
@@ -47,7 +47,10 @@ export const memberships = mysqlTable("memberships", {
   role: mysqlEnum("role", ["tenant_admin", "member"]).default("member").notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-});
+}, (table) => ({
+  userIdIdx: index("userId_idx").on(table.userId),
+  tenantIdIdx: index("tenantId_idx").on(table.tenantId),
+}));
 
 /**
  * Study - estudos de mercado solicitados pelas franqueadoras
@@ -75,7 +78,11 @@ export const studies = mysqlTable("studies", {
   }>(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-});
+}, (table) => ({
+  tenantIdIdx: index("tenantId_idx").on(table.tenantId),
+  statusIdx: index("status_idx").on(table.status),
+  createdByIdx: index("createdBy_idx").on(table.createdBy),
+}));
 
 /**
  * StudyComment - comentários em estudos com suporte a menções
