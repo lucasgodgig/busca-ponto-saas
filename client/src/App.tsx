@@ -7,9 +7,11 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
+import MapPage from "./pages/MapPage";
 import InviteCodeValidation from "./pages/InviteCodeValidation";
 import Cadastro from "./pages/Cadastro";
 import AnalysisDashboard from "./pages/AnalysisDashboard";
+import AppLayout from "./components/AppLayout";
 
 // Lazy load rotas não críticas
 const History = lazy(() => import("./pages/History"));
@@ -37,13 +39,44 @@ function Router() {
       <Route path={"/"} component={Home} />
       <Route path={"/cadastro"} component={Cadastro} />
       <Route path={"/invite"} component={InviteCodeValidation} />
-      <Route path={"/app"} component={Dashboard} />
-      <Route path={"/history"} component={History} />
+      
+      {/* Rotas com Sidebar */}
+      <Route path={"/app"}>
+        <AppLayout>
+          <Dashboard />
+        </AppLayout>
+      </Route>
+      <Route path={"/mapa"}>
+        <AppLayout>
+          <MapPage />
+        </AppLayout>
+      </Route>
+      <Route path={"/historico"}>
+        <AppLayout>
+          <History />
+        </AppLayout>
+      </Route>
       <Route path={"/onboarding"} component={Onboarding} />
-      <Route path={"/studies"} component={Studies} />
-      <Route path={"/studies/:id"} component={StudyDetailsPage} />
-      <Route path={"/studies/new"} component={NewStudy} />
-      <Route path={"/settings"} component={Settings} />
+      <Route path={"/estudos"}>
+        <AppLayout>
+          <Studies />
+        </AppLayout>
+      </Route>
+      <Route path={"/estudos/:id"}>
+        <AppLayout>
+          <StudyDetailsPage />
+        </AppLayout>
+      </Route>
+      <Route path={"/estudos/novo"}>
+        <AppLayout>
+          <NewStudy />
+        </AppLayout>
+      </Route>
+      <Route path={"/configuracoes"}>
+        <AppLayout>
+          <Settings />
+        </AppLayout>
+      </Route>
       <Route path={"/analysis"} component={AnalysisDashboard} />
       <Route path={"/generate-study"} component={GenerateStudyPage} />
       <Route path={"/generated-studies"} component={GeneratedStudiesListPage} />
@@ -66,7 +99,7 @@ function App() {
     <ErrorBoundary>
       <ThemeProvider
         defaultTheme="light"
-        // switchable
+        switchable
       >
         <TooltipProvider>
           <Toaster />

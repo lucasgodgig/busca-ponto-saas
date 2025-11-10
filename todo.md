@@ -846,3 +846,40 @@
     - Timeout de API
     - URL base incorreta
 
+
+
+
+## 🎨 REDESIGN - Nova Identidade Visual
+
+### Estrutura Nova
+- [x] **Criar Dashboard como página inicial** (/app)
+  - Cards de ações principais
+  - Estatísticas rápidas
+  - Atalhos para funcionalidades
+- [x] **Implementar Sidebar de navegação**
+  - Home (Dashboard)
+  - Mapa Interativo
+  - Estudos
+  - Histórico
+  - Configurações
+- [x] **Mover mapa para /mapa**
+  - Ajustar rotas
+  - Atualizar links de navegação
+- [x] **Implementar toggle dark/light theme**
+  - Tema claro por padrão
+  - Botão de troca no header
+  - Persistir preferência
+
+### Cards do Dashboard
+- [x] 🗺️ **Análise Rápida** - Ir para mapa interativo
+- [x] 📊 **Solicitar Estudo** - Novo estudo de mercado
+- [x] 📁 **Meus Estudos** - Ver estudos em andamento
+- [x] 📈 **Relatórios** - Histórico de análises
+- [ ] ⚙️ **Configurações** - Gerenciar conta
+
+### Design
+- [x] Tema claro por padrão
+- [x] Sidebar fixa (desktop) / colapsável (mobile)
+- [x] Cards com ícones e hover effects
+- [x] Responsivo mobile-first
+

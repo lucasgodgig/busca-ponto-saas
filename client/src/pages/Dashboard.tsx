@@ -1,174 +1,168 @@
-import { useState } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
-import { trpc } from "@/lib/trpc";
-import MapShell from "@/components/MapShell";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Loader2, History, TrendingUp, FileText } from "lucide-react";
-import { toast } from "sonner";
-import { useLocation } from "wouter";
-import { useEffect } from "react";
+import { 
+  Map, 
+  FileText, 
+  FolderOpen, 
+  BarChart3,
+  TrendingUp,
+  Clock,
+  CheckCircle2
+} from "lucide-react";
+import { Link } from "wouter";
+import { trpc } from "@/lib/trpc";
 
 export default function Dashboard() {
-  const { user, loading: authLoading } = useAuth();
-  const [, setLocation] = useLocation();
-  const [selectedTenant, setSelectedTenant] = useState<number | null>(null);
-  const [queryLoading, setQueryLoading] = useState(false);
+  const { user } = useAuth();
+  const { data: studies } = trpc.studies.list.useQuery();
 
-  // Buscar dados do tenant selecionado
-  const { data: tenantData } = trpc.tenants.usage.useQuery(
-    { tenantId: selectedTenant! },
-    { enabled: !!selectedTenant }
-  );
+  const pendingStudies = studies?.filter(s => s.status === 'aberto' || s.status === 'em_analise').length || 0;
+  const completedStudies = studies?.filter(s => s.status === 'concluido').length || 0;
 
-  // Buscar histórico de consultas
-  const { data: history, refetch: refetchHistory } = trpc.space.history.useQuery(
-    { tenantId: selectedTenant!, limit: 10, offset: 0 },
-    { enabled: !!selectedTenant }
-  );
-
-  // Mutation para consulta rápida
-  const quickQueryMutation = trpc.space.query.useMutation({
-    onSuccess: () => {
-      refetchHistory();
+  const actionCards = [
+    {
+      title: "Análise Rápida",
+      description: "Acesse o mapa interativo para análises em tempo real",
+      icon: Map,
+      href: "/mapa",
+      color: "text-blue-600 dark:text-blue-400",
+      bgColor: "bg-blue-50 dark:bg-blue-950/30",
     },
-  });
+    {
+      title: "Solicitar Estudo",
+      description: "Solicite um estudo de mercado completo",
+      icon: FileText,
+      href: "/estudos/novo",
+      color: "text-green-600 dark:text-green-400",
+      bgColor: "bg-green-50 dark:bg-green-950/30",
+    },
+    {
+      title: "Meus Estudos",
+      description: "Acompanhe seus estudos em andamento",
+      icon: FolderOpen,
+      href: "/estudos",
+      color: "text-purple-600 dark:text-purple-400",
+      bgColor: "bg-purple-50 dark:bg-purple-950/30",
+    },
+    {
+      title: "Relatórios",
+      description: "Acesse seu histórico de análises",
+      icon: BarChart3,
+      href: "/historico",
+      color: "text-orange-600 dark:text-orange-400",
+      bgColor: "bg-orange-50 dark:bg-orange-950/30",
+    },
+  ];
 
-  // Selecionar tenant automaticamente se houver apenas um
-  if (!authLoading && user && user.memberships && user.memberships.length > 0 && !selectedTenant) {
-    setSelectedTenant(user.memberships[0].tenant?.id || null);
-  }
-
-  // Handler para consulta rápida
-  const handleQuickQuery = async (lat: number, lng: number, radius: number) => {
-    if (!selectedTenant) {
-      toast.error("Selecione um tenant");
-      return;
-    }
-
-    setQueryLoading(true);
-    try {
-      const result = await quickQueryMutation.mutateAsync({
-        tenantId: selectedTenant,
-        lat,
-        lng,
-        radius,
-      });
-      return result;
-    } finally {
-      setQueryLoading(false);
-    }
-  };
-
-  if (authLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="w-8 h-8 animate-spin" />
-      </div>
-    );
-  }
-
-  if (!user) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Card className="w-96">
-          <CardHeader>
-            <CardTitle>Acesso Negado</CardTitle>
-            <CardDescription>Você precisa estar logado para acessar esta página</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button onClick={() => setLocation("/")}>Fazer Login</Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  // Se não tiver memberships, mostrar onboarding
-  if (!user.memberships || user.memberships.length === 0) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Card className="w-96">
-          <CardHeader>
-            <CardTitle>Bem-vindo!</CardTitle>
-            <CardDescription>
-              Você ainda não faz parte de nenhuma franqueadora
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button onClick={() => setLocation("/onboarding")}>
-              Criar Franqueadora
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+  const stats = [
+    {
+      title: "Estudos Pendentes",
+      value: pendingStudies,
+      icon: Clock,
+      color: "text-yellow-600 dark:text-yellow-400",
+    },
+    {
+      title: "Estudos Concluídos",
+      value: completedStudies,
+      icon: CheckCircle2,
+      color: "text-green-600 dark:text-green-400",
+    },
+    {
+      title: "Total de Estudos",
+      value: studies?.length || 0,
+      icon: TrendingUp,
+      color: "text-blue-600 dark:text-blue-400",
+    },
+  ];
 
   return (
-    <div className="flex flex-col h-screen">
-      {/* Header - Fixed on mobile */}
-      <header className="sticky top-0 z-50 border-b bg-background md:relative">
-        <div className="flex items-center justify-between px-2 md:px-6 py-2 md:py-4">
-          <div className="flex items-center gap-2 md:gap-4">
-            <h1 className="text-lg md:text-2xl font-bold cursor-pointer hover:text-primary transition-colors" onClick={() => setLocation("/")}>Busca Ponto</h1>
-            {tenantData?.tenant && (
-              <Badge variant="secondary" className="text-xs md:text-sm">{tenantData.tenant.name}</Badge>
-            )}
-          </div>
-
-          <div className="flex items-center gap-1 md:gap-4">
-            {/* Uso do plano */}
-            {tenantData && (
-              <div className="hidden sm:flex items-center gap-2 text-xs md:text-sm">
-                <TrendingUp className="w-3 h-3 md:w-4 md:h-4" />
-                <span className="text-muted-foreground">
-                  {tenantData.usage?.quickQueriesUsed || 0} / {tenantData.tenant?.limitsJson.quickQueriesPerMonth} consultas
-                </span>
-              </div>
-            )}
-
-            <Button
-              variant="outline"
-              size="sm"
-              className="text-xs md:text-sm px-2 md:px-4"
-              onClick={() => setLocation("/studies")}
-            >
-              <FileText className="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
-              <span className="hidden sm:inline">Estudos</span>
-            </Button>
-
-            <Button
-              variant="outline"
-              size="sm"
-              className="text-xs md:text-sm px-2 md:px-4"
-              onClick={() => setLocation("/history")}
-            >
-              <History className="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
-              <span className="hidden sm:inline">Histórico</span>
-            </Button>
-
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-xs md:text-sm px-1 md:px-4"
-              onClick={() => setLocation("/settings")}
-            >
-              <span className="hidden sm:inline">{user.name}</span>
-              <span className="sm:hidden">⚙️</span>
-            </Button>
-          </div>
+    <div className="min-h-screen bg-background">
+      <div className="container py-4 md:py-8 px-4">
+        {/* Header */}
+        <div className="mb-6 md:mb-8">
+          <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
+            Bem-vindo, {user?.name || 'Usuário'}!
+          </h1>
+          <p className="text-muted-foreground">
+            Gerencie seus estudos de mercado e análises de localização
+          </p>
         </div>
-      </header>
 
-      {/* Mapa */}
-      {selectedTenant && (
-        <MapShell
-          tenantId={selectedTenant}
-          onNavigateHome={() => setLocation("/")}
-        />
-      )}
+        {/* Stats */}
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-3 mb-6 md:mb-8">
+          {stats.map((stat) => (
+            <Card key={stat.title}>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  {stat.title}
+                </CardTitle>
+                <stat.icon className={`h-4 w-4 ${stat.color}`} />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stat.value}</div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* Action Cards */}
+        <h2 className="text-xl md:text-2xl font-bold mb-4">Acesso Rápido</h2>
+        <div className="grid gap-4 md:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 mb-6 md:mb-8">
+          {actionCards.map((card) => (
+            <Link key={card.title} href={card.href}>
+              <Card className="group cursor-pointer transition-all hover:shadow-lg hover:scale-[1.02] border-2 hover:border-primary/50">
+                <CardHeader className="pb-3">
+                  <div className={`w-14 h-14 rounded-xl ${card.bgColor} flex items-center justify-center mb-4 transition-transform group-hover:scale-110`}>
+                    <card.icon className={`h-7 w-7 ${card.color}`} />
+                  </div>
+                  <CardTitle className="text-lg mb-2">{card.title}</CardTitle>
+                  <CardDescription className="text-sm">{card.description}</CardDescription>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <Button variant="ghost" className="w-full justify-between group-hover:text-primary transition-colors">
+                    Acessar
+                    <span className="ml-2 transition-transform group-hover:translate-x-1">→</span>
+                  </Button>
+                </CardContent>
+              </Card>
+            </Link>
+          ))}
+        </div>
+
+        {/* Recent Studies */}
+        {studies && studies.length > 0 && (
+          <div className="mt-6 md:mt-8">
+            <h2 className="text-xl md:text-2xl font-bold mb-4">Estudos Recentes</h2>
+            <div className="grid gap-4">
+              {studies.slice(0, 3).map((study) => (
+                <Link key={study.id} href={`/estudos/${study.id}`}>
+                  <Card className="cursor-pointer hover:shadow-md transition-shadow">
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <CardTitle className="text-base">{study.title}</CardTitle>
+                          <CardDescription>{study.address}</CardDescription>
+                        </div>
+                        <div className={`px-3 py-1 rounded-full text-xs font-medium ${
+                          study.status === 'concluido' 
+                            ? 'bg-green-100 text-green-800 dark:bg-green-950/30 dark:text-green-400'
+                            : study.status === 'em_analise'
+                            ? 'bg-blue-100 text-blue-800 dark:bg-blue-950/30 dark:text-blue-400'
+                            : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-950/30 dark:text-yellow-400'
+                        }`}>
+                          {study.status === 'concluido' ? 'Concluído' : 
+                           study.status === 'em_analise' ? 'Em Análise' : 'Aberto'}
+                        </div>
+                      </div>
+                    </CardHeader>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
