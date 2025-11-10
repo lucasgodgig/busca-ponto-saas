@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Loader2, Settings as SettingsIcon, Building2, Palette } from "lucide-react";
 import { useLocation } from "wouter";
+import NotificationSettings from "@/components/NotificationSettings";
 
 export default function Settings() {
   const [, setLocation] = useLocation();
@@ -194,6 +195,9 @@ export default function Settings() {
               </form>
             </CardContent>
           </Card>
+
+          {/* Notificações */}
+          <NotificationSettings />
 
           {/* Informações do Plano */}
           <Card>

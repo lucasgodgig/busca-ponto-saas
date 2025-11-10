@@ -2,6 +2,7 @@ import { ReactNode, useState } from "react";
 import Sidebar from "./Sidebar";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import ShortcutsHelp from "./ShortcutsHelp";
+import CommandPalette from "./CommandPalette";
 import { useLocation } from "wouter";
 
 interface AppLayoutProps {
@@ -10,6 +11,7 @@ interface AppLayoutProps {
 
 export default function AppLayout({ children }: AppLayoutProps) {
   const [showShortcuts, setShowShortcuts] = useState(false);
+  const [showCommandPalette, setShowCommandPalette] = useState(false);
   const [, setLocation] = useLocation();
 
   useKeyboardShortcuts([
@@ -17,7 +19,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
       key: "k",
       ctrlKey: true,
       description: "Busca rápida",
-      action: () => console.log("Busca rápida"),
+      action: () => setShowCommandPalette(true),
     },
     {
       key: "n",
@@ -44,6 +46,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
   
   return (
     <>
+      <CommandPalette open={showCommandPalette} onOpenChange={setShowCommandPalette} />
       <ShortcutsHelp open={showShortcuts} onOpenChange={setShowShortcuts} />
       <div className="flex min-h-screen">
         <Sidebar />

@@ -4,7 +4,9 @@ import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, ArrowLeft, Plus, FileText } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Loader2, ArrowLeft, Plus, FileText, Search, X } from "lucide-react";
 import { useLocation } from "wouter";
 
 const statusLabels = {
@@ -31,6 +33,9 @@ export default function Studies() {
   const { user, loading: authLoading } = useAuth();
   const [, setLocation] = useLocation();
   const [selectedTenant, setSelectedTenant] = useState<number | null>(null);
+  const [searchText, setSearchText] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [segmentFilter, setSegmentFilter] = useState<string>("all");
 
   // Buscar estudos do tenant
   const { data: studies, isLoading } = trpc.studies.list.useQuery(
@@ -42,6 +47,40 @@ export default function Studies() {
   if (!authLoading && user && user.memberships && user.memberships.length > 0 && !selectedTenant) {
     setSelectedTenant(user.memberships[0].tenant?.id || null);
   }
+
+  // Filtrar estudos
+  const filteredStudies = studies?.filter((study) => {
+    // Filtro de texto
+    if (searchText) {
+      const searchLower = searchText.toLowerCase();
+      const matchText = 
+        study.title.toLowerCase().includes(searchLower) ||
+        study.address?.toLowerCase().includes(searchLower) ||
+        study.segment?.toLowerCase().includes(searchLower);
+      if (!matchText) return false;
+    }
+
+    // Filtro de status
+    if (statusFilter !== "all" && study.status !== statusFilter) {
+      return false;
+    }
+
+    // Filtro de segmento
+    if (segmentFilter !== "all" && study.segment !== segmentFilter) {
+      return false;
+    }
+
+    return true;
+  });
+
+  // Limpar todos os filtros
+  const clearFilters = () => {
+    setSearchText("");
+    setStatusFilter("all");
+    setSegmentFilter("all");
+  };
+
+  const hasActiveFilters = searchText || statusFilter !== "all" || segmentFilter !== "all";
 
   if (authLoading || isLoading) {
     return (
@@ -80,15 +119,75 @@ export default function Studies() {
         </div>
       </header>
 
+      {/* Filtros */}
+      <div className="container py-6">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center">
+          {/* Busca por texto */}
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Buscar por título, endereço ou segmento..."
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              className="pl-9"
+            />
+          </div>
+
+          {/* Filtro de status */}
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-full md:w-[180px]">
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos os status</SelectItem>
+              <SelectItem value="aberto">Aberto</SelectItem>
+              <SelectItem value="em_analise">Em Análise</SelectItem>
+              <SelectItem value="devolvido">Devolvido</SelectItem>
+              <SelectItem value="concluido">Concluído</SelectItem>
+            </SelectContent>
+          </Select>
+
+          {/* Filtro de segmento */}
+          <Select value={segmentFilter} onValueChange={setSegmentFilter}>
+            <SelectTrigger className="w-full md:w-[180px]">
+              <SelectValue placeholder="Segmento" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos os segmentos</SelectItem>
+              <SelectItem value="alimentacao">Alimentação</SelectItem>
+              <SelectItem value="varejo">Varejo</SelectItem>
+              <SelectItem value="servicos">Serviços</SelectItem>
+              <SelectItem value="saude">Saúde</SelectItem>
+              <SelectItem value="educacao">Educação</SelectItem>
+            </SelectContent>
+          </Select>
+
+          {/* Limpar filtros */}
+          {hasActiveFilters && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={clearFilters}
+              className="gap-2"
+            >
+              <X className="h-4 w-4" />
+              Limpar
+            </Button>
+          )}
+        </div>
+      </div>
+
       {/* Conteúdo */}
-      <div className="container py-8">
-        {!studies || studies.length === 0 ? (
+      <div className="container pb-8">
+        {!filteredStudies || filteredStudies.length === 0 ? (
           <Card>
             <CardContent className="flex flex-col items-center justify-center py-12">
               <FileText className="w-12 h-12 text-muted-foreground mb-4" />
-              <p className="text-lg font-medium">Nenhum estudo solicitado ainda</p>
+              <p className="text-lg font-medium">
+                {hasActiveFilters ? "Nenhum estudo encontrado" : "Nenhum estudo solicitado ainda"}
+              </p>
               <p className="text-sm text-muted-foreground mb-4">
-                Crie seu primeiro estudo de mercado
+                {hasActiveFilters ? "Tente ajustar os filtros" : "Crie seu primeiro estudo de mercado"}
               </p>
               <Button onClick={() => setLocation("/studies/new")}>
                 <Plus className="w-4 h-4 mr-2" />
@@ -98,7 +197,7 @@ export default function Studies() {
           </Card>
         ) : (
           <div className="grid gap-4">
-            {studies.map((item) => (
+            {filteredStudies.map((item) => (
               <Card
                 key={item.study.id}
                 className="cursor-pointer hover:shadow-md transition-shadow"

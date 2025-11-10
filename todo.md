@@ -934,3 +934,28 @@
 - [x] Gerar PDF com estatísticas e gráfico
 - [x] Incluir logo e informações do tenant
 
+
+
+
+## 🚀 FUNCIONALIDADES AVANÇADAS
+
+### Busca Global (Command Palette)
+- [x] Criar componente CommandPalette
+- [x] Implementar busca fuzzy em estudos
+- [x] Adicionar ações rápidas (Novo estudo, Ir para mapa, etc)
+- [x] Mostrar resultados recentes
+- [x] Atalho Ctrl+K para abrir
+
+### Filtros na Página de Estudos
+- [x] Filtro por status (aberto, em_analise, concluido, etc)
+- [x] Filtro por data (hoje, semana, mês, customizado)
+- [x] Filtro por segmento
+- [x] Busca por texto (título, endereço)
+- [x] Limpar todos os filtros
+
+### Notificações Push
+- [x] Solicitar permissão de notificações
+- [x] Enviar notificação quando estudo for atualizado
+- [x] Notificar quando estudo for concluído
+- [x] Configurações de notificações
+
