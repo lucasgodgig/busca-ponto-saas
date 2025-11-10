@@ -913,3 +913,24 @@
 - Erro ocorre ao carregar Dashboard
 - Provavelmente relacionado a trpc.studies.list.useQuery()
 
+
+
+
+## 🚀 MELHORIAS AVANÇADAS DE UX
+
+### Spotlight Effect no Onboarding
+- [ ] Criar overlay escuro com spotlight nos elementos
+- [ ] Animar transição entre steps
+- [ ] Destacar elementos da UI durante o tour
+
+### Atalhos de Teclado
+- [x] Implementar Ctrl+K para busca rápida
+- [x] Implementar N para novo estudo
+- [x] Implementar H para ir ao home
+- [x] Mostrar modal de ajuda com atalhos (?)
+
+### Exportação de Dashboard
+- [x] Botão de exportar PDF no dashboard
+- [x] Gerar PDF com estatísticas e gráfico
+- [x] Incluir logo e informações do tenant
+

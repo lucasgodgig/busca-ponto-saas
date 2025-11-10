@@ -14,6 +14,9 @@ import { Link } from "wouter";
 import { trpc } from "@/lib/trpc";
 import Onboarding from "@/components/Onboarding";
 import StudiesChart from "@/components/StudiesChart";
+import { useExportDashboard } from "@/hooks/useExportDashboard";
+import { Download } from "lucide-react";
+import { toast } from "sonner";
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -22,6 +25,18 @@ export default function Dashboard() {
     { tenantId: tenantId! },
     { enabled: !!tenantId }
   );
+  const { exportToPDF } = useExportDashboard();
+
+  const handleExport = async () => {
+    toast.loading("Gerando PDF...");
+    const success = await exportToPDF();
+    toast.dismiss();
+    if (success) {
+      toast.success("Dashboard exportado com sucesso!");
+    } else {
+      toast.error("Erro ao exportar dashboard");
+    }
+  };
 
   const pendingStudies = studies?.filter(s => s.status === 'aberto' || s.status === 'em_analise').length || 0;
   const completedStudies = studies?.filter(s => s.status === 'concluido').length || 0;
@@ -86,15 +101,21 @@ export default function Dashboard() {
     <>
       <Onboarding />
       <div className="min-h-screen bg-background">
-      <div className="container py-4 md:py-8 px-4">
+      <div id="dashboard-content" className="container py-4 md:py-8 px-4">
         {/* Header */}
-        <div className="mb-6 md:mb-8">
-          <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
-            Bem-vindo, {user?.name || 'Usuário'}!
-          </h1>
-          <p className="text-muted-foreground">
-            Gerencie seus estudos de mercado e análises de localização
-          </p>
+        <div className="mb-6 md:mb-8 flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
+              Bem-vindo, {user?.name?.split(" ")[0] || "Usuário"}!
+            </h1>
+            <p className="text-muted-foreground">
+              Gerencie seus estudos de mercado e análises de localização
+            </p>
+          </div>
+          <Button onClick={handleExport} variant="outline" className="gap-2">
+            <Download className="h-4 w-4" />
+            Exportar PDF
+          </Button>
         </div>
 
         {/* Stats */}
