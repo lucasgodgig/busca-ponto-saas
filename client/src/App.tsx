@@ -23,6 +23,7 @@ const GenerateStudyPage = lazy(() => import("./pages/GenerateStudyPage"));
 const GeneratedStudiesListPage = lazy(() => import("./pages/GeneratedStudiesListPage"));
 const GeneratedStudyDetailsPage = lazy(() => import("./pages/GeneratedStudyDetailsPage"));
 const StudyDetailsPage = lazy(() => import("./pages/StudyDetailsPage"));
+const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 
 // Loading component
 const PageLoader = () => (
@@ -49,6 +50,11 @@ function Router() {
       <Route path={"/mapa"}>
         <AppLayout>
           <MapPage />
+        </AppLayout>
+      </Route>
+      <Route path={"/admin"}>
+        <AppLayout>
+          <AdminDashboard />
         </AppLayout>
       </Route>
       <Route path={"/historico"}>

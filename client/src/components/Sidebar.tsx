@@ -9,13 +9,15 @@ import {
   Menu,
   X,
   Moon,
-  Sun
+  Sun,
+  Shield
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { APP_LOGO, APP_TITLE } from "@/const";
 import { useTheme } from "@/contexts/ThemeContext";
 import { cn } from "@/lib/utils";
 import NotificationBadge from "./NotificationBadge";
+import { useAuth } from "@/_core/hooks/useAuth";
 
 interface SidebarProps {
   className?: string;
@@ -25,6 +27,7 @@ export default function Sidebar({ className }: SidebarProps) {
   const [location] = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
+  const { user } = useAuth();
 
   const menuItems = [
     {
@@ -53,6 +56,15 @@ export default function Sidebar({ className }: SidebarProps) {
       href: "/configuracoes",
     },
   ];
+
+  // Adicionar Admin BP se for admin_bp
+  if (user?.role === "admin_bp") {
+    menuItems.push({
+      title: "Admin BP",
+      icon: Shield,
+      href: "/admin",
+    });
+  }
 
   const isActive = (href: string) => {
     if (href === "/app") {

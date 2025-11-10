@@ -959,3 +959,31 @@
 - [x] Notificar quando estudo for concluído
 - [x] Configurações de notificações
 
+
+
+
+## 🎯 FUNCIONALIDADES FINAIS
+
+### Dashboard do Admin BP
+- [x] Criar rota /admin
+- [x] Verificar role admin_bp
+- [x] Listar todos estudos de todos tenants
+- [x] Métricas agregadas (total, por status, por tenant)
+- [x] Gráficos de performance
+- [x] Filtros por tenant e período
+
+### Exportação de Estudos
+- [x] Botão "Exportar" na página de Estudos
+- [x] Exportar para Excel (.xlsx)
+- [x] Exportar para CSV
+- [ ] Incluir todos os campos relevantes
+- [ ] Respeitar filtros ativos
+
+### Sistema de Comentários
+- [ ] Adicionar tabela de comentários no schema
+- [ ] tRPC procedures (list, create)
+- [ ] Componente de lista de comentários
+- [ ] Input para novo comentário
+- [ ] Notificação em tempo real
+- [ ] Avatar e timestamp
+

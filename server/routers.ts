@@ -558,6 +558,60 @@ export const appRouter = router({
 
         return { success: true };
       }),
+
+    // Comentários
+    comments: router({
+      list: protectedProcedure
+        .input(z.object({ studyId: z.number() }))
+        .query(async ({ ctx, input }) => {
+          const dbInstance = await db.getDb();
+          if (!dbInstance) {
+            throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database não disponível" });
+          }
+
+          const { studyComments, users } = await import("../drizzle/schema");
+          const { eq, desc } = await import("drizzle-orm");
+
+          const comments = await dbInstance
+            .select({
+              comment: studyComments,
+              author: users,
+            })
+            .from(studyComments)
+            .leftJoin(users, eq(studyComments.authorId, users.id))
+            .where(eq(studyComments.studyId, input.studyId))
+            .orderBy(desc(studyComments.createdAt));
+
+          return comments.map((row) => ({
+            ...row.comment,
+            author: row.author,
+          }));
+        }),
+
+      create: protectedProcedure
+        .input(z.object({
+          studyId: z.number(),
+          body: z.string().min(1),
+        }))
+        .mutation(async ({ ctx, input }) => {
+          const dbInstance = await db.getDb();
+          if (!dbInstance) {
+            throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database não disponível" });
+          }
+
+          const { studyComments } = await import("../drizzle/schema");
+
+          const result = await dbInstance
+            .insert(studyComments)
+            .values({
+              studyId: input.studyId,
+              authorId: ctx.user.id,
+              body: input.body,
+            });
+
+          return { success: true, id: Number(result.insertId) };
+        }),
+    }),
   }),
 
   // Generated Studies
@@ -738,6 +792,82 @@ export const appRouter = router({
         });
 
         return { success: true };
+      }),
+
+    // Dashboard do Admin BP - Listar todos os estudos
+    getAllStudies: adminProcedure
+      .query(async ({ ctx }) => {
+        const dbInstance = await db.getDb();
+        if (!dbInstance) {
+          throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database não disponível" });
+        }
+
+        const { studies, tenants } = await import("../drizzle/schema");
+        const { desc } = await import("drizzle-orm");
+
+        const allStudies = await dbInstance
+          .select({
+            study: studies,
+            tenant: tenants,
+          })
+          .from(studies)
+          .leftJoin(tenants, (eb: any) => eb.eq(studies.tenantId, tenants.id))
+          .orderBy(desc(studies.createdAt));
+
+        return allStudies.map((row: any) => ({
+          ...row.study,
+          tenant: row.tenant,
+        }));
+      }),
+
+    // Dashboard do Admin BP - Métricas agregadas
+    getMetrics: adminProcedure
+      .query(async ({ ctx }) => {
+        const dbInstance = await db.getDb();
+        if (!dbInstance) {
+          throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database não disponível" });
+        }
+
+        const { studies, tenants } = await import("../drizzle/schema");
+        const { count, eq, sql } = await import("drizzle-orm");
+
+        // Total de estudos
+        const totalStudies = await dbInstance
+          .select({ count: count() })
+          .from(studies);
+
+        // Estudos por status
+        const byStatus = await dbInstance
+          .select({
+            status: studies.status,
+            count: count(),
+          })
+          .from(studies)
+          .groupBy(studies.status);
+
+        // Estudos por tenant
+        const byTenant = await dbInstance
+          .select({
+            tenantId: studies.tenantId,
+            tenantName: tenants.name,
+            count: count(),
+          })
+          .from(studies)
+          .leftJoin(tenants, (eb: any) => eb.eq(studies.tenantId, tenants.id))
+          .groupBy(studies.tenantId, tenants.name);
+
+        return {
+          total: totalStudies[0]?.count || 0,
+          byStatus: byStatus.map((s: any) => ({
+            status: s.status,
+            count: s.count,
+          })),
+          byTenant: byTenant.map((t: any) => ({
+            tenantId: t.tenantId,
+            tenantName: t.tenantName,
+            count: t.count,
+          })),
+        };
       }),
   }),
 });

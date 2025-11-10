@@ -6,8 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, ArrowLeft, Plus, FileText, Search, X } from "lucide-react";
+import { Loader2, ArrowLeft, Plus, FileText, Search, X, Download } from "lucide-react";
 import { useLocation } from "wouter";
+import { useExportStudies } from "@/hooks/useExportStudies";
 
 const statusLabels = {
   aberto: "Aberto",
@@ -36,6 +37,7 @@ export default function Studies() {
   const [searchText, setSearchText] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [segmentFilter, setSegmentFilter] = useState<string>("all");
+  const { exportToExcel, exportToCSV } = useExportStudies();
 
   // Buscar estudos do tenant
   const { data: studies, isLoading } = trpc.studies.list.useQuery(
@@ -111,10 +113,28 @@ export default function Studies() {
                 </p>
               </div>
             </div>
-            <Button onClick={() => setLocation("/studies/new")}>
-              <Plus className="w-4 h-4 mr-2" />
-              Novo Estudo
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => exportToExcel(filteredStudies || [])}
+                disabled={!filteredStudies || filteredStudies.length === 0}
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Excel
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => exportToCSV(filteredStudies || [])}
+                disabled={!filteredStudies || filteredStudies.length === 0}
+              >
+                <Download className="w-4 h-4 mr-2" />
+                CSV
+              </Button>
+              <Button onClick={() => setLocation("/studies/new")}>
+                <Plus className="w-4 h-4 mr-2" />
+                Novo Estudo
+              </Button>
+            </div>
           </div>
         </div>
       </header>

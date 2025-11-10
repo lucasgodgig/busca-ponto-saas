@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, ArrowLeft, MapPin, Clock, User } from "lucide-react";
+import StudyComments from "@/components/StudyComments";
 import { useLocation } from "wouter";
 
 const statusLabels = {
@@ -183,6 +184,9 @@ export default function StudyDetailsPage() {
             )}
           </CardContent>
         </Card>
+
+        {/* Comentários */}
+        <StudyComments studyId={parseInt(id || "0")} />
       </div>
     </div>
   );
