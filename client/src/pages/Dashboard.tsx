@@ -12,10 +12,16 @@ import {
 } from "lucide-react";
 import { Link } from "wouter";
 import { trpc } from "@/lib/trpc";
+import Onboarding from "@/components/Onboarding";
+import StudiesChart from "@/components/StudiesChart";
 
 export default function Dashboard() {
   const { user } = useAuth();
-  const { data: studies } = trpc.studies.list.useQuery();
+  const tenantId = user?.memberships?.[0]?.tenant?.id;
+  const { data: studies } = trpc.studies.list.useQuery(
+    { tenantId: tenantId! },
+    { enabled: !!tenantId }
+  );
 
   const pendingStudies = studies?.filter(s => s.status === 'aberto' || s.status === 'em_analise').length || 0;
   const completedStudies = studies?.filter(s => s.status === 'concluido').length || 0;
@@ -77,7 +83,9 @@ export default function Dashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <>
+      <Onboarding />
+      <div className="min-h-screen bg-background">
       <div className="container py-4 md:py-8 px-4">
         {/* Header */}
         <div className="mb-6 md:mb-8">
@@ -130,6 +138,13 @@ export default function Dashboard() {
           ))}
         </div>
 
+        {/* Chart */}
+        {studies && studies.length > 0 && (
+          <div className="mb-6 md:mb-8">
+            <StudiesChart />
+          </div>
+        )}
+
         {/* Recent Studies */}
         {studies && studies.length > 0 && (
           <div className="mt-6 md:mt-8">
@@ -164,6 +179,7 @@ export default function Dashboard() {
         )}
       </div>
     </div>
+    </>
   );
 }
 

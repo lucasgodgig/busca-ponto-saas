@@ -883,3 +883,33 @@
 - [x] Cards com ícones e hover effects
 - [x] Responsivo mobile-first
 
+
+
+
+## 🎯 MELHORIAS FINAIS
+
+### Onboarding
+- [x] Criar componente de tutorial guiado
+- [x] Detectar primeiro acesso do usuário
+- [x] Tour pelos recursos principais
+- [x] Persistir estado de conclusão
+
+### Notificações
+- [x] Badge de notificações na sidebar
+- [x] Contador de notificações não lidas
+- [x] Dropdown com lista de notificações
+- [ ] Marcar como lida
+
+### Gráficos Dashboard
+- [x] Gráfico de evolução de estudos (últimos 30 dias)
+- [ ] Gráfico de distribuição por status
+- [x] Usar recharts para visualizações
+
+
+
+
+## 🐛 BUG - Erro tRPC no Dashboard
+- [x] **Corrigir erro de validação** "expected object, received undefined" em /app
+- Erro ocorre ao carregar Dashboard
+- Provavelmente relacionado a trpc.studies.list.useQuery()
+

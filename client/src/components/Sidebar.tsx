@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { APP_LOGO, APP_TITLE } from "@/const";
 import { useTheme } from "@/contexts/ThemeContext";
 import { cn } from "@/lib/utils";
+import NotificationBadge from "./NotificationBadge";
 
 interface SidebarProps {
   className?: string;
@@ -68,13 +69,16 @@ export default function Sidebar({ className }: SidebarProps) {
           {APP_LOGO && <img src={APP_LOGO} alt={APP_TITLE} className="h-8 w-8" />}
           <span className="font-bold text-lg">{APP_TITLE}</span>
         </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setIsOpen(!isOpen)}
-        >
-          {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-        </Button>
+        <div className="flex items-center gap-2">
+          <NotificationBadge />
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setIsOpen(!isOpen)}
+          >
+            {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </Button>
+        </div>
       </div>
 
       {/* Sidebar */}
@@ -87,9 +91,12 @@ export default function Sidebar({ className }: SidebarProps) {
         )}
       >
         {/* Logo */}
-        <div className="h-16 flex items-center gap-2 px-6 border-b">
-          {APP_LOGO && <img src={APP_LOGO} alt={APP_TITLE} className="h-8 w-8" />}
-          <span className="font-bold text-lg">{APP_TITLE}</span>
+        <div className="h-16 flex items-center justify-between px-6 border-b">
+          <div className="flex items-center gap-2">
+            {APP_LOGO && <img src={APP_LOGO} alt={APP_TITLE} className="h-8 w-8" />}
+            <span className="font-bold text-lg">{APP_TITLE}</span>
+          </div>
+          <NotificationBadge />
         </div>
 
         {/* Menu */}
