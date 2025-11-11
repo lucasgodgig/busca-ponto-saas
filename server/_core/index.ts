@@ -39,12 +39,16 @@ async function startServer() {
   
   // Config endpoint para frontend
   app.get("/api/config", (_req, res) => {
+    // FALLBACK DE EMERGÊNCIA: API key hardcoded para garantir funcionamento em produção
+    const EMERGENCY_API_KEY = 'AIzaSyCMRKty6h9qmy9M_IArn1T6Cye26epmujE';
+    
     const viteKey = process.env.VITE_GOOGLE_MAPS_API_KEY;
     const placesKey = process.env.GOOGLE_PLACES_API_KEY;
-    const finalKey = viteKey || placesKey || "";
+    const finalKey = viteKey || placesKey || EMERGENCY_API_KEY;
     
     console.log("[API Config] VITE_GOOGLE_MAPS_API_KEY:", viteKey ? "SET (length: " + viteKey.length + ")" : "NOT SET");
     console.log("[API Config] GOOGLE_PLACES_API_KEY:", placesKey ? "SET (length: " + placesKey.length + ")" : "NOT SET");
+    console.log("[API Config] Using EMERGENCY fallback:", !viteKey && !placesKey);
     console.log("[API Config] Final key:", finalKey ? "SET (length: " + finalKey.length + ")" : "EMPTY");
     
     res.json({
