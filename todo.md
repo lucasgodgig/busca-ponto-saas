@@ -1055,3 +1055,26 @@
 - [x] Localizar lista sem key prop no Dashboard.tsx (encontrado em StudiesChart.tsx)
 - [x] Adicionar key prop apropriada (elementos <stop> do linearGradient)
 
+
+
+
+## 🐛 BUG CRÍTICO (11/11/2025)
+- [x] Erro "Erro ao buscar dados da localização" ao clicar no mapa
+- [x] Investigar se variáveis de ambiente estão configuradas (SPACE_API_BASE_URL, SPACE_API_KEY) - OK
+- [x] Verificar rota /api/space - Funcionando corretamente
+- [x] Adicionar melhor tratamento de erro e mensagem ao usuário
+- [x] Adicionar logs detalhados para debug
+- [ ] Aguardando teste do usuário para confirmar correção
+
+
+
+
+## 🐛 ERRO URI MALFORMED (11/11/2025)
+- [x] Erro "URI malformed" ao fazer requisição /api/space
+- [x] Investigar encoding de parâmetros lat/lng
+- [x] Verificar se SPACE_API_BASE_URL tem formato correto
+- [x] Corrigir construção da URL no servidor
+- [x] Usar URLSearchParams para encoding seguro
+- [x] Adicionar trim() nas variáveis de ambiente
+- [x] Validar formato da URL base
+

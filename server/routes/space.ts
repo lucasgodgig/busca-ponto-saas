@@ -1,8 +1,18 @@
 import { Request, Response } from 'express';
 
-const BASE = process.env.SPACE_API_BASE_URL;
-const KEY = process.env.SPACE_API_KEY;
+// Sanitizar URL base removendo espaços e garantindo formato correto
+const BASE = process.env.SPACE_API_BASE_URL?.trim();
+const KEY = process.env.SPACE_API_KEY?.trim();
 const MAXR = Number(process.env.SPACE_MAX_RADIUS ?? 5000);
+
+// Validar formato da URL base
+if (BASE) {
+  try {
+    new URL(BASE);
+  } catch (e) {
+    console.error('[SPACE API] SPACE_API_BASE_URL tem formato inválido:', BASE);
+  }
+}
 
 // Validar variáveis de ambiente críticas
 if (!BASE || !KEY) {
@@ -106,7 +116,14 @@ export async function handleSpaceDebug(req: Request, res: Response) {
       });
     }
 
-    const url = `${BASE}?lat=${lat}&lng=${lng}&radius=${radius}&key=${KEY}`;
+    // Construir URL com encoding adequado
+    const params = new URLSearchParams({
+      lat: String(lat),
+      lng: String(lng),
+      radius: String(radius),
+      key: KEY!,
+    });
+    const url = `${BASE}?${params.toString()}`;
     const r = await fetch(url, { cache: 'no-store' });
     const raw = await r.json().catch(() => null);
     const keys = raw ? Object.keys(raw).slice(0, 50) : [];
@@ -152,7 +169,14 @@ export async function handleSpaceQuery(req: Request, res: Response) {
       });
     }
 
-    const url = `${BASE}?lat=${lat}&lng=${lng}&radius=${radius}&key=${KEY}`;
+    // Construir URL com encoding adequado
+    const params = new URLSearchParams({
+      lat: String(lat),
+      lng: String(lng),
+      radius: String(radius),
+      key: KEY!,
+    });
+    const url = `${BASE}?${params.toString()}`;
     const r = await fetch(url, { cache: 'no-store' });
     if (!r.ok) {
       const text = await r.text().catch(() => '');

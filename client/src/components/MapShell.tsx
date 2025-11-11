@@ -144,8 +144,19 @@ export default function MapShell({ tenantId, loading = false, onNavigateHome }: 
       setSpaceError(null);
       
       try {
-        const response = await fetch(`/api/space?lat=${newMarker.lat}&lng=${newMarker.lng}&radius=${radius[0]}`);
+        const url = `/api/space?lat=${newMarker.lat}&lng=${newMarker.lng}&radius=${radius[0]}`;
+        console.log('[MapShell] Fetching:', url);
+        const response = await fetch(url);
+        console.log('[MapShell] Response status:', response.status, response.ok);
+        
+        if (!response.ok) {
+          const text = await response.text();
+          console.error('[MapShell] Error response:', text);
+          throw new Error(`HTTP ${response.status}: ${text.slice(0, 100)}`);
+        }
+        
         const result = await response.json();
+        console.log('[MapShell] Result:', result);
         
         if (result.ok && result.data) {
           setSpaceData(result.data);
@@ -168,13 +179,23 @@ export default function MapShell({ tenantId, loading = false, onNavigateHome }: 
           setAnalysisHistory(updatedHistory);
           localStorage.setItem('analysisHistory', JSON.stringify(updatedHistory));
         } else {
-          setSpaceError("Erro ao buscar dados");
-          toast.error("Erro ao buscar dados da localização");
+          const errorMsg = result.error === 'CONFIG_MISSING' 
+            ? 'API não configurada. Configure as variáveis em Settings → Secrets'
+            : result.message || 'Erro ao buscar dados da localização';
+          setSpaceError(errorMsg);
+          toast.error(errorMsg, {
+            description: result.error === 'CONFIG_MISSING' ? 'SPACE_API_BASE_URL e SPACE_API_KEY' : undefined,
+            duration: 5000,
+          });
         }
       } catch (err: any) {
-        console.error("Erro ao buscar dados:", err);
-        setSpaceError(err?.message || "Erro ao buscar dados");
-        toast.error("Erro ao buscar dados");
+        console.error('[MapShell] Catch error:', err);
+        const errorMsg = err?.message || 'Erro ao buscar dados';
+        setSpaceError(errorMsg);
+        toast.error('Erro ao buscar dados da localização', {
+          description: errorMsg,
+          duration: 5000,
+        });
       } finally {
         setSpaceLoading(false);
       }
