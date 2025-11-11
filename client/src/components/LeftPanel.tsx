@@ -13,6 +13,8 @@ interface LeftPanelProps {
   loading?: boolean;
   onReset?: () => void;
   onNavigateHome?: () => void;
+  hasAddress?: boolean;
+  onAnalyze?: () => void;
 }
 
 const SEGMENTS = [
@@ -31,6 +33,8 @@ export default function LeftPanel({
   loading = false,
   onReset,
   onNavigateHome,
+  hasAddress = false,
+  onAnalyze,
 }: LeftPanelProps) {
   return (
     <div className="w-full md:w-80 bg-white shadow-lg flex flex-col h-full overflow-y-auto">
@@ -103,6 +107,37 @@ export default function LeftPanel({
           </CardContent>
         </Card>
 
+        {/* Botão de Análise */}
+        {hasAddress && onAnalyze && (
+          <Card className="border-green-200 bg-green-50">
+            <CardContent className="pt-4">
+              <button
+                onClick={onAnalyze}
+                disabled={loading}
+                className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold py-3 px-4 rounded-lg shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    Analisando...
+                  </>
+                ) : (
+                  <>
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="12" r="10"/>
+                      <polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                    Analisar Localização
+                  </>
+                )}
+              </button>
+              <p className="text-xs text-green-700 mt-2 text-center">
+                Clique para gerar análise completa
+              </p>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Status */}
         {loading && (
           <Card className="border-blue-200 bg-blue-50">
@@ -116,7 +151,11 @@ export default function LeftPanel({
 
       {/* Footer */}
       <div className="border-t p-4 bg-gray-50 text-xs text-gray-500">
-        <p>Clique no mapa para selecionar uma localização</p>
+        {hasAddress ? (
+          <p className="text-green-600 font-medium">✓ Endereço selecionado. Ajuste o raio e clique em "Analisar".</p>
+        ) : (
+          <p>Busque um endereço acima para começar</p>
+        )}
       </div>
     </div>
   );

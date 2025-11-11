@@ -125,12 +125,105 @@ export default function MapShell({ tenantId, loading = false, onNavigateHome }: 
 
       // Mostrar toast informando que o usuário pode ajustar o raio
       toast.info('Endereço encontrado!', {
-        description: 'Ajuste o raio e clique no mapa para analisar',
-        duration: 3000,
+        description: 'Ajuste o raio e clique no botão "Analisar Localização"',
+        duration: 4000,
       });
     },
     [selectedRadius]
   );
+
+  // Handle analyze current location (from button)
+  const handleAnalyzeCurrentLocation = useCallback(async () => {
+    if (!marker) {
+      toast.error('Nenhuma localização selecionada');
+      return;
+    }
+
+    // Update circle on map with current radius
+    const map = mapRef.current?.getMap();
+    if (map) {
+      upsertAnalysisCircle({
+        map,
+        center: [marker.lng, marker.lat],
+        radiusMeters: radius[0],
+      });
+    }
+
+    // Fetch space data
+    setSpaceLoading(true);
+    setSpaceError(null);
+    
+    // Tentar buscar do cache primeiro
+    const cachedData = getFromCache(marker.lat, marker.lng, radius[0]);
+    if (cachedData) {
+      setSpaceData(cachedData);
+      setSpaceLoading(false);
+      toast.success('Dados carregados do cache!', {
+        icon: <Database className="w-4 h-4" />,
+      });
+      
+      const newPoint: AnalysisPoint = {
+        lat: marker.lat,
+        lng: marker.lng,
+        address: address || `${marker.lat.toFixed(5)}, ${marker.lng.toFixed(5)}`,
+        segment,
+        radius: radius[0],
+        timestamp: Date.now(),
+      };
+      
+      const updatedHistory = [newPoint, ...analysisHistory.filter(
+        p => !(Math.abs(p.lat - newPoint.lat) < 0.0001 && Math.abs(p.lng - newPoint.lng) < 0.0001)
+      )].slice(0, 5);
+      
+      setAnalysisHistory(updatedHistory);
+      localStorage.setItem('analysisHistory', JSON.stringify(updatedHistory));
+      return;
+    }
+    
+    try {
+      const url = `/api/space?lat=${marker.lat}&lng=${marker.lng}&radius=${radius[0]}`;
+      const response = await fetch(url);
+      
+      if (!response.ok) {
+        const text = await response.text();
+        throw new Error(`HTTP ${response.status}: ${text.slice(0, 100)}`);
+      }
+      
+      const result = await response.json();
+      
+      if (result.ok && result.data) {
+        setSpaceData(result.data);
+        saveToCache(marker.lat, marker.lng, radius[0], result.data);
+        toast.success("Dados carregados com sucesso!");
+        
+        const newPoint: AnalysisPoint = {
+          lat: marker.lat,
+          lng: marker.lng,
+          address: address || `${marker.lat.toFixed(5)}, ${marker.lng.toFixed(5)}`,
+          segment,
+          radius: radius[0],
+          timestamp: Date.now(),
+        };
+        
+        const updatedHistory = [newPoint, ...analysisHistory.filter(
+          p => !(Math.abs(p.lat - newPoint.lat) < 0.0001 && Math.abs(p.lng - newPoint.lng) < 0.0001)
+        )].slice(0, 5);
+        
+        setAnalysisHistory(updatedHistory);
+        localStorage.setItem('analysisHistory', JSON.stringify(updatedHistory));
+      } else {
+        setSpaceError(result.error || 'Erro desconhecido');
+        toast.error('Erro ao carregar dados');
+      }
+    } catch (err: any) {
+      setSpaceError(err.message || 'Erro ao carregar dados');
+      toast.error('Erro ao carregar dados', {
+        description: err.message,
+      });
+    } finally {
+      setSpaceLoading(false);
+    }
+  }, [marker, radius, address, segment, analysisHistory]);
 
   // Handle map click
   const handleMapClick = useCallback(
@@ -324,6 +417,8 @@ export default function MapShell({ tenantId, loading = false, onNavigateHome }: 
           loading={spaceLoading}
           onReset={handleReset}
           onNavigateHome={onNavigateHome}
+          hasAddress={!!marker}
+          onAnalyze={handleAnalyzeCurrentLocation}
         />
       </div>
 

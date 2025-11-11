@@ -1592,3 +1592,10 @@ Substituir análise de centroide + raio fixo por análise real usando coordenada
 
 - [x] Botão "Mapa Interativo" no painel esquerdo redireciona para home em vez de manter usuário no mapa (CORRIGIDO - agora reseta o mapa)
 
+
+
+## 🎨 Melhorias de UX Solicitadas (11/11/2025)
+- [x] Após buscar endereço e ajustar raio, não fica claro que usuário precisa clicar no mapa para gerar análise (RESOLVIDO)
+- [x] Adicionar botão "Analisar Localização" visível no painel lateral (IMPLEMENTADO - botão verde grande)
+- [x] Melhorar instruções visuais sobre como proceder após buscar endereço (IMPLEMENTADO - footer dinâmico + toast)
+
