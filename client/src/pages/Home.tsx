@@ -57,7 +57,7 @@ export default function Home() {
         <section className="container py-20">
           <div className="max-w-3xl mx-auto text-center space-y-6">
             <h2 className="text-5xl font-bold tracking-tight">
-              Análise Geoespacial para Franqueadoras
+              Análise Geoespacial para Grandes Redes
             </h2>
             <p className="text-xl text-muted-foreground">
               Tome decisões estratégicas com dados precisos de mercado.
@@ -133,7 +133,7 @@ export default function Home() {
               Pronto para começar?
             </h3>
             <p className="text-lg opacity-90">
-              Junte-se às franqueadoras que já usam o Sistema Busca Ponto para tomar
+              Junte-se às grandes redes que já usam o Sistema Busca Ponto para tomar
               decisões baseadas em dados.
             </p>
             {!isAuthenticated && (

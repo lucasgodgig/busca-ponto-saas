@@ -1630,3 +1630,9 @@ Substituir análise de centroide + raio fixo por análise real usando coordenada
 - Backend: Input `segment` adicionado ao procedure `tenants.create`
 - Textos: Todas as referências a "Franqueadora" substituídas por "Empresa"
 
+
+
+## 🎨 Ajustes de Texto na Landing Page (11/11/2025)
+- [x] Trocar "Franqueadoras" por "Grandes Redes" no título principal (CONCLUÍDO)
+- [x] Trocar "Junte-se a franqueadoras" por "Junte-se a grandes redes" no botão CTA (CONCLUÍDO)
+
