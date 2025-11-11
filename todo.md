@@ -1588,3 +1588,7 @@ Substituir análise de centroide + raio fixo por análise real usando coordenada
 - [x] Busca de endereço funciona mas mapa não centraliza na localização encontrada (CORRIGIDO - adicionado flyTo())
 - [x] Mapa permanece em São Paulo mesmo após selecionar endereço em Joinville/SC (CORRIGIDO - animação suave de 1.5s)
 
+
+
+- [x] Botão "Mapa Interativo" no painel esquerdo redireciona para home em vez de manter usuário no mapa (CORRIGIDO - agora reseta o mapa)
+

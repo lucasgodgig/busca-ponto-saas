@@ -42,9 +42,9 @@ export default function LeftPanel({
           if (input) {
             input.value = "";
           }
-          // Chamar callback para navegar para home
-          if (onNavigateHome) {
-            onNavigateHome();
+          // Resetar mapa em vez de navegar
+          if (onReset) {
+            onReset();
           }
         }}
         className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 border-b hover:from-blue-700 hover:to-blue-800 transition text-left cursor-pointer"
