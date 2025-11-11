@@ -10,10 +10,12 @@ import { querySpaceApiWithCache } from "./services/spaceApiService";
 import { searchAddress, searchCompetitors } from "./services/googlePlacesService";
 import { ENV } from "./_core/env";
 import { leadsRouter } from "./routes/leads";
+import { studyRequestsRouter } from "./routes/studyRequests";
 
 export const appRouter = router({
   system: systemRouter,
   leads: leadsRouter,
+  studyRequests: studyRequestsRouter,
 
   auth: router({
     me: publicProcedure.query(async ({ ctx }) => {

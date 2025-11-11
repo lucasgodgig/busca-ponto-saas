@@ -25,6 +25,9 @@ const GeneratedStudyDetailsPage = lazy(() => import("./pages/GeneratedStudyDetai
 const StudyDetailsPage = lazy(() => import("./pages/StudyDetailsPage"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 const AdminPanel = lazy(() => import("./pages/AdminPanel"));
+const MeusEstudos = lazy(() => import("./pages/MeusEstudos"));
+const SolicitarEstudo = lazy(() => import("./pages/SolicitarEstudo"));
+const AdminStudyRequests = lazy(() => import("./pages/AdminStudyRequests"));
 
 // Loading component
 const PageLoader = () => (
@@ -93,6 +96,21 @@ function Router() {
       <Route path={"/generate-study"} component={GenerateStudyPage} />
       <Route path={"/generated-studies"} component={GeneratedStudiesListPage} />
       <Route path={"/generated-studies/:studyId"} component={GeneratedStudyDetailsPage} />
+      <Route path={"/meus-estudos"}>
+        <AppLayout>
+          <MeusEstudos />
+        </AppLayout>
+      </Route>
+      <Route path={"/solicitar-estudo"}>
+        <AppLayout>
+          <SolicitarEstudo />
+        </AppLayout>
+      </Route>
+      <Route path={"/admin-bp/solicitacoes"}>
+        <AppLayout>
+          <AdminStudyRequests />
+        </AppLayout>
+      </Route>
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

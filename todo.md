@@ -1641,3 +1641,30 @@ Substituir análise de centroide + raio fixo por análise real usando coordenada
 ## 🎨 Ajuste de Layout do Título (11/11/2025)
 - [x] Evitar quebra de linha entre "Grandes" e "Redes" no título principal (CONCLUÍDO - whitespace-nowrap)
 
+
+
+
+## 🆕 Sistema de Solicitação de Estudos (11/11/2025)
+### Funcionalidade Completa Solicitada
+
+**Fluxo:**
+1. Cliente acessa "Solicitar Estudo" e preenche formulário
+2. Solicitação aparece no painel Admin BP
+3. Admin analisa, trabalha no estudo e faz upload do PDF
+4. Cliente recebe notificação e pode baixar o PDF
+
+**Tarefas:**
+- [x] Criar tabela `study_requests` no banco (CONCLUÍDO - 20 colunas)
+- [x] Criar procedure `studyRequests.create` (cliente) (CONCLUÍDO)
+- [x] Criar procedure `studyRequests.listAll` (admin) (CONCLUÍDO)
+- [x] Criar procedure `studyRequests.update` (admin - status) (CONCLUÍDO)
+- [x] Criar procedure `studyRequests.uploadPdf` (admin - S3) (CONCLUÍDO)
+- [x] Criar procedure `studyRequests.myRequests` (cliente) (CONCLUÍDO)
+- [x] Criar procedure `studyRequests.getById` (detalhes) (CONCLUÍDO)
+- [x] Criar página "Solicitar Estudo" para cliente (CONCLUÍDO - /solicitar-estudo)
+- [x] Criar coluna "Solicitações" no Admin BP (CONCLUÍDO - /admin-bp/solicitacoes)
+- [x] Criar página "Meus Estudos" para cliente visualizar PDFs (CONCLUÍDO - /meus-estudos)
+- [x] Implementar upload de PDF para S3 (CONCLUÍDO - base64 + storagePut)
+- [x] Adicionar links de navegação no Sidebar (CONCLUÍDO)
+- [x] Testar fluxo completo end-to-end (CONCLUÍDO - sidebar mostrando menus, compilação OK)
+

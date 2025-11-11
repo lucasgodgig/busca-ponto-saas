@@ -406,6 +406,59 @@ export const generatedStudiesRelations = relations(generatedStudies, ({ one }) =
   }),
 }));
 
+/**
+ * StudyRequest - Solicitações de estudos via formulário
+ * Cliente preenche formulário, admin analisa e faz upload do PDF final
+ */
+export const studyRequests = mysqlTable('studyRequests', {
+  id: int('id').autoincrement().primaryKey(),
+  tenantId: int('tenantId').notNull(),
+  createdBy: int('createdBy').notNull(),
+  
+  // Dados da solicitação
+  title: varchar('title', { length: 255 }).notNull(),
+  segment: varchar('segment', { length: 255 }),
+  address: text('address').notNull(),
+  lat: varchar('lat', { length: 50 }),
+  lng: varchar('lng', { length: 50 }),
+  radiusM: int('radiusM'),
+  description: text('description'),
+  objectives: text('objectives'),
+  
+  // Controle
+  status: mysqlEnum('status', ['pendente', 'em_analise', 'concluido', 'cancelado']).default('pendente').notNull(),
+  priority: mysqlEnum('priority', ['baixa', 'media', 'alta']).default('media').notNull(),
+  assignedTo: int('assignedTo'), // Admin BP responsável
+  
+  // Resultado
+  pdfUrl: text('pdfUrl'), // URL do PDF no S3
+  pdfFileKey: text('pdfFileKey'), // Chave do arquivo no S3
+  adminNotes: text('adminNotes'), // Notas internas do admin
+  completedAt: timestamp('completedAt'),
+  
+  createdAt: timestamp('createdAt').defaultNow().notNull(),
+  updatedAt: timestamp('updatedAt').defaultNow().onUpdateNow().notNull(),
+}, (table) => ({
+  tenantIdIdx: index('tenantId_idx').on(table.tenantId),
+  statusIdx: index('status_idx').on(table.status),
+  createdByIdx: index('createdBy_idx').on(table.createdBy),
+}));
+
+export const studyRequestsRelations = relations(studyRequests, ({ one }) => ({
+  tenant: one(tenants, {
+    fields: [studyRequests.tenantId],
+    references: [tenants.id],
+  }),
+  creator: one(users, {
+    fields: [studyRequests.createdBy],
+    references: [users.id],
+  }),
+  assignedUser: one(users, {
+    fields: [studyRequests.assignedTo],
+    references: [users.id],
+  }),
+}));
+
 // Type exports
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
@@ -435,4 +488,6 @@ export type SavedLocation = typeof savedLocations.$inferSelect;
 export type InsertSavedLocation = typeof savedLocations.$inferInsert;
 export type StudyUsage = typeof studyUsage.$inferSelect;
 export type InsertStudyUsage = typeof studyUsage.$inferInsert;
+export type StudyRequest = typeof studyRequests.$inferSelect;
+export type InsertStudyRequest = typeof studyRequests.$inferInsert;
 

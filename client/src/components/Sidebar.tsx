@@ -46,6 +46,11 @@ export default function Sidebar({ className }: SidebarProps) {
       href: "/estudos",
     },
     {
+      title: "Meus Estudos",
+      icon: FileText,
+      href: "/meus-estudos",
+    },
+    {
       title: "Histórico",
       icon: Clock,
       href: "/historico",
@@ -57,12 +62,17 @@ export default function Sidebar({ className }: SidebarProps) {
     },
   ];
 
-  // Adicionar Admin BP se for admin_bp
-  if (user?.role === "admin_bp") {
+  // Adicionar Admin BP se for admin_bp ou analyst_bp
+  if (user?.role === "admin_bp" || user?.role === "analyst_bp") {
     menuItems.push({
       title: "Admin BP",
       icon: Shield,
       href: "/admin-bp",
+    });
+    menuItems.push({
+      title: "Solicitações",
+      icon: FileText,
+      href: "/admin-bp/solicitacoes",
     });
   }
 
