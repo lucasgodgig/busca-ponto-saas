@@ -1480,3 +1480,29 @@ Substituir análise de centroide + raio fixo por análise real usando coordenada
 ### Status: PRONTO PARA PUBLICAR ✅
 
 
+
+
+
+## 🚨 BUG CRÍTICO: BUSCA NÃO FUNCIONA EM PRODUÇÃO (11/11/2025)
+
+### Sintomas
+- ✅ Funciona perfeitamente em desenvolvimento (localhost)
+- ❌ Falha em produção (sistema-buscaponto.manus.space)
+- Erro: InvalidKeyMapError
+- API key está configurada e sem restrições
+
+### Causa Raiz Identificada
+- [x] Script do Google Maps estava duplicado
+- [x] index.html carregava com %VITE_GOOGLE_MAPS_API_KEY% (não substituído no build)
+- [x] AddressSearch esperava window.google já disponível
+
+### Solução Implementada
+- [x] Removido script do index.html
+- [x] AddressSearch agora usa loadGoogleMapsScript() do google.ts
+- [x] Carregamento dinâmico com import.meta.env.VITE_GOOGLE_MAPS_API_KEY
+- [x] API key corretamente injetada no build
+
+### Status: PRONTO PARA PUBLICAR ✅
+- Aguardando deploy para testar em produção
+
+

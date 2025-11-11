@@ -2,6 +2,7 @@
 
 import { Search, Loader2, MapPin, AlertCircle, X } from "lucide-react";
 import { useRef, useState, useEffect, useCallback, useTransition } from "react";
+import { loadGoogleMapsScript } from "@/lib/google";
 
 interface AddressSearchProps {
   onAddressSelect: (lat: number, lng: number, address: string) => void;
@@ -50,41 +51,39 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
   useEffect(() => {
     console.log('[AddressSearch] Inicializando Google Places API...');
     
-    if (!window.google) {
-      console.error('[AddressSearch] window.google não disponível');
-      setError("Google Maps API não carregada");
-      return;
-    }
-
-    if (!window.google.maps || !window.google.maps.places) {
-      console.error('[AddressSearch] Google Places API não disponível');
-      setError("Google Places API não carregada");
-      return;
-    }
-
-    try {
-      sessionTokenRef.current = new window.google.maps.places.AutocompleteSessionToken();
-      autocompleteServiceRef.current = new window.google.maps.places.AutocompleteService();
-      
-      // Usar elemento DOM real em vez de div criado dinamicamente
-      // Isso evita InvalidMapError em produção
-      if (placesServiceContainerRef.current) {
-        placesServiceRef.current = new window.google.maps.places.PlacesService(
-          placesServiceContainerRef.current
-        );
-        console.log('[AddressSearch] PlacesService inicializado com elemento DOM real');
-      } else {
-        console.warn('[AddressSearch] placesServiceContainerRef não disponível, usando fallback');
-        // Fallback: criar div temporariamente
-        const tempDiv = document.createElement("div");
-        placesServiceRef.current = new window.google.maps.places.PlacesService(tempDiv);
-      }
-      
-      console.log('[AddressSearch] Google Places API inicializada com sucesso');
-    } catch (err) {
-      console.error("[AddressSearch] Erro ao carregar Google Places:", err);
-      setError("Erro ao carregar Google Places");
-    }
+    // Carregar Google Maps dinamicamente
+    loadGoogleMapsScript()
+      .then((google) => {
+        console.log('[AddressSearch] Google Maps carregado com sucesso');
+        
+        try {
+          sessionTokenRef.current = new google.maps.places.AutocompleteSessionToken();
+          autocompleteServiceRef.current = new google.maps.places.AutocompleteService();
+          
+          // Usar elemento DOM real em vez de div criado dinamicamente
+          // Isso evita InvalidMapError em produção
+          if (placesServiceContainerRef.current) {
+            placesServiceRef.current = new google.maps.places.PlacesService(
+              placesServiceContainerRef.current
+            );
+            console.log('[AddressSearch] PlacesService inicializado com elemento DOM real');
+          } else {
+            console.warn('[AddressSearch] placesServiceContainerRef não disponível, usando fallback');
+            // Fallback: criar div temporariamente
+            const tempDiv = document.createElement("div");
+            placesServiceRef.current = new google.maps.places.PlacesService(tempDiv);
+          }
+          
+          console.log('[AddressSearch] Google Places API inicializada com sucesso');
+        } catch (err) {
+          console.error("[AddressSearch] Erro ao inicializar Google Places:", err);
+          setError("Erro ao carregar Google Places");
+        }
+      })
+      .catch((err) => {
+        console.error("[AddressSearch] Erro ao carregar Google Maps:", err);
+        setError("Erro ao carregar Google Maps API");
+      });
   }, []);
 
   // Handler para input - apenas atualiza o valor
