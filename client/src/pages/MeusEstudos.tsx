@@ -4,7 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useLocation } from "wouter";
+import { useState } from "react";
 import { Loader2, FileText, Download, Clock, CheckCircle2, AlertCircle, Plus } from "lucide-react";
+import { useAuth } from "@/_core/hooks/useAuth";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -38,8 +40,30 @@ const statusConfig = {
 export default function MeusEstudos() {
   const { user, loading } = useAuth();
   const [, setLocation] = useLocation();
+  const [downloadingId, setDownloadingId] = useState<number | null>(null);
 
   const tenantId = user?.memberships?.[0]?.tenant?.id;
+
+  const handleDownloadPdf = async (pdfUrl: string, title: string) => {
+    try {
+      setDownloadingId(Math.random() as any);
+      const response = await fetch(pdfUrl);
+      if (!response.ok) throw new Error("Falha ao baixar arquivo");
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${title}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Erro ao baixar:", error);
+    } finally {
+      setDownloadingId(null);
+    }
+  };
 
   const { data: requests, isLoading } = trpc.studyRequests.myRequests.useQuery(
     { tenantId: tenantId! },
@@ -148,11 +172,21 @@ export default function MeusEstudos() {
                       </span>
 
                       {request.status === "concluido" && request.pdfUrl ? (
-                        <Button asChild>
-                          <a href={request.pdfUrl} target="_blank" rel="noopener noreferrer">
-                            <Download className="w-4 h-4 mr-2" />
-                            Baixar Estudo (PDF)
-                          </a>
+                        <Button
+                          onClick={() => handleDownloadPdf(request.pdfUrl!, request.title)}
+                          disabled={downloadingId !== null}
+                        >
+                          {downloadingId !== null ? (
+                            <>
+                              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                              Baixando...
+                            </>
+                          ) : (
+                            <>
+                              <Download className="w-4 h-4 mr-2" />
+                              Baixar Estudo (PDF)
+                            </>
+                          )}
                         </Button>
                       ) : (
                         <span className="text-sm text-muted-foreground italic">

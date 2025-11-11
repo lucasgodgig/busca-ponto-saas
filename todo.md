@@ -1674,3 +1674,16 @@ Substituir análise de centroide + raio fixo por análise real usando coordenada
 - [x] Remover item "Estudos" do sidebar (está dando erro) (CONCLUÍDO)
 - [x] Manter apenas "Meus Estudos" no menu (CONCLUÍDO)
 
+
+
+## 🔒 Problema de Segurança no Download (11/11/2025)
+- [x] Chrome mostra aviso "Site perigoso" ao clicar no link do PDF (CORRIGIDO)
+- [x] Implementar download direto via fetch + blob (IMPLEMENTADO)
+- [x] Adicionar atributo download ao link (IMPLEMENTADO)
+
+### Solução:
+- Download usa fetch + blob em vez de abrir em nova aba
+- Arquivo baixa com nome: [Título].pdf
+- Estado de carregamento: Baixando...
+- Sem aviso de Site perigoso do Chrome
+
