@@ -1636,3 +1636,8 @@ Substituir análise de centroide + raio fixo por análise real usando coordenada
 - [x] Trocar "Franqueadoras" por "Grandes Redes" no título principal (CONCLUÍDO)
 - [x] Trocar "Junte-se a franqueadoras" por "Junte-se a grandes redes" no botão CTA (CONCLUÍDO)
 
+
+
+## 🎨 Ajuste de Layout do Título (11/11/2025)
+- [x] Evitar quebra de linha entre "Grandes" e "Redes" no título principal (CONCLUÍDO - whitespace-nowrap)
+

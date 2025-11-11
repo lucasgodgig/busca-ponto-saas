@@ -57,7 +57,7 @@ export default function Home() {
         <section className="container py-20">
           <div className="max-w-3xl mx-auto text-center space-y-6">
             <h2 className="text-5xl font-bold tracking-tight">
-              Análise Geoespacial para Grandes Redes
+              Análise Geoespacial para <span className="whitespace-nowrap">Grandes Redes</span>
             </h2>
             <p className="text-xl text-muted-foreground">
               Tome decisões estratégicas com dados precisos de mercado.
