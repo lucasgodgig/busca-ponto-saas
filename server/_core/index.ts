@@ -37,6 +37,13 @@ async function startServer() {
   // OAuth callback under /api/oauth/callback
   registerOAuthRoutes(app);
   
+  // Config endpoint para frontend
+  app.get("/api/config", (_req, res) => {
+    res.json({
+      googleMapsApiKey: process.env.VITE_GOOGLE_MAPS_API_KEY || process.env.GOOGLE_PLACES_API_KEY || "",
+    });
+  });
+  
   // Space API routes
   app.get("/api/space", handleSpaceQuery);
   app.get("/api/space/debug", handleSpaceDebug);

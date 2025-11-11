@@ -1530,3 +1530,30 @@ Substituir análise de centroide + raio fixo por análise real usando coordenada
 ### Status: PRONTO PARA PUBLICAR ✅
 
 
+
+
+
+## 🔧 NOVA ABORDAGEM: API KEY VIA ENDPOINT (11/11/2025)
+
+### Problema
+- Injeção de API key no HTML não funciona em produção
+- HTML já está minificado, substituição de </head> falha
+- Erro persiste: "Google Maps API key is not configured"
+
+### Solução Implementada
+- [x] Criado endpoint /api/config que retorna { googleMapsApiKey: "..." }
+- [x] Atualizado google.ts para buscar API key do endpoint
+- [x] Implementado cache no cliente para evitar múltiplas requisições
+- [x] Fallback: tenta variáveis de ambiente primeiro, depois busca do servidor
+
+### Fluxo Implementado
+1. loadGoogleMapsScript() é chamado
+2. Tenta API key de import.meta.env (build time)
+3. Se não encontrar, faz GET /api/config
+4. Servidor retorna API key de process.env
+5. API key é cacheada no cliente
+6. Script do Google Maps é carregado com a API key
+
+### Status: PRONTO PARA PUBLICAR ✅
+
+
