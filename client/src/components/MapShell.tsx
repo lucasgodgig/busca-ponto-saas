@@ -51,6 +51,11 @@ export default function MapShell({ tenantId, loading = false, onNavigateHome }: 
   const [spaceData, setSpaceData] = useState<SpaceData | null>(null);
   const [spaceError, setSpaceError] = useState<string | null>(null);
   const [analysisMode, setAnalysisMode] = useState(false);
+  
+  // Modos de análise: 'radius' | 'point' | 'area' | null
+  type AnalysisMode = 'radius' | 'point' | 'area' | null;
+  const [activeMode, setActiveMode] = useState<AnalysisMode>(null);
+  const [selectedRadius, setSelectedRadius] = useState<number>(1000); // Raio pré-selecionado em metros
 
   // Histórico de pontos analisados (últimos 5)
   type AnalysisPoint = {
@@ -69,8 +74,8 @@ export default function MapShell({ tenantId, loading = false, onNavigateHome }: 
   // Handle address selection
   const handleAddressSelect = useCallback(
     (lat: number, lng: number, addressStr: string) => {
-      // Ativar modo de análise automaticamente ao buscar endereço
-      setAnalysisMode(true);
+      // Ativar modo radius automaticamente ao buscar endereço
+      setActiveMode('radius');
       
       const newMarker = { lat, lng };
       setMarker(newMarker);
@@ -139,87 +144,46 @@ export default function MapShell({ tenantId, loading = false, onNavigateHome }: 
   // Handle map click
   const handleMapClick = useCallback(
     async (e: any) => {
-      // Só permite clicar se o modo de análise estiver ativo
-      if (!analysisMode) return;
+      // Só permite clicar se algum modo estiver ativo
+      if (!activeMode) return;
       
       const { lngLat } = e;
       const newMarker = { lat: lngLat.lat, lng: lngLat.lng };
-      setMarker(newMarker);
-
-      // Update circle on map
-      const map = mapRef.current?.getMap();
-      if (map) {
-        upsertAnalysisCircle({
-          map,
-          center: [newMarker.lng, newMarker.lat],
-          radiusMeters: radius[0],
-        });
-      }
-
-      // Fetch space data
-      setSpaceLoading(true);
-      setSpaceError(null);
       
-      // Tentar buscar do cache primeiro
-      const cachedData = getFromCache(newMarker.lat, newMarker.lng, radius[0]);
-      if (cachedData) {
-        console.log('[MapShell] Usando dados do cache');
-        setSpaceData(cachedData);
-        setSpaceLoading(false);
-        toast.success('Dados carregados do cache!', {
-          description: 'Dados salvos anteriormente',
-          icon: <Database className="w-4 h-4" />,
-        });
-        
-        // Adicionar ao histórico mesmo vindo do cache
-        const newPoint: AnalysisPoint = {
-          lat: newMarker.lat,
-          lng: newMarker.lng,
-          address: address || `${newMarker.lat.toFixed(5)}, ${newMarker.lng.toFixed(5)}`,
-          segment,
-          radius: radius[0],
-          timestamp: Date.now(),
-        };
-        
-        const updatedHistory = [newPoint, ...analysisHistory.filter(
-          p => !(Math.abs(p.lat - newPoint.lat) < 0.0001 && Math.abs(p.lng - newPoint.lng) < 0.0001)
-        )].slice(0, 5);
-        
-        setAnalysisHistory(updatedHistory);
-        localStorage.setItem('analysisHistory', JSON.stringify(updatedHistory));
-        return;
-      }
-      
-      try {
-        const url = `/api/space?lat=${newMarker.lat}&lng=${newMarker.lng}&radius=${radius[0]}`;
-        console.log('[MapShell] Fetching:', url);
-        const response = await fetch(url);
-        console.log('[MapShell] Response status:', response.status, response.ok);
-        
-        if (!response.ok) {
-          const text = await response.text();
-          console.error('[MapShell] Error response:', text);
-          throw new Error(`HTTP ${response.status}: ${text.slice(0, 100)}`);
+      // MODO: Consultar Raio
+      if (activeMode === 'radius') {
+        setMarker(newMarker);
+        setRadius([selectedRadius]); // Atualizar radius para selectedRadius
+
+        // Update circle on map
+        const map = mapRef.current?.getMap();
+        if (map) {
+          upsertAnalysisCircle({
+            map,
+            center: [newMarker.lng, newMarker.lat],
+            radiusMeters: selectedRadius,
+          });
         }
+
+        // Fetch space data
+        setSpaceLoading(true);
+        setSpaceError(null);
         
-        const result = await response.json();
-        console.log('[MapShell] Result:', result);
-        
-        if (result.ok && result.data) {
-          setSpaceData(result.data);
+        // Tentar buscar do cache primeiro
+        const cachedData = getFromCache(newMarker.lat, newMarker.lng, selectedRadius);
+        if (cachedData) {
+          setSpaceData(cachedData);
+          setSpaceLoading(false);
+          toast.success('Dados carregados do cache!', {
+            icon: <Database className="w-4 h-4" />,
+          });
           
-          // Salvar no cache
-          saveToCache(newMarker.lat, newMarker.lng, radius[0], result.data);
-          
-          toast.success("Dados carregados com sucesso!");
-          
-          // Adicionar ao histórico
           const newPoint: AnalysisPoint = {
             lat: newMarker.lat,
             lng: newMarker.lng,
             address: address || `${newMarker.lat.toFixed(5)}, ${newMarker.lng.toFixed(5)}`,
             segment,
-            radius: radius[0],
+            radius: selectedRadius,
             timestamp: Date.now(),
           };
           
@@ -229,29 +193,68 @@ export default function MapShell({ tenantId, loading = false, onNavigateHome }: 
           
           setAnalysisHistory(updatedHistory);
           localStorage.setItem('analysisHistory', JSON.stringify(updatedHistory));
-        } else {
-          const errorMsg = result.error === 'CONFIG_MISSING' 
-            ? 'API não configurada. Configure as variáveis em Settings → Secrets'
-            : result.message || 'Erro ao buscar dados da localização';
-          setSpaceError(errorMsg);
-          toast.error(errorMsg, {
-            description: result.error === 'CONFIG_MISSING' ? 'SPACE_API_BASE_URL e SPACE_API_KEY' : undefined,
-            duration: 5000,
-          });
+          return;
         }
-      } catch (err: any) {
-        console.error('[MapShell] Catch error:', err);
-        const errorMsg = err?.message || 'Erro ao buscar dados';
-        setSpaceError(errorMsg);
-        toast.error('Erro ao buscar dados da localização', {
-          description: errorMsg,
-          duration: 5000,
-        });
-      } finally {
-        setSpaceLoading(false);
+        
+        try {
+          const url = `/api/space?lat=${newMarker.lat}&lng=${newMarker.lng}&radius=${selectedRadius}`;
+          const response = await fetch(url);
+          
+          if (!response.ok) {
+            const text = await response.text();
+            throw new Error(`HTTP ${response.status}: ${text.slice(0, 100)}`);
+          }
+          
+          const result = await response.json();
+          
+          if (result.ok && result.data) {
+            setSpaceData(result.data);
+            saveToCache(newMarker.lat, newMarker.lng, selectedRadius, result.data);
+            toast.success("Dados carregados com sucesso!");
+            
+            const newPoint: AnalysisPoint = {
+              lat: newMarker.lat,
+              lng: newMarker.lng,
+              address: address || `${newMarker.lat.toFixed(5)}, ${newMarker.lng.toFixed(5)}`,
+              segment,
+              radius: selectedRadius,
+              timestamp: Date.now(),
+            };
+            
+            const updatedHistory = [newPoint, ...analysisHistory.filter(
+              p => !(Math.abs(p.lat - newPoint.lat) < 0.0001 && Math.abs(p.lng - newPoint.lng) < 0.0001)
+            )].slice(0, 5);
+            
+            setAnalysisHistory(updatedHistory);
+            localStorage.setItem('analysisHistory', JSON.stringify(updatedHistory));
+          } else {
+            const errorMsg = result.message || 'Erro ao buscar dados da localização';
+            setSpaceError(errorMsg);
+            toast.error(errorMsg);
+          }
+        } catch (err: any) {
+          const errorMsg = err?.message || 'Erro ao buscar dados';
+          setSpaceError(errorMsg);
+          toast.error('Erro ao buscar dados da localização', {
+            description: errorMsg,
+          });
+        } finally {
+          setSpaceLoading(false);
+        }
+      }
+      
+      // MODO: Adicionar Ponto
+      else if (activeMode === 'point') {
+        setMarker(newMarker);
+        toast.success('Ponto adicionado!');
+      }
+      
+      // MODO: Desenhar Área
+      else if (activeMode === 'area') {
+        toast.info('Funcionalidade em desenvolvimento');
       }
     },
-    [analysisMode, radius, address, segment, analysisHistory]
+    [activeMode, selectedRadius, address, segment, analysisHistory]
   );
 
   // Update circle when radius changes
@@ -338,7 +341,7 @@ export default function MapShell({ tenantId, loading = false, onNavigateHome }: 
             onMove={(evt) => setViewport(evt.viewState)}
             onClick={handleMapClick}
             style={{ width: "100%", height: "100%" }}
-            cursor={analysisMode ? "crosshair" : "grab"}
+            cursor={activeMode ? "crosshair" : "grab"}
             mapStyle="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
           >
             {marker && (
@@ -354,33 +357,91 @@ export default function MapShell({ tenantId, loading = false, onNavigateHome }: 
             )}
           </Map>
 
-          {/* Botão de modo de análise */}
-          <div className="absolute top-4 right-4 z-10">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  onClick={() => setAnalysisMode(!analysisMode)}
-                  className={`px-4 py-2 rounded-lg shadow-lg font-medium transition-all ${
-                    analysisMode
-                      ? "bg-blue-600 text-white hover:bg-blue-700"
-                      : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-300"
-                  }`}
-                >
-                  {analysisMode ? (
-                    <span className="flex items-center gap-2">
-                      <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
-                      Modo Análise Ativo
-                    </span>
-                  ) : (
-                    "Ativar Análise"
-                  )}
-                </button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>{analysisMode ? "Clique no mapa para selecionar um ponto" : "Ative para selecionar pontos no mapa"}</p>
-              </TooltipContent>
-            </Tooltip>
+          {/* Menu de modos de análise */}
+          <div className="absolute top-4 left-4 z-10 bg-white rounded-lg shadow-lg p-2 space-y-1">
+            <div className="text-xs font-semibold text-gray-500 px-2 py-1">MODOS DE ANÁLISE</div>
+            
+            {/* Modo: Consultar Raio */}
+            <button
+              onClick={() => setActiveMode(activeMode === 'radius' ? null : 'radius')}
+              className={`w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all ${
+                activeMode === 'radius'
+                  ? 'bg-blue-600 text-white'
+                  : 'text-gray-700 hover:bg-gray-100'
+              }`}
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="8" strokeWidth="2" />
+                <circle cx="12" cy="12" r="2" fill="currentColor" />
+              </svg>
+              Consulte um raio
+            </button>
+            
+            {/* Modo: Adicionar Ponto */}
+            <button
+              onClick={() => setActiveMode(activeMode === 'point' ? null : 'point')}
+              className={`w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all ${
+                activeMode === 'point'
+                  ? 'bg-blue-600 text-white'
+                  : 'text-gray-700 hover:bg-gray-100'
+              }`}
+            >
+              <MapPin className="w-4 h-4" />
+              Adicione um ponto
+            </button>
+            
+            {/* Modo: Desenhar Área */}
+            <button
+              onClick={() => setActiveMode(activeMode === 'area' ? null : 'area')}
+              className={`w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all ${
+                activeMode === 'area'
+                  ? 'bg-blue-600 text-white'
+                  : 'text-gray-700 hover:bg-gray-100'
+              }`}
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M3 3l7 7m4 4l7 7M3 21l7-7m4-4l7-7" strokeWidth="2" strokeLinecap="round" />
+              </svg>
+              Desenhe uma área
+            </button>
           </div>
+          
+          {/* Painel de opções do modo ativo */}
+          {activeMode === 'radius' && (
+            <div className="absolute top-4 left-56 z-10 bg-white rounded-lg shadow-lg p-3">
+              <div className="text-xs font-semibold text-gray-500 mb-2">SELECIONE O RAIO</div>
+              <div className="flex gap-2">
+                {[500, 1000, 1500, 2000, 3000, 5000].map(r => (
+                  <button
+                    key={r}
+                    onClick={() => setSelectedRadius(r)}
+                    className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
+                      selectedRadius === r
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    {r >= 1000 ? `${r/1000}km` : `${r}m`}
+                  </button>
+                ))}
+              </div>
+              <div className="text-xs text-gray-500 mt-2">Clique no mapa para analisar</div>
+            </div>
+          )}
+          
+          {activeMode === 'point' && (
+            <div className="absolute top-4 left-56 z-10 bg-white rounded-lg shadow-lg p-3">
+              <div className="text-xs font-semibold text-gray-500 mb-2">ADICIONAR PONTO</div>
+              <div className="text-xs text-gray-600">Clique no mapa para adicionar um marcador</div>
+            </div>
+          )}
+          
+          {activeMode === 'area' && (
+            <div className="absolute top-4 left-56 z-10 bg-white rounded-lg shadow-lg p-3">
+              <div className="text-xs font-semibold text-gray-500 mb-2">DESENHAR ÁREA</div>
+              <div className="text-xs text-gray-600">Clique para criar vértices do polígono</div>
+            </div>
+          )}
 
           {/* Botão de estatísticas de cache */}
           <div className="absolute top-20 right-4 z-10">

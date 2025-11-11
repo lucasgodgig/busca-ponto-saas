@@ -1121,3 +1121,38 @@
 - [x] Remover verificação que retornava CONFIG_MISSING
 - [ ] Testar em produção após publicar
 
+
+
+
+## 🗺️ SISTEMA DE MODOS DE ANÁLISE PROFISSIONAL (11/11/2025)
+
+### Modo 1: Consultar Raio
+- [x] Menu lateral com 3 opções de modo
+- [x] Botões de raio pré-definidos (500m, 1km, 1.5km, 2km, 3km, 5km)
+- [x] Ao selecionar raio e clicar no mapa, aplica círculo automaticamente
+- [x] Análise automática da área circular
+- [x] Visual destacado para raio selecionado
+
+### Modo 2: Adicionar Ponto
+- [ ] Modo de adicionar pins/marcadores no mapa
+- [ ] Ao clicar, adiciona pin personalizado
+- [ ] Integração com Google Maps (abrir no Maps, rotas, street view)
+- [ ] Opção de consultar raios a partir do ponto
+- [ ] Gerenciar múltiplos pontos
+
+### Modo 3: Desenhar Área
+- [ ] Ferramenta de desenho livre com mouse
+- [ ] Clique para criar vértices do polígono
+- [ ] Fechar polígono automaticamente
+- [ ] Análise de área customizada (não circular)
+- [ ] Calcular dados demográficos dentro do polígono
+- [ ] Opção de editar/deletar área desenhada
+
+### Integração e UX
+- [ ] Remover modo "Ativar Análise" antigo
+- [ ] Menu lateral com os 3 modos
+- [ ] Ícones intuitivos para cada modo
+- [ ] Feedback visual do modo ativo
+- [ ] Instruções contextuais para cada modo
+- [ ] Limpar análises anteriores ao trocar de modo
+
