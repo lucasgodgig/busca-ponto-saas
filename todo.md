@@ -1047,3 +1047,11 @@
 - [x] Salvar automaticamente após análise bem-sucedida
 - [x] Restaurar círculo, marcador e dados ao clicar
 
+
+
+
+## 🐛 BUG REPORTADO (11/11/2025)
+- [x] Erro React: "Each child in a list should have a unique key prop" no componente Dashboard
+- [x] Localizar lista sem key prop no Dashboard.tsx (encontrado em StudiesChart.tsx)
+- [x] Adicionar key prop apropriada (elementos <stop> do linearGradient)
+
