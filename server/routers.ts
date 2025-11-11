@@ -478,6 +478,18 @@ export const appRouter = router({
       }))
       .mutation(async ({ ctx, input }) => {
         const tenantCtx = await validateTenantAccess(ctx, input.tenantId);
+        
+        // Verificar limite de estudos do usuário
+        const { checkStudyLimit, incrementStudyUsage } = await import("./db/admin");
+        const limitCheck = await checkStudyLimit(ctx.user.id);
+        
+        if (!limitCheck.allowed) {
+          throw new TRPCError({ 
+            code: "FORBIDDEN", 
+            message: `Limite de estudos atingido. Você já solicitou ${limitCheck.current} de ${limitCheck.limit} estudos este mês.` 
+          });
+        }
+        
         const dbInstance = await db.getDb();
         
         if (!dbInstance) {
@@ -500,7 +512,10 @@ export const appRouter = router({
           createdBy: ctx.user.id,
         }).$returningId();
 
-        // Incrementar contador de estudos
+        // Incrementar contador de estudos do usuário
+        await incrementStudyUsage(ctx.user.id);
+        
+        // Incrementar contador de estudos do tenant
         await db.incrementStudyUsage(tenantCtx.tenantId);
 
         // Audit log
@@ -945,6 +960,77 @@ export const appRouter = router({
         const { deleteSavedLocation } = await import("./db/savedLocations");
         return await deleteSavedLocation(input.id, ctx.user.id);
       }),
+  }),
+
+  // Admin Panel - Gestão de usuários e limites
+  admin: router({ users: router({
+      list: adminProcedure.query(async () => {
+        const { listAllUsers } = await import("./db/admin");
+        return await listAllUsers();
+      }),
+
+      create: adminProcedure
+        .input(z.object({
+          openId: z.string().min(1),
+          name: z.string().optional(),
+          email: z.string().email().optional(),
+          role: z.enum(["admin_bp", "tenant_admin", "member", "analyst_bp"]).default("member"),
+          monthlyStudyLimit: z.number().min(3).max(40).default(10),
+          isActive: z.boolean().default(true),
+        }))
+        .mutation(async ({ input }) => {
+          const { createUser } = await import("./db/admin");
+          return await createUser(input);
+        }),
+
+      update: adminProcedure
+        .input(z.object({
+          userId: z.number(),
+          name: z.string().optional(),
+          email: z.string().email().optional(),
+          role: z.enum(["admin_bp", "tenant_admin", "member", "analyst_bp"]).optional(),
+          monthlyStudyLimit: z.number().min(3).max(40).optional(),
+          isActive: z.boolean().optional(),
+        }))
+        .mutation(async ({ input }) => {
+          const { updateUser } = await import("./db/admin");
+          const { userId, ...data } = input;
+          return await updateUser(userId, data);
+        }),
+
+      delete: adminProcedure
+        .input(z.object({ userId: z.number() }))
+        .mutation(async ({ ctx, input }) => {
+          // Não permitir deletar próprio usuário
+          if (ctx.user.id === input.userId) {
+            throw new TRPCError({ code: "BAD_REQUEST", message: "Você não pode deletar seu próprio usuário" });
+          }
+          const { deleteUser } = await import("./db/admin");
+          return await deleteUser(input.userId);
+        }),
+
+      getUsage: adminProcedure
+        .input(z.object({
+          userId: z.number(),
+          month: z.number().min(1).max(12).optional(),
+          year: z.number().optional(),
+        }))
+        .query(async ({ input }) => {
+          const { getUserStudyUsage } = await import("./db/admin");
+          return await getUserStudyUsage(input.userId, input.month, input.year);
+        }),
+
+      resetUsage: adminProcedure
+        .input(z.object({
+          userId: z.number(),
+          month: z.number().min(1).max(12).optional(),
+          year: z.number().optional(),
+        }))
+        .mutation(async ({ input }) => {
+          const { resetStudyUsage } = await import("./db/admin");
+          return await resetStudyUsage(input.userId, input.month, input.year);
+        }),
+    }),
   }),
 });
 

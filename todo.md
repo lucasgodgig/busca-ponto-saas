@@ -1202,3 +1202,51 @@
 - [ ] Cores diferentes por categoria
 - [ ] Filtro por categoria no dropdown
 
+
+
+
+## 👨‍💼 PAINEL DE ADMINISTRADOR (11/11/2025)
+
+### Schema do Banco de Dados
+- [x] Adicionar campo `monthlyStudyLimit` na tabela users (padrão 10)
+- [x] Adicionar campo `isActive` para ativar/desativar usuários
+- [x] Criar tabela `studyUsage` para rastrear estudos por mês
+- [x] Campos: userId, month, year, count, createdAt, updatedAt
+- [x] Índice composto em (userId, month, year)
+- [x] Relations com users
+- [x] Migração aplicada com sucesso
+
+### Procedures tRPC Admin
+- [x] `admin.users.list` - Listar todos os usuários com uso atual
+- [x] `admin.users.create` - Criar novo usuário
+- [x] `admin.users.update` - Atualizar usuário (limite, status)
+- [x] `admin.users.delete` - Deletar usuário (com proteção)
+- [x] `admin.users.getUsage` - Ver uso de estudos do usuário
+- [x] `admin.users.resetUsage` - Resetar contador de estudos
+- [x] Validação de limite 3-40
+- [x] Apenas role admin_bp pode acessar
+
+### Sistema de Limites
+- [x] Middleware para verificar limite antes de criar estudo
+- [x] Incrementar contador ao criar estudo completo
+- [x] Mensagem de erro quando limite atingido
+- [x] Verificação de usuário ativo (isActive)
+- [ ] Reset automático mensal (implementar quando necessário)
+- [ ] Alerta quando próximo do limite (feature futura)
+
+### Interface do Painel Admin
+- [ ] Página `/admin` protegida (apenas admin_bp)
+- [ ] Tabela de usuários com filtros
+- [ ] Modal de criar/editar usuário
+- [ ] Campo de limite de estudos (slider 3-40)
+- [ ] Toggle ativar/desativar usuário
+- [ ] Indicador visual de uso (barra de progresso)
+- [ ] Botão de deletar com confirmação
+- [ ] Botão de resetar contador de estudos
+
+### Validações e Segurança
+- [ ] Apenas role `admin_bp` pode acessar painel
+- [ ] Validar limite entre 3 e 40
+- [ ] Não permitir deletar próprio usuário
+- [ ] Audit log de todas as ações admin
+

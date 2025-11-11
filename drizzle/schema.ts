@@ -12,6 +12,8 @@ export const users = mysqlTable("users", {
   loginMethod: varchar("loginMethod", { length: 64 }),
   role: mysqlEnum("role", ["admin_bp", "tenant_admin", "member", "analyst_bp"]).default("member").notNull(),
   image: text("image"),
+  monthlyStudyLimit: int("monthlyStudyLimit").default(10).notNull(),
+  isActive: boolean("isActive").default(true).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   lastSignedIn: timestamp("lastSignedIn").defaultNow().notNull(),
@@ -224,6 +226,21 @@ export const savedLocations = mysqlTable("savedLocations", {
   categoryIdx: index("category_idx").on(table.category),
 }));
 
+/**
+ * StudyUsage - Rastreamento de estudos completos por usuário por mês
+ */
+export const studyUsage = mysqlTable("studyUsage", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  month: int("month").notNull(), // 1-12
+  year: int("year").notNull(),
+  count: int("count").default(0).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => ({
+  userMonthYearIdx: index("user_month_year_idx").on(table.userId, table.month, table.year),
+}));
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   memberships: many(memberships),
@@ -232,6 +249,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   comments: many(studyComments),
   quickQueries: many(quickQueries),
   savedLocations: many(savedLocations),
+  studyUsage: many(studyUsage),
 }));
 
 export const tenantsRelations = relations(tenants, ({ many, one }) => ({
@@ -348,6 +366,13 @@ export const savedLocationsRelations = relations(savedLocations, ({ one }) => ({
   }),
 }));
 
+export const studyUsageRelations = relations(studyUsage, ({ one }) => ({
+  user: one(users, {
+    fields: [studyUsage.userId],
+    references: [users.id],
+  }),
+}));
+
 /**
  * GeneratedStudy - Estudos gerados automaticamente com dados da Space API
  */
@@ -407,4 +432,6 @@ export type GeneratedStudy = typeof generatedStudies.$inferSelect;
 export type InsertGeneratedStudy = typeof generatedStudies.$inferInsert;
 export type SavedLocation = typeof savedLocations.$inferSelect;
 export type InsertSavedLocation = typeof savedLocations.$inferInsert;
+export type StudyUsage = typeof studyUsage.$inferSelect;
+export type InsertStudyUsage = typeof studyUsage.$inferInsert;
 
