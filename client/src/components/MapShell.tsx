@@ -45,10 +45,14 @@ export default function MapShell({ tenantId, loading = false, onNavigateHome }: 
   const [spaceLoading, setSpaceLoading] = useState(false);
   const [spaceData, setSpaceData] = useState<SpaceData | null>(null);
   const [spaceError, setSpaceError] = useState<string | null>(null);
+  const [analysisMode, setAnalysisMode] = useState(false);
 
   // Handle address selection
   const handleAddressSelect = useCallback(
     (lat: number, lng: number, addressStr: string) => {
+      // Ativar modo de análise automaticamente ao buscar endereço
+      setAnalysisMode(true);
+      
       const newMarker = { lat, lng };
       setMarker(newMarker);
       setAddress(addressStr);
@@ -100,6 +104,9 @@ export default function MapShell({ tenantId, loading = false, onNavigateHome }: 
   // Handle map click
   const handleMapClick = useCallback(
     async (e: any) => {
+      // Só permite clicar se o modo de análise estiver ativo
+      if (!analysisMode) return;
+      
       const { lngLat } = e;
       const newMarker = { lat: lngLat.lat, lng: lngLat.lng };
       setMarker(newMarker);
@@ -137,7 +144,7 @@ export default function MapShell({ tenantId, loading = false, onNavigateHome }: 
         setSpaceLoading(false);
       }
     },
-    [radius]
+    [analysisMode, radius]
   );
 
   // Update circle when radius changes
@@ -238,6 +245,27 @@ export default function MapShell({ tenantId, loading = false, onNavigateHome }: 
               </Marker>
             )}
           </Map>
+
+          {/* Botão de modo de análise */}
+          <div className="absolute top-4 right-4 z-10">
+            <button
+              onClick={() => setAnalysisMode(!analysisMode)}
+              className={`px-4 py-2 rounded-lg shadow-lg font-medium transition-all ${
+                analysisMode
+                  ? "bg-blue-600 text-white hover:bg-blue-700"
+                  : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-300"
+              }`}
+            >
+              {analysisMode ? (
+                <span className="flex items-center gap-2">
+                  <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
+                  Modo Análise Ativo
+                </span>
+              ) : (
+                "Ativar Análise"
+              )}
+            </button>
+          </div>
 
           {/* Loading overlay */}
           {spaceLoading && (

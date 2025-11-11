@@ -987,3 +987,16 @@
 - [ ] Notificação em tempo real
 - [ ] Avatar e timestamp
 
+
+
+
+## 🗺️ MELHORIA DO MAPA
+
+### Modo de Análise Toggle
+- [x] Adicionar estado `analysisMode` (boolean)
+- [x] Botão "Ativar Análise" quando modo está desativado
+- [x] Botão "Desativar Análise" quando modo está ativo
+- [x] Desabilitar onClick do mapa quando modo está desativado
+- [x] Mostrar feedback visual do modo ativo (borda, cor, ícone)
+- [x] Permitir navegação livre (pan, zoom) em qualquer modo
+
