@@ -7,7 +7,7 @@ import { registerOAuthRoutes } from "./oauth";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
-import { handleSpaceQuery, handleSpaceDebug } from "../routes/space";
+import { handleSpaceQuery, handleSpaceDebug, handleSpacePolygonQuery } from "../routes/space";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -40,6 +40,7 @@ async function startServer() {
   // Space API routes
   app.get("/api/space", handleSpaceQuery);
   app.get("/api/space/debug", handleSpaceDebug);
+  app.post("/api/space/polygon", handleSpacePolygonQuery);
   // tRPC API
   app.use(
     "/api/trpc",

@@ -199,3 +199,132 @@ export async function handleSpaceQuery(req: Request, res: Response) {
   }
 }
 
+
+
+// Função auxiliar: verificar se ponto está dentro do polígono (ray-casting algorithm)
+function isPointInPolygon(point: { lat: number; lng: number }, polygon: Array<{ lat: number; lng: number }>): boolean {
+  let inside = false;
+  const x = point.lng;
+  const y = point.lat;
+  
+  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+    const xi = polygon[i].lng;
+    const yi = polygon[i].lat;
+    const xj = polygon[j].lng;
+    const yj = polygon[j].lat;
+    
+    const intersect = ((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+    if (intersect) inside = !inside;
+  }
+  
+  return inside;
+}
+
+// Calcular bounding box do polígono
+function getBoundingBox(polygon: Array<{ lat: number; lng: number }>) {
+  const lats = polygon.map(p => p.lat);
+  const lngs = polygon.map(p => p.lng);
+  
+  return {
+    minLat: Math.min(...lats),
+    maxLat: Math.max(...lats),
+    minLng: Math.min(...lngs),
+    maxLng: Math.max(...lngs),
+  };
+}
+
+// Calcular distância entre dois pontos em metros (Haversine)
+function getDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const R = 6371000; // Raio da Terra em metros
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const a = 
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLng / 2) * Math.sin(dLng / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+// Nova rota: análise de polígono
+export async function handleSpacePolygonQuery(req: Request, res: Response) {
+  try {
+    const { polygon } = req.body;
+    
+    // Validar polígono
+    if (!Array.isArray(polygon) || polygon.length < 3) {
+      return res.status(400).json({
+        error: 'INVALID_POLYGON',
+        message: 'Polígono deve ter pelo menos 3 vértices',
+      });
+    }
+    
+    // Validar coordenadas
+    for (const point of polygon) {
+      if (!Number.isFinite(point.lat) || !Number.isFinite(point.lng)) {
+        return res.status(400).json({
+          error: 'INVALID_COORDINATES',
+          message: 'Todas as coordenadas devem ser números válidos',
+        });
+      }
+    }
+    
+    // Calcular bounding box
+    const bbox = getBoundingBox(polygon);
+    const centerLat = (bbox.minLat + bbox.maxLat) / 2;
+    const centerLng = (bbox.minLng + bbox.maxLng) / 2;
+    
+    // Calcular raio que cobre todo o polígono (distância do centro ao ponto mais distante)
+    let maxRadius = 0;
+    for (const point of polygon) {
+      const dist = getDistance(centerLat, centerLng, point.lat, point.lng);
+      if (dist > maxRadius) maxRadius = dist;
+    }
+    
+    // Adicionar margem de segurança (20%)
+    const queryRadius = Math.min(Math.ceil(maxRadius * 1.2), MAXR);
+    
+    console.log('[SPACE POLYGON] Bounding box:', bbox);
+    console.log('[SPACE POLYGON] Center:', { lat: centerLat, lng: centerLng });
+    console.log('[SPACE POLYGON] Query radius:', queryRadius);
+    
+    // Fazer consulta na Space API usando o centro e raio expandido
+    const params = new URLSearchParams({
+      lat: String(centerLat),
+      lng: String(centerLng),
+      radius: String(queryRadius),
+      key: KEY!,
+    });
+    const url = `${BASE}?${params.toString()}`;
+    const r = await fetch(url, { cache: 'no-store' });
+    
+    if (!r.ok) {
+      const text = await r.text().catch(() => '');
+      console.error('[SPACE_POLYGON_ERROR]', { status: r.status, text: text.slice(0, 200) });
+      return res.status(502).json({ error: 'SPACE_DOWN', status: r.status });
+    }
+    
+    const raw = await r.json();
+    
+    // Por enquanto, retornar dados normalizados
+    // TODO: Se a API retornar pontos individuais, filtrar apenas os que estão dentro do polígono
+    const data = normalize(raw);
+    
+    return res.json({ 
+      ok: true, 
+      data,
+      meta: {
+        polygon: polygon.length + ' vértices',
+        boundingBox: bbox,
+        queryRadius,
+        method: 'center_with_expanded_radius'
+      }
+    });
+  } catch (e: any) {
+    console.error('[Space Polygon API Error]', e?.message);
+    return res
+      .status(500)
+      .json({ error: 'UNEXPECTED', message: e?.message });
+  }
+}
+

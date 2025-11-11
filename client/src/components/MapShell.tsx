@@ -612,29 +612,40 @@ export default function MapShell({ tenantId, loading = false, onNavigateHome }: 
                     ) : (
                       <button
                         onClick={async () => {
-                          // Calcular centroide do polígono
-                          const centroidLat = polygonVertices.reduce((sum, v) => sum + v.lat, 0) / polygonVertices.length;
-                          const centroidLng = polygonVertices.reduce((sum, v) => sum + v.lng, 0) / polygonVertices.length;
-                          
-                          // Por enquanto, fazer análise do centroide com raio fixo
-                          // TODO: Implementar análise real de polígono na API
+                          // Usar análise real de polígono
                           setSpaceLoading(true);
                           setSpaceError(null);
                           
                           try {
-                            const response = await fetch(`/api/space?lat=${centroidLat}&lng=${centroidLng}&radius=1000`);
+                            const response = await fetch('/api/space/polygon', {
+                              method: 'POST',
+                              headers: {
+                                'Content-Type': 'application/json',
+                              },
+                              body: JSON.stringify({
+                                polygon: polygonVertices,
+                              }),
+                            });
+                            
                             const result = await response.json();
                             
                             if (result.ok && result.data) {
                               setSpaceData(result.data);
-                              toast.success('Análise da área concluída!');
+                              
+                              // Mostrar informações sobre a análise
+                              const meta = result.meta;
+                              toast.success('Análise da área concluída!', {
+                                description: meta ? `${meta.polygon} | Raio: ${Math.round(meta.queryRadius)}m` : undefined,
+                              });
                             } else {
                               setSpaceError(result.error || 'Erro ao analisar área');
                               toast.error('Erro ao analisar área');
                             }
                           } catch (err: any) {
                             setSpaceError(err.message || 'Erro ao analisar área');
-                            toast.error('Erro ao analisar área');
+                            toast.error('Erro ao analisar área', {
+                              description: err.message,
+                            });
                           } finally {
                             setSpaceLoading(false);
                           }
