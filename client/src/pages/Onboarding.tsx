@@ -103,7 +103,7 @@ export default function Onboarding() {
         <CardHeader>
           <CardTitle>Criar Franqueadora</CardTitle>
           <CardDescription>
-            Configure sua franqueadora para começar a usar o Busca Ponto
+            Configure sua franqueadora para começar a usar o Sistema Busca Ponto
           </CardDescription>
         </CardHeader>
         <CardContent>

@@ -54,7 +54,7 @@ export default function InviteCodeValidation() {
               <Lock className="w-8 h-8 text-blue-500" />
             </div>
           </div>
-          <CardTitle className="text-2xl font-bold text-white">Busca Ponto</CardTitle>
+          <CardTitle className="text-2xl font-bold text-white">Sistema Busca Ponto</CardTitle>
           <CardDescription className="text-slate-400">
             Digite o código de convite para continuar
           </CardDescription>

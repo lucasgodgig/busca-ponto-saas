@@ -167,7 +167,7 @@ export default function StudyDetailsPage() {
 
             {study.status === "em_analise" && (
               <div className="bg-yellow-50 border border-yellow-200 rounded p-3">
-                <p className="text-sm text-yellow-800">Este estudo está sendo analisado pela equipe Busca Ponto.</p>
+                <p className="text-sm text-yellow-800">Este estudo está sendo analisado pela equipe Sistema Busca Ponto.</p>
               </div>
             )}
 

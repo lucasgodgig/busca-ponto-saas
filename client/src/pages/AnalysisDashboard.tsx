@@ -169,7 +169,7 @@ export default function AnalysisDashboard() {
           {/* Disclaimer */}
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
             <p className="text-sm text-blue-900">
-              <span className="font-medium">Dados conectados</span> de ferramentas oficiais com base no Censo. Para informações específicas, consulte o time da Busca Ponto.
+              <span className="font-medium">Dados conectados</span> de ferramentas oficiais com base no Censo. Para informações específicas, consulte o time da Sistema Busca Ponto.
             </p>
           </div>
 

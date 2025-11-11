@@ -54,7 +54,7 @@ export function PDFReport({ address, segment, data }: PDFReportProps) {
         <!-- Cabeçalho -->
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 3px solid #2563eb; padding-bottom: 20px;">
           <div>
-            <h1 style="color: #2563eb; margin: 0; font-size: 28px;">Busca Ponto</h1>
+            <h1 style="color: #2563eb; margin: 0; font-size: 28px;">Sistema Busca Ponto</h1>
             <p style="color: #666; margin: 5px 0 0 0; font-size: 14px;">Análise de Localização</p>
           </div>
           <div style="text-align: right; font-size: 12px; color: #666;">
@@ -164,13 +164,13 @@ export function PDFReport({ address, segment, data }: PDFReportProps) {
 
         <!-- Aviso -->
         <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; border-radius: 4px; font-size: 12px; color: #92400e; margin-top: 30px;">
-          <strong>Aviso Importante:</strong> Dados conectados de ferramentas oficiais com base no Censo. Para informações específicas, consulte o time da Busca Ponto.
+          <strong>Aviso Importante:</strong> Dados conectados de ferramentas oficiais com base no Censo. Para informações específicas, consulte o time da Sistema Busca Ponto.
         </div>
 
         <!-- Rodapé -->
         <div style="margin-top: 40px; padding-top: 20px; border-top: 2px solid #e2e8f0; text-align: center; color: #999; font-size: 11px;">
-          <p style="margin: 0;">Relatório gerado automaticamente pelo Busca Ponto SaaS</p>
-          <p style="margin: 5px 0 0 0;">© 2025 Busca Ponto. Todos os direitos reservados.</p>
+          <p style="margin: 0;">Relatório gerado automaticamente pelo Sistema Busca Ponto SaaS</p>
+          <p style="margin: 5px 0 0 0;">© 2025 Sistema Busca Ponto. Todos os direitos reservados.</p>
         </div>
       </div>
     `;

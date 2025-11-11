@@ -12,7 +12,7 @@ interface OnboardingStep {
 
 const steps: OnboardingStep[] = [
   {
-    title: "Bem-vindo ao Busca Ponto!",
+    title: "Bem-vindo ao Sistema Busca Ponto!",
     description: "Vamos fazer um tour rápido pelas principais funcionalidades da plataforma.",
     icon: CheckCircle2,
     color: "text-green-600",

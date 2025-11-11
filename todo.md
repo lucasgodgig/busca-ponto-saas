@@ -1599,3 +1599,8 @@ Substituir análise de centroide + raio fixo por análise real usando coordenada
 - [x] Adicionar botão "Analisar Localização" visível no painel lateral (IMPLEMENTADO - botão verde grande)
 - [x] Melhorar instruções visuais sobre como proceder após buscar endereço (IMPLEMENTADO - footer dinâmico + toast)
 
+
+
+## 🏷️ Branding (11/11/2025)
+- [x] Alterar nome do SaaS para "Sistema Busca Ponto" em toda aplicação (CONCLUÍDO - 12 ocorrências atualizadas)
+

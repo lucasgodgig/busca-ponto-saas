@@ -133,7 +133,7 @@ export default function Home() {
               Pronto para começar?
             </h3>
             <p className="text-lg opacity-90">
-              Junte-se às franqueadoras que já usam o Busca Ponto para tomar
+              Junte-se às franqueadoras que já usam o Sistema Busca Ponto para tomar
               decisões baseadas em dados.
             </p>
             {!isAuthenticated && (
@@ -148,7 +148,7 @@ export default function Home() {
       {/* Footer */}
       <footer className="border-t py-8">
         <div className="container text-center text-sm text-muted-foreground">
-          <p>© 2025 Busca Ponto. Todos os direitos reservados.</p>
+          <p>© 2025 Sistema Busca Ponto. Todos os direitos reservados.</p>
         </div>
       </footer>
     </div>
