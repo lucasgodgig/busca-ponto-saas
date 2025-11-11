@@ -3,13 +3,19 @@ import { getDb } from "../db";
 import { users, studyUsage, InsertUser, InsertStudyUsage } from "../../drizzle/schema";
 
 /**
- * Listar todos os usuários com informações de uso
+ * Listar todos os usuários ativos com informações de uso
+ * Filtra apenas usuários com isActive = true
  */
 export async function listAllUsers() {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
-  const allUsers = await db.select().from(users).orderBy(desc(users.createdAt));
+  // Filtrar apenas usuários ativos
+  const allUsers = await db
+    .select()
+    .from(users)
+    .where(eq(users.isActive, true))
+    .orderBy(desc(users.createdAt));
   
   // Buscar uso atual de cada usuário
   const currentMonth = new Date().getMonth() + 1;
@@ -70,13 +76,17 @@ export async function updateUser(
 }
 
 /**
- * Deletar usuário
+ * Desativar usuário (soft delete)
+ * Em vez de deletar fisicamente, marca isActive = false para bloquear acesso
  */
 export async function deleteUser(userId: number) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
-  await db.delete(users).where(eq(users.id, userId));
+  // Soft delete: desativa o usuário em vez de deletar
+  await db.update(users)
+    .set({ isActive: false, updatedAt: new Date() })
+    .where(eq(users.id, userId));
 
   return { success: true };
 }

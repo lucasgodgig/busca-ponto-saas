@@ -1604,3 +1604,16 @@ Substituir análise de centroide + raio fixo por análise real usando coordenada
 ## 🏷️ Branding (11/11/2025)
 - [x] Alterar nome do SaaS para "Sistema Busca Ponto" em toda aplicação (CONCLUÍDO - 12 ocorrências atualizadas)
 
+
+
+## 🐛 Bug Crítico de Segurança (11/11/2025)
+- [x] Usuário deletado no painel admin continua conseguindo acessar o sistema (CORRIGIDO)
+- [x] OAuth da Manus permite reautenticação mesmo após deleção do registro (CORRIGIDO)
+- [x] Necessário implementar validação no middleware de autenticação (IMPLEMENTADO)
+
+### Solução Implementada:
+- Soft delete: botão "deletar" agora marca `isActive = false` em vez de remover registro
+- Validação no `authenticateRequest`: bloqueia usuários com `isActive = false`
+- Listagem do admin filtra apenas usuários ativos
+- Mensagem de erro clara: "User account is deactivated"
+
