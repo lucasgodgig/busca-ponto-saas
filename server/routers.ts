@@ -870,6 +870,82 @@ export const appRouter = router({
         };
       }),
   }),
+
+  // Saved Locations (Pontos e Polígonos salvos)
+  locations: router({
+    create: protectedProcedure
+      .input(z.object({
+        type: z.enum(["point", "polygon"]),
+        name: z.string().min(1).max(255),
+        description: z.string().optional(),
+        category: z.enum(["concorrente", "oportunidade", "cliente", "fornecedor", "outro"]).default("outro"),
+        coordinatesJson: z.object({
+          lat: z.number().optional(),
+          lng: z.number().optional(),
+          vertices: z.array(z.object({
+            lat: z.number(),
+            lng: z.number(),
+          })).optional(),
+        }),
+        metadataJson: z.record(z.any()).optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const { createSavedLocation } = await import("./db/savedLocations");
+        const result = await createSavedLocation({
+          userId: ctx.user.id,
+          type: input.type,
+          name: input.name,
+          description: input.description,
+          category: input.category,
+          coordinatesJson: input.coordinatesJson,
+          metadataJson: input.metadataJson,
+        });
+        return result;
+      }),
+
+    list: protectedProcedure
+      .input(z.object({
+        category: z.enum(["concorrente", "oportunidade", "cliente", "fornecedor", "outro"]).optional(),
+      }).optional())
+      .query(async ({ ctx, input }) => {
+        const { listSavedLocations } = await import("./db/savedLocations");
+        return await listSavedLocations(ctx.user.id, input?.category);
+      }),
+
+    get: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .query(async ({ ctx, input }) => {
+        const { getSavedLocation } = await import("./db/savedLocations");
+        const location = await getSavedLocation(input.id, ctx.user.id);
+        if (!location) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Localização não encontrada" });
+        }
+        return location;
+      }),
+
+    update: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        name: z.string().min(1).max(255).optional(),
+        description: z.string().optional(),
+        category: z.enum(["concorrente", "oportunidade", "cliente", "fornecedor", "outro"]).optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const { updateSavedLocation } = await import("./db/savedLocations");
+        return await updateSavedLocation(input.id, ctx.user.id, {
+          name: input.name,
+          description: input.description,
+          category: input.category,
+        });
+      }),
+
+    delete: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        const { deleteSavedLocation } = await import("./db/savedLocations");
+        return await deleteSavedLocation(input.id, ctx.user.id);
+      }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;

@@ -1168,3 +1168,37 @@
 - [ ] Limpar análises anteriores ao trocar de modo (feature futura)
 - [ ] Confirmação antes de limpar dados (feature futura)
 
+
+
+
+## 💾 PERSISTÊNCIA DE PONTOS E ÁREAS (11/11/2025)
+
+### Schema do Banco de Dados
+- [x] Criar tabela `savedLocations` para pontos e polígonos
+- [x] Campos: id, userId, type (point/polygon), name, description, category
+- [x] Campo coordinatesJson (JSON) para armazenar lat/lng ou vértices
+- [x] Campo metadataJson (JSON) para dados da análise
+- [x] Timestamps: createdAt, updatedAt
+- [x] Índices em userId e category
+- [x] Relations com users
+- [x] Migração aplicada com sucesso
+
+### Procedures tRPC
+- [x] `locations.create` - Salvar novo ponto/polígono
+- [x] `locations.list` - Listar localizações do usuário
+- [x] `locations.get` - Obter detalhes de uma localização
+- [x] `locations.update` - Atualizar nome/descrição/categoria
+- [x] `locations.delete` - Remover localização
+- [x] Filtro por categoria opcional
+- [x] Ordenação por data de criação (mais recente primeiro)# Interface no Mapa
+- [ ] Botão "Salvar" ao adicionar ponto ou fechar polígono
+- [ ] Modal para inserir nome, descrição e categoria
+- [ ] Dropdown "Localizações Salvas" para carregar
+- [ ] Ícone de favorito nos pontos salvos
+- [ ] Opção de editar/deletar localizações salvas
+
+### Categorização
+- [ ] Categorias pré-definidas (Concorrentes, Oportunidades, Clientes, etc)
+- [ ] Cores diferentes por categoria
+- [ ] Filtro por categoria no dropdown
+

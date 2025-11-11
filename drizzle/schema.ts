@@ -201,6 +201,29 @@ export const inviteCodes = mysqlTable("inviteCodes", {
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
 
+/**
+ * SavedLocation - Pontos e polígonos salvos pelo usuário no mapa interativo
+ */
+export const savedLocations = mysqlTable("savedLocations", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  type: mysqlEnum("type", ["point", "polygon"]).notNull(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  category: mysqlEnum("category", ["concorrente", "oportunidade", "cliente", "fornecedor", "outro"]).default("outro").notNull(),
+  coordinatesJson: json("coordinatesJson").$type<{
+    lat?: number;
+    lng?: number;
+    vertices?: Array<{ lat: number; lng: number }>;
+  }>().notNull(),
+  metadataJson: json("metadataJson").$type<Record<string, any>>(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => ({
+  userIdIdx: index("userId_idx").on(table.userId),
+  categoryIdx: index("category_idx").on(table.category),
+}));
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   memberships: many(memberships),
@@ -208,6 +231,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   assignedStudies: many(studies, { relationName: "assignedTo" }),
   comments: many(studyComments),
   quickQueries: many(quickQueries),
+  savedLocations: many(savedLocations),
 }));
 
 export const tenantsRelations = relations(tenants, ({ many, one }) => ({
@@ -317,6 +341,13 @@ export const inviteCodesRelations = relations(inviteCodes, ({ one }) => ({
   }),
 }));
 
+export const savedLocationsRelations = relations(savedLocations, ({ one }) => ({
+  user: one(users, {
+    fields: [savedLocations.userId],
+    references: [users.id],
+  }),
+}));
+
 /**
  * GeneratedStudy - Estudos gerados automaticamente com dados da Space API
  */
@@ -374,4 +405,6 @@ export type InviteCode = typeof inviteCodes.$inferSelect;
 export type InsertInviteCode = typeof inviteCodes.$inferInsert;
 export type GeneratedStudy = typeof generatedStudies.$inferSelect;
 export type InsertGeneratedStudy = typeof generatedStudies.$inferInsert;
+export type SavedLocation = typeof savedLocations.$inferSelect;
+export type InsertSavedLocation = typeof savedLocations.$inferInsert;
 
