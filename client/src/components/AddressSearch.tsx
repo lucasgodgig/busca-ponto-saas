@@ -70,44 +70,60 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
   }, []);
 
   // Handler para buscar (Enter ou botão)
-  const handleSearch = useCallback(async () => {
+  const handleSearch = useCallback(() => {
     if (!inputValue.trim()) {
       setError("Digite um endereço");
       return;
     }
 
-    if (!autocompleteServiceRef.current) return;
+    if (!autocompleteServiceRef.current) {
+      setError("Serviço de busca não disponível");
+      return;
+    }
 
-    try {
-      setIsLoading(true);
-      const predictions = await autocompleteServiceRef.current.getPlacePredictions({
+    setIsLoading(true);
+    setError(null);
+
+    autocompleteServiceRef.current.getPlacePredictions(
+      {
         input: inputValue,
         sessionToken: sessionTokenRef.current,
         componentRestrictions: { country: "br" },
-      });
+      },
+      (predictions: any[], status: string) => {
+        setIsLoading(false);
 
-      const formattedSuggestions: Suggestion[] = (predictions.predictions || []).map(
-        (prediction: any) => ({
-          id: prediction.place_id,
-          description: prediction.description,
-          placeId: prediction.place_id,
-        })
-      );
+        if (status !== window.google.maps.places.PlacesServiceStatus.OK) {
+          console.error("Erro ao buscar sugestões:", status);
+          setError("Erro ao buscar endereços");
+          setSuggestions([]);
+          suggestionsRef.current = [];
+          return;
+        }
 
-      suggestionsRef.current = formattedSuggestions;
-      startTransition(() => {
-        setSuggestions(formattedSuggestions);
-        setShowSuggestions(true);
-      });
-      setError(null);
-    } catch (err) {
-      console.error("Erro ao buscar sugestões:", err);
-      setError("Erro ao buscar endereços");
-      setSuggestions([]);
-      suggestionsRef.current = [];
-    } finally {
-      setIsLoading(false);
-    }
+        if (!predictions || predictions.length === 0) {
+          setError("Nenhum endereço encontrado");
+          setSuggestions([]);
+          suggestionsRef.current = [];
+          return;
+        }
+
+        const formattedSuggestions: Suggestion[] = predictions.map(
+          (prediction: any) => ({
+            id: prediction.place_id,
+            description: prediction.description,
+            placeId: prediction.place_id,
+          })
+        );
+
+        suggestionsRef.current = formattedSuggestions;
+        startTransition(() => {
+          setSuggestions(formattedSuggestions);
+          setShowSuggestions(true);
+        });
+        setError(null);
+      }
+    );
   }, [inputValue]);
 
   // Handler para selecionar uma sugestão

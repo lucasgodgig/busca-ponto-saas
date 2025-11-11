@@ -1284,3 +1284,22 @@
 - [ ] Procedure tRPC para obter uso atual do usuário logado
 - [ ] Atualizar indicador após criar estudo
 
+
+
+
+## 🔧 CORREÇÃO BUSCA DE ENDEREÇOS (11/11/2025)
+
+### Bug Reportado
+- [x] Erro "Erro ao buscar endereços" ao digitar no campo de busca do mapa (CORRIGIDO)
+- [x] Verificar integração com Google Places API (OK - usando callback)
+- [x] Corrigir método getPlacePredictions para usar callback em vez de Promise
+- [ ] Testar busca com diferentes queries (rua, cidade, CEP)
+- [x] Validar se API key está configurada corretamente (OK)
+
+### Correção Aplicada
+- Alterado `handleSearch` para usar callback do Google Places API
+- Método `getPlacePredictions()` não retorna Promise, usa callback
+- Adicionado tratamento de status e mensagens de erro apropriadas
+- Melhorado feedback visual para usuário
+
+
