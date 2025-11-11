@@ -12,6 +12,7 @@ import InviteCodeValidation from "./pages/InviteCodeValidation";
 import Cadastro from "./pages/Cadastro";
 import AnalysisDashboard from "./pages/AnalysisDashboard";
 import AppLayout from "./components/AppLayout";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 // Lazy load rotas não críticas
 const History = lazy(() => import("./pages/History"));
@@ -47,69 +48,97 @@ function Router() {
       
       {/* Rotas com Sidebar */}
       <Route path={"/app"}>
-        <AppLayout>
-          <Dashboard />
-        </AppLayout>
+        <ProtectedRoute>
+          <AppLayout>
+            <Dashboard />
+          </AppLayout>
+        </ProtectedRoute>
       </Route>
       <Route path={"/mapa"}>
-        <AppLayout>
-          <MapPage />
-        </AppLayout>
+        <ProtectedRoute>
+          <AppLayout>
+            <MapPage />
+          </AppLayout>
+        </ProtectedRoute>
       </Route>
       <Route path={"/admin"}>
-        <AppLayout>
-          <AdminDashboard />
-        </AppLayout>
+        <ProtectedRoute>
+          <AppLayout>
+            <AdminDashboard />
+          </AppLayout>
+        </ProtectedRoute>
       </Route>
       <Route path={"/admin-bp"}>
-        <AppLayout>
-          <AdminPanel />
-        </AppLayout>
+        <ProtectedRoute>
+          <AppLayout>
+            <AdminPanel />
+          </AppLayout>
+        </ProtectedRoute>
       </Route>
       <Route path={"/historico"}>
-        <AppLayout>
-          <History />
-        </AppLayout>
+        <ProtectedRoute>
+          <AppLayout>
+            <History />
+          </AppLayout>
+        </ProtectedRoute>
       </Route>
-      <Route path={"/onboarding"} component={Onboarding} />
+      <Route path={"/onboarding"}>
+        <ProtectedRoute>
+          <Onboarding />
+        </ProtectedRoute>
+      </Route>
       <Route path={"/estudos"}>
-        <AppLayout>
-          <Studies />
-        </AppLayout>
+        <ProtectedRoute>
+          <AppLayout>
+            <Studies />
+          </AppLayout>
+        </ProtectedRoute>
       </Route>
       <Route path={"/estudos/:id"}>
-        <AppLayout>
-          <StudyDetailsPage />
-        </AppLayout>
+        <ProtectedRoute>
+          <AppLayout>
+            <StudyDetailsPage />
+          </AppLayout>
+        </ProtectedRoute>
       </Route>
       <Route path={"/estudos/novo"}>
-        <AppLayout>
-          <NewStudy />
-        </AppLayout>
+        <ProtectedRoute>
+          <AppLayout>
+            <NewStudy />
+          </AppLayout>
+        </ProtectedRoute>
       </Route>
       <Route path={"/configuracoes"}>
-        <AppLayout>
-          <Settings />
-        </AppLayout>
+        <ProtectedRoute>
+          <AppLayout>
+            <Settings />
+          </AppLayout>
+        </ProtectedRoute>
       </Route>
       <Route path={"/analysis"} component={AnalysisDashboard} />
       <Route path={"/generate-study"} component={GenerateStudyPage} />
       <Route path={"/generated-studies"} component={GeneratedStudiesListPage} />
       <Route path={"/generated-studies/:studyId"} component={GeneratedStudyDetailsPage} />
       <Route path={"/meus-estudos"}>
-        <AppLayout>
-          <MeusEstudos />
-        </AppLayout>
+        <ProtectedRoute>
+          <AppLayout>
+            <MeusEstudos />
+          </AppLayout>
+        </ProtectedRoute>
       </Route>
       <Route path={"/solicitar-estudo"}>
-        <AppLayout>
-          <SolicitarEstudo />
-        </AppLayout>
+        <ProtectedRoute>
+          <AppLayout>
+            <SolicitarEstudo />
+          </AppLayout>
+        </ProtectedRoute>
       </Route>
       <Route path={"/admin-bp/solicitacoes"}>
-        <AppLayout>
-          <AdminStudyRequests />
-        </AppLayout>
+        <ProtectedRoute>
+          <AppLayout>
+            <AdminStudyRequests />
+          </AppLayout>
+        </ProtectedRoute>
       </Route>
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}

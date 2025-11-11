@@ -1729,3 +1729,19 @@ Substituir análise de centroide + raio fixo por análise real usando coordenada
 - Badge mostra contador de notificações não lidas
 - Clique em notificação marca como lida
 
+
+
+
+## 🚨 Bug Crítico de Segurança - Rota /app (11/11/2025)
+- [x] Rota /app permite acesso sem autenticação (CORRIGIDO)
+- [x] Usuários não logados conseguem acessar dashboard e funcionalidades (CORRIGIDO)
+- [x] Deve redirecionar para landing page (/) ou tela de login (IMPLEMENTADO)
+- [x] Implementar proteção de rotas privadas (IMPLEMENTADO)
+
+### Solução:
+- Criado componente `ProtectedRoute` que verifica autenticação
+- Redireciona usuários não logados para landing page (/)
+- Aplicado em todas as 14 rotas privadas: /app, /mapa, /admin, /admin-bp, /historico, /onboarding, /estudos, /configuracoes, /meus-estudos, /solicitar-estudo, etc
+- Loading state enquanto verifica autenticação
+- Agora é impossível acessar rotas privadas sem login
+
