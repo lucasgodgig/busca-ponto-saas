@@ -56,6 +56,21 @@ export default function MapShell({ tenantId, loading = false, onNavigateHome }: 
   type AnalysisMode = 'radius' | 'point' | 'area' | null;
   const [activeMode, setActiveMode] = useState<AnalysisMode>(null);
   const [selectedRadius, setSelectedRadius] = useState<number>(1000); // Raio pré-selecionado em metros
+  
+  // Pontos adicionados manualmente (modo "Adicionar Ponto")
+  type SavedPoint = {
+    id: string;
+    lat: number;
+    lng: number;
+    name?: string;
+  };
+  const [savedPoints, setSavedPoints] = useState<SavedPoint[]>([]);
+  const [contextMenuPoint, setContextMenuPoint] = useState<SavedPoint | null>(null);
+  const [contextMenuPosition, setContextMenuPosition] = useState<{ x: number; y: number } | null>(null);
+  
+  // Polígonos desenhados (modo "Desenhar Área")
+  const [polygonVertices, setPolygonVertices] = useState<Array<{ lat: number; lng: number }>>([]);
+  const [isDrawingPolygon, setIsDrawingPolygon] = useState(false);
 
   // Histórico de pontos analisados (últimos 5)
   type AnalysisPoint = {
@@ -245,13 +260,38 @@ export default function MapShell({ tenantId, loading = false, onNavigateHome }: 
       
       // MODO: Adicionar Ponto
       else if (activeMode === 'point') {
-        setMarker(newMarker);
-        toast.success('Ponto adicionado!');
+        const newPoint: SavedPoint = {
+          id: `point-${Date.now()}`,
+          lat: newMarker.lat,
+          lng: newMarker.lng,
+        };
+        setSavedPoints(prev => [...prev, newPoint]);
+        toast.success('Ponto adicionado! Clique com botão direito para opções');
       }
       
       // MODO: Desenhar Área
       else if (activeMode === 'area') {
-        toast.info('Funcionalidade em desenvolvimento');
+        const newVertex = { lat: newMarker.lat, lng: newMarker.lng };
+        setPolygonVertices(prev => [...prev, newVertex]);
+        
+        if (polygonVertices.length === 0) {
+          toast.info('Clique para adicionar vértices. Clique no primeiro ponto para fechar.');
+        } else if (polygonVertices.length >= 2) {
+          // Verificar se clicou perto do primeiro ponto para fechar polígono
+          const firstVertex = polygonVertices[0];
+          const distance = Math.sqrt(
+            Math.pow(newMarker.lat - firstVertex.lat, 2) + 
+            Math.pow(newMarker.lng - firstVertex.lng, 2)
+          );
+          
+          // Se clicar a menos de 0.001 graus (~100m) do primeiro ponto, fechar polígono
+          if (distance < 0.001) {
+            setIsDrawingPolygon(false);
+            toast.success(`Polígono fechado com ${polygonVertices.length} vértices!`);
+          } else {
+            toast.info(`Vértice ${polygonVertices.length + 1} adicionado`);
+          }
+        }
       }
     },
     [activeMode, selectedRadius, address, segment, analysisHistory]
@@ -355,6 +395,127 @@ export default function MapShell({ tenantId, loading = false, onNavigateHome }: 
                 </div>
               </Marker>
             )}
+            
+            {/* Vértices do polígono sendo desenhado */}
+            {polygonVertices.map((vertex, index) => (
+              <Marker
+                key={`vertex-${index}`}
+                longitude={vertex.lng}
+                latitude={vertex.lat}
+                anchor="center"
+              >
+                <div className="relative">
+                  <div className="w-3 h-3 bg-purple-600 rounded-full border-2 border-white shadow-lg" />
+                  {index === 0 && polygonVertices.length > 0 && (
+                    <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-purple-600 text-white text-xs px-2 py-1 rounded whitespace-nowrap">
+                      Início
+                    </div>
+                  )}
+                </div>
+              </Marker>
+            ))}
+            
+            {/* Markers dos pontos salvos */}
+            {savedPoints.map(point => (
+              <Marker
+                key={point.id}
+                longitude={point.lng}
+                latitude={point.lat}
+                anchor="bottom"
+              >
+                <div
+                  onContextMenu={(e) => {
+                    e.preventDefault();
+                    setContextMenuPoint(point);
+                    setContextMenuPosition({ x: e.clientX, y: e.clientY });
+                  }}
+                  className="w-6 h-6 bg-green-600 rounded-full border-2 border-white shadow-lg flex items-center justify-center cursor-pointer hover:scale-110 transition-transform"
+                >
+                  <MapPin className="w-3 h-3 text-white" />
+                </div>
+              </Marker>
+            ))}
+            
+            {/* Linhas do polígono */}
+            {polygonVertices.length > 1 && (
+              <>
+                <Source
+                  id="polygon-lines"
+                  type="geojson"
+                  data={{
+                    type: 'Feature',
+                    properties: {},
+                    geometry: {
+                      type: 'LineString',
+                      coordinates: polygonVertices.map(v => [v.lng, v.lat]),
+                    },
+                  }}
+                >
+                  <Layer
+                    id="polygon-lines-layer"
+                    type="line"
+                    paint={{
+                      'line-color': '#9333ea',
+                      'line-width': 2,
+                      'line-dasharray': [2, 2],
+                    }}
+                  />
+                </Source>
+                
+                {/* Linha de fechamento (do último vértice ao primeiro) */}
+                {!isDrawingPolygon && polygonVertices.length >= 3 && (
+                  <Source
+                    id="polygon-closing-line"
+                    type="geojson"
+                    data={{
+                      type: 'Feature',
+                      properties: {},
+                      geometry: {
+                        type: 'LineString',
+                        coordinates: [
+                          [polygonVertices[polygonVertices.length - 1].lng, polygonVertices[polygonVertices.length - 1].lat],
+                          [polygonVertices[0].lng, polygonVertices[0].lat],
+                        ],
+                      },
+                    }}
+                  >
+                    <Layer
+                      id="polygon-closing-line-layer"
+                      type="line"
+                      paint={{
+                        'line-color': '#9333ea',
+                        'line-width': 2,
+                      }}
+                    />
+                  </Source>
+                )}
+                
+                {/* Preenchimento do polígono fechado */}
+                {!isDrawingPolygon && polygonVertices.length >= 3 && (
+                  <Source
+                    id="polygon-fill"
+                    type="geojson"
+                    data={{
+                      type: 'Feature',
+                      properties: {},
+                      geometry: {
+                        type: 'Polygon',
+                        coordinates: [[...polygonVertices.map(v => [v.lng, v.lat]), [polygonVertices[0].lng, polygonVertices[0].lat]]],
+                      },
+                    }}
+                  >
+                    <Layer
+                      id="polygon-fill-layer"
+                      type="fill"
+                      paint={{
+                        'fill-color': '#9333ea',
+                        'fill-opacity': 0.2,
+                      }}
+                    />
+                  </Source>
+                )}
+              </>
+            )}
           </Map>
 
           {/* Menu de modos de análise */}
@@ -437,9 +598,41 @@ export default function MapShell({ tenantId, loading = false, onNavigateHome }: 
           )}
           
           {activeMode === 'area' && (
-            <div className="absolute top-4 left-56 z-10 bg-white rounded-lg shadow-lg p-3">
-              <div className="text-xs font-semibold text-gray-500 mb-2">DESENHAR ÁREA</div>
-              <div className="text-xs text-gray-600">Clique para criar vértices do polígono</div>
+            <div className="absolute top-4 left-56 z-10 bg-white rounded-lg shadow-lg p-3 space-y-2">
+              <div className="text-xs font-semibold text-gray-500">DESENHAR ÁREA</div>
+              <div className="text-xs text-gray-600 mb-2">
+                {polygonVertices.length === 0 
+                  ? 'Clique no mapa para iniciar o polígono'
+                  : `${polygonVertices.length} vértice(s) adicionado(s)`
+                }
+              </div>
+              {polygonVertices.length > 0 && (
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => {
+                      if (polygonVertices.length >= 3) {
+                        setIsDrawingPolygon(false);
+                        toast.success(`Polígono fechado com ${polygonVertices.length} vértices!`);
+                      } else {
+                        toast.error('Mínimo de 3 vértices necessários');
+                      }
+                    }}
+                    className="px-3 py-1.5 bg-green-600 text-white rounded-md text-xs font-medium hover:bg-green-700 transition-colors"
+                  >
+                    Fechar Polígono
+                  </button>
+                  <button
+                    onClick={() => {
+                      setPolygonVertices([]);
+                      setIsDrawingPolygon(false);
+                      toast.info('Polígono limpo');
+                    }}
+                    className="px-3 py-1.5 bg-red-600 text-white rounded-md text-xs font-medium hover:bg-red-700 transition-colors"
+                  >
+                    Limpar
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
@@ -580,6 +773,133 @@ export default function MapShell({ tenantId, loading = false, onNavigateHome }: 
             </div>
           )}
 
+          {/* Menu contextual para pontos salvos */}
+          {contextMenuPoint && contextMenuPosition && (
+            <>
+              {/* Overlay para fechar menu ao clicar fora */}
+              <div
+                className="fixed inset-0 z-20"
+                onClick={() => {
+                  setContextMenuPoint(null);
+                  setContextMenuPosition(null);
+                }}
+              />
+              
+              <div
+                className="fixed z-30 bg-white rounded-lg shadow-xl border border-gray-200 py-1 min-w-[200px]"
+                style={{
+                  left: `${contextMenuPosition.x}px`,
+                  top: `${contextMenuPosition.y}px`,
+                }}
+              >
+                <button
+                  onClick={() => {
+                    window.open(`https://www.google.com/maps?q=${contextMenuPoint.lat},${contextMenuPoint.lng}`, '_blank');
+                    setContextMenuPoint(null);
+                    setContextMenuPosition(null);
+                  }}
+                  className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 flex items-center gap-2"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                  Abrir no Google Maps
+                </button>
+                
+                <button
+                  onClick={() => {
+                    window.open(`https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${contextMenuPoint.lat},${contextMenuPoint.lng}`, '_blank');
+                    setContextMenuPoint(null);
+                    setContextMenuPosition(null);
+                  }}
+                  className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 flex items-center gap-2"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                  Ver Street View
+                </button>
+                
+                <div className="border-t border-gray-200 my-1" />
+                
+                <div className="px-4 py-1 text-xs font-semibold text-gray-500">Consultar raios</div>
+                
+                {[500, 1000, 1500, 2000, 3000, 5000].map(r => (
+                  <button
+                    key={r}
+                    onClick={() => {
+                      // Ativar modo radius, definir raio e fazer análise
+                      setActiveMode('radius');
+                      setSelectedRadius(r);
+                      setRadius([r]);
+                      setMarker({ lat: contextMenuPoint.lat, lng: contextMenuPoint.lng });
+                      
+                      // Atualizar círculo
+                      const map = mapRef.current?.getMap();
+                      if (map) {
+                        upsertAnalysisCircle({
+                          map,
+                          center: [contextMenuPoint.lng, contextMenuPoint.lat],
+                          radiusMeters: r,
+                        });
+                      }
+                      
+                      // Buscar dados
+                      setSpaceLoading(true);
+                      setSpaceError(null);
+                      
+                      const cachedData = getFromCache(contextMenuPoint.lat, contextMenuPoint.lng, r);
+                      if (cachedData) {
+                        setSpaceData(cachedData);
+                        setSpaceLoading(false);
+                        toast.success('Dados carregados do cache!', {
+                          icon: <Database className="w-4 h-4" />,
+                        });
+                      } else {
+                        fetch(`/api/space?lat=${contextMenuPoint.lat}&lng=${contextMenuPoint.lng}&radius=${r}`)
+                          .then(res => res.json())
+                          .then(result => {
+                            if (result.ok && result.data) {
+                              setSpaceData(result.data);
+                              saveToCache(contextMenuPoint.lat, contextMenuPoint.lng, r, result.data);
+                              toast.success('Dados carregados com sucesso!');
+                            }
+                            setSpaceLoading(false);
+                          })
+                          .catch(() => {
+                            setSpaceLoading(false);
+                            toast.error('Erro ao buscar dados');
+                          });
+                      }
+                      
+                      setContextMenuPoint(null);
+                      setContextMenuPosition(null);
+                    }}
+                    className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100"
+                  >
+                    {r >= 1000 ? `${r/1000}km` : `${r}m`}
+                  </button>
+                ))}
+                
+                <div className="border-t border-gray-200 my-1" />
+                
+                <button
+                  onClick={() => {
+                    setSavedPoints(prev => prev.filter(p => p.id !== contextMenuPoint.id));
+                    setContextMenuPoint(null);
+                    setContextMenuPosition(null);
+                    toast.success('Ponto removido');
+                  }}
+                  className="w-full px-4 py-2 text-left text-sm hover:bg-red-50 text-red-600 flex items-center gap-2"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  Remover ponto
+                </button>
+              </div>
+            </>
+          )}
+          
           {/* Loading overlay */}
           {spaceLoading && (
             <div className="absolute inset-0 bg-black/20 flex items-center justify-center rounded-lg">

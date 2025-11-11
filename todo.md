@@ -1134,25 +1134,37 @@
 - [x] Visual destacado para raio selecionado
 
 ### Modo 2: Adicionar Ponto
-- [ ] Modo de adicionar pins/marcadores no mapa
-- [ ] Ao clicar, adiciona pin personalizado
-- [ ] Integração com Google Maps (abrir no Maps, rotas, street view)
-- [ ] Opção de consultar raios a partir do ponto
-- [ ] Gerenciar múltiplos pontos
+- [x] Modo de adicionar pins/marcadores no mapa
+- [x] Ao clicar, adiciona pin personalizado
+- [x] Menu contextual ao clicar com botão direito no pin
+- [x] Opção "Abrir no Google Maps" (nova aba)
+- [x] Opção "Ver Street View"
+- [x] Opção "Consultar raios" (abre submenu com 500m, 1km, 2km, etc)
+- [x] Opção "Remover ponto"
+- [x] Gerenciar múltiplos pontos simultaneamente
+- [ ] Salvar pontos com nome personalizado (feature futura)
 
 ### Modo 3: Desenhar Área
-- [ ] Ferramenta de desenho livre com mouse
-- [ ] Clique para criar vértices do polígono
-- [ ] Fechar polígono automaticamente
-- [ ] Análise de área customizada (não circular)
-- [ ] Calcular dados demográficos dentro do polígono
-- [ ] Opção de editar/deletar área desenhada
+- [x] Ferramenta de desenho livre com mouse
+- [x] Clique para criar vértices do polígono
+- [x] Fechar polígono com botão "Fechar Polígono"
+- [x] Botão "Limpar" para resetar polígono
+- [x] Contador de vértices em tempo real
+- [x] Marcação visual do primeiro vértice
+- [x] Renderizar linhas conectando vértices (tracejadas)
+- [x] Linha de fechamento automática ao fechar polígono
+- [x] Preenchimento semi-transparente do polígono fechado
+- [ ] Análise de área customizada (não circular) - requer API
+- [ ] Calcular dados demográficos dentro do polígono - requer API
 
 ### Integração e UX
-- [ ] Remover modo "Ativar Análise" antigo
-- [ ] Menu lateral com os 3 modos
-- [ ] Ícones intuitivos para cada modo
-- [ ] Feedback visual do modo ativo
-- [ ] Instruções contextuais para cada modo
-- [ ] Limpar análises anteriores ao trocar de modo
+- [x] Remover modo "Ativar Análise" antigo
+- [x] Menu lateral com os 3 modos
+- [x] Ícones intuitivos para cada modo
+- [x] Feedback visual do modo ativo
+- [x] Instruções contextuais para cada modo
+- [x] Animações suaves (hover, transitions)
+- [x] Skeleton loaders durante carregamento (já existente)
+- [ ] Limpar análises anteriores ao trocar de modo (feature futura)
+- [ ] Confirmação antes de limpar dados (feature futura)
 
