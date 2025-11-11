@@ -113,15 +113,12 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
     setError(null);
 
     // Construir objeto de requisição
+    // NOTA: Removido sessionToken temporariamente para debug
     const requestOptions: any = {
       input: inputValue,
       componentRestrictions: { country: "br" },
+      // sessionToken: sessionTokenRef.current,  // Desativado para debug
     };
-    
-    // Adicionar sessionToken se disponível
-    if (sessionTokenRef.current) {
-      requestOptions.sessionToken = sessionTokenRef.current;
-    }
     
     console.log('[AddressSearch] Requisição:', requestOptions);
 
