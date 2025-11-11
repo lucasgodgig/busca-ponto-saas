@@ -38,6 +38,7 @@ export default function MapShell({ tenantId, loading = false, onNavigateHome }: 
   const [marker, setMarker] = useState<{ lat: number; lng: number } | null>(null);
   const [address, setAddress] = useState<string>("");
   const [radius, setRadius] = useState([DEFAULT_RADIUS]);
+  const [selectedRadius, setSelectedRadius] = useState<number>(DEFAULT_RADIUS); // Raio pré-selecionado em metros
 
   // Debounced radius change handler
   const debouncedRadiusChange = useMemo(
@@ -55,7 +56,6 @@ export default function MapShell({ tenantId, loading = false, onNavigateHome }: 
   // Modos de análise: 'radius' | 'point' | 'area' | null
   type AnalysisMode = 'radius' | 'point' | 'area' | null;
   const [activeMode, setActiveMode] = useState<AnalysisMode>(null);
-  const [selectedRadius, setSelectedRadius] = useState<number>(1000); // Raio pré-selecionado em metros
   
   // Pontos adicionados manualmente (modo "Adicionar Ponto")
   type SavedPoint = {
@@ -96,64 +96,33 @@ export default function MapShell({ tenantId, loading = false, onNavigateHome }: 
       setMarker(newMarker);
       setAddress(addressStr);
 
-      // Update circle on map
+      // Centralizar mapa no endereço
+      setViewport({
+        latitude: lat,
+        longitude: lng,
+        zoom: 14,
+      });
+
+      // Update circle on map com selectedRadius
       const map = mapRef.current?.getMap();
       if (map) {
         upsertAnalysisCircle({
           map,
           center: [lng, lat],
-          radiusMeters: radius[0],
+          radiusMeters: selectedRadius,
         });
       }
 
-      // Validar raio
-      const currentRadius = radius[0];
-      if (currentRadius > MAX_RADIUS) {
-        toast.error(`Raio máximo permitido: ${MAX_RADIUS}m`);
-        return;
-      }
+      // Atualizar radius com selectedRadius
+      setRadius([selectedRadius]);
 
-      // Fetch space data
-      setSpaceLoading(true);
-      setSpaceError(null);
-      
-      // Tentar buscar do cache primeiro
-      const cachedData = getFromCache(lat, lng, currentRadius);
-      if (cachedData) {
-        console.log('[MapShell] Usando dados do cache (address)');
-        setSpaceData(cachedData);
-        setSpaceLoading(false);
-        toast.success('Dados carregados do cache!', {
-          description: 'Dados salvos anteriormente',
-          icon: <Database className="w-4 h-4" />,
-        });
-        return;
-      }
-      
-      fetch(`/api/space?lat=${lat}&lng=${lng}&radius=${currentRadius}`)
-        .then((res) => res.json())
-        .then((response) => {
-          if (response.ok && response.data) {
-            setSpaceData(response.data);
-            // Salvar no cache
-            saveToCache(lat, lng, currentRadius, response.data);
-          } else {
-            setSpaceError(response.error || 'Erro ao buscar dados');
-          }
-          setSpaceLoading(false);
-        })
-        .catch((err) => {
-          console.error('[MapShell] Erro ao buscar dados:', err);
-          const errorMsg = err.message || 'Erro ao buscar dados da localização';
-          setSpaceError(errorMsg);
-          toast.error(errorMsg, {
-            description: 'Verifique se as variáveis de ambiente estão configuradas em Settings → Secrets',
-            duration: 5000,
-          });
-          setSpaceLoading(false);
-        });
+      // Mostrar toast informando que o usuário pode ajustar o raio
+      toast.info('Endereço encontrado!', {
+        description: 'Ajuste o raio e clique no mapa para analisar',
+        duration: 3000,
+      });
     },
-    [radius]
+    [selectedRadius]
   );
 
   // Handle map click
@@ -310,6 +279,22 @@ export default function MapShell({ tenantId, loading = false, onNavigateHome }: 
       }
     }
   }, [radius, marker]);
+
+  // Update circle when selectedRadius changes (modo radius ativo)
+  useEffect(() => {
+    if (marker && activeMode === 'radius') {
+      const map = mapRef.current?.getMap();
+      if (map) {
+        upsertAnalysisCircle({
+          map,
+          center: [marker.lng, marker.lat],
+          radiusMeters: selectedRadius,
+        });
+      }
+      // Atualizar radius também
+      setRadius([selectedRadius]);
+    }
+  }, [selectedRadius, marker, activeMode]);
 
   // Handle reset
   const handleReset = useCallback(() => {

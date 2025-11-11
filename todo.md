@@ -1303,3 +1303,33 @@
 - Melhorado feedback visual para usuário
 
 
+
+
+
+## 🗺️ CORREÇÃO FLUXO MAPA INTERATIVO (11/11/2025)
+
+### Bug Reportado
+- [x] Busca de endereço funciona, mas seleção de raio não aplica (CORRIGIDO)
+- [x] Botão "Executar Análise Rápida" não funciona após selecionar raio (CORRIGIDO)
+- [x] Círculo no mapa não aparece ou não atualiza com o raio selecionado (CORRIGIDO)
+- [x] Fluxo completo está quebrado: buscar → ajustar raio → executar análise (CORRIGIDO)
+- [x] Verificar integração entre AddressSearch, MapPage e execução da consulta (OK)
+
+### Correções Aplicadas
+- [x] Sincronizado `selectedRadius` com `radius` no estado
+- [x] Adicionado `useEffect` para atualizar círculo quando `selectedRadius` mudar
+- [x] Busca de endereço agora centraliza mapa e mostra círculo com raio selecionado
+- [x] Toast informativo após buscar endereço: "Ajuste o raio e clique no mapa para analisar"
+- [x] Círculo atualiza em tempo real ao mudar raio nos botões (500m, 1km, 1.5km, 2km, 3km, 5km)
+- [x] Fluxo completo funcional: buscar endereço → selecionar raio → clicar no mapa → executar análise
+
+### Fluxo Corrigido
+1. Usuário busca endereço (AddressSearch)
+2. Mapa centraliza no endereço e ativa modo "Consulte um raio"
+3. Círculo aparece no mapa com raio padrão (1500m)
+4. Usuário pode ajustar raio clicando nos botões (500m-5km)
+5. Círculo atualiza visualmente em tempo real
+6. Usuário clica no mapa para executar análise
+7. Dados da Space API são carregados e exibidos no painel lateral
+
+
