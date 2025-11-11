@@ -1668,3 +1668,9 @@ Substituir análise de centroide + raio fixo por análise real usando coordenada
 - [x] Adicionar links de navegação no Sidebar (CONCLUÍDO)
 - [x] Testar fluxo completo end-to-end (CONCLUÍDO - sidebar mostrando menus, compilação OK)
 
+
+
+## 🔧 Ajuste de Navegação (11/11/2025)
+- [x] Remover item "Estudos" do sidebar (está dando erro) (CONCLUÍDO)
+- [x] Manter apenas "Meus Estudos" no menu (CONCLUÍDO)
+

@@ -41,11 +41,6 @@ export default function Sidebar({ className }: SidebarProps) {
       href: "/mapa",
     },
     {
-      title: "Estudos",
-      icon: FileText,
-      href: "/estudos",
-    },
-    {
       title: "Meus Estudos",
       icon: FileText,
       href: "/meus-estudos",
