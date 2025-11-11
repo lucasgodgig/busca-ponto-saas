@@ -2,7 +2,7 @@ import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { adminProcedure, protectedProcedure, router } from "../_core/trpc";
 import { getDb } from "../db";
-import { studyRequests, studyUsage } from "../../drizzle/schema";
+import { studyRequests, studyUsage, notifications } from "../../drizzle/schema";
 import { eq, and, desc } from "drizzle-orm";
 import { storagePut } from "../storage";
 
@@ -243,6 +243,22 @@ export const studyRequestsRouter = router({
       // Upload para S3
       const { url } = await storagePut(fileKey, pdfBuffer, "application/pdf");
 
+      // Obter dados da solicitacao para notificacao
+      const studyRequest = await db
+        .select()
+        .from(studyRequests)
+        .where(eq(studyRequests.id, input.requestId))
+        .limit(1);
+
+      if (studyRequest.length === 0) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Solicitacao nao encontrada",
+        });
+      }
+
+      const study = studyRequest[0];
+
       // Atualizar registro no banco
       await db
         .update(studyRequests)
@@ -253,6 +269,18 @@ export const studyRequestsRouter = router({
           completedAt: new Date(),
         })
         .where(eq(studyRequests.id, input.requestId));
+
+      // Criar notificacao para o usuario
+      await db
+        .insert(notifications)
+        .values({
+          userId: study.createdBy,
+          title: `Estudo Pronto: ${study.title}`,
+          content: `Seu estudo "${study.title}" esta pronto para download. Acesse a pagina "Meus Estudos" para visualizar.`,
+          type: "study_ready",
+          relatedStudyRequestId: input.requestId,
+          isRead: false,
+        });
 
       return {
         success: true,
@@ -300,6 +328,62 @@ export const studyRequestsRouter = router({
       }
 
       return request[0];
+    }),
+});
+
+
+
+// Adicionar procedures de notificacoes
+export const notificationsRouter = router({
+  getNotifications: protectedProcedure
+    .input(
+      z.object({
+        limit: z.number().default(10),
+        offset: z.number().default(0),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const db = await getDb();
+      if (!db) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Database nao disponivel",
+        });
+      }
+
+      const notifs = await db
+        .select()
+        .from(notifications)
+        .where(eq(notifications.userId, ctx.user.id))
+        .orderBy(desc(notifications.createdAt))
+        .limit(input.limit)
+        .offset(input.offset);
+
+      return notifs;
+    }),
+
+  markAsRead: protectedProcedure
+    .input(z.object({ notificationId: z.number() }))
+    .mutation(async ({ ctx, input }) => {
+      const db = await getDb();
+      if (!db) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Database nao disponivel",
+        });
+      }
+
+      await db
+        .update(notifications)
+        .set({ isRead: true })
+        .where(
+          and(
+            eq(notifications.id, input.notificationId),
+            eq(notifications.userId, ctx.user.id)
+          )
+        );
+
+      return { success: true };
     }),
 });
 

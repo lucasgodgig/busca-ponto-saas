@@ -85,6 +85,13 @@
       "when": 1762897504876,
       "tag": "0011_blue_psynapse",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "5",
+      "when": 1762899324966,
+      "tag": "0012_colossal_supreme_intelligence",
+      "breakpoints": true
     }
   ]
 }

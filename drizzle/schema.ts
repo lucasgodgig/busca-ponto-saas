@@ -242,6 +242,23 @@ export const studyUsage = mysqlTable("studyUsage", {
   userMonthYearIdx: index("user_month_year_idx").on(table.userId, table.month, table.year),
 }));
 
+/**
+ * Notifications - Notificacoes para usuarios
+ */
+export const notifications = mysqlTable('notifications', {
+  id: int('id').autoincrement().primaryKey(),
+  userId: int('userId').notNull(),
+  title: varchar('title', { length: 255 }).notNull(),
+  content: text('content').notNull(),
+  type: mysqlEnum('type', ['study_ready', 'study_rejected', 'system', 'other']).default('other').notNull(),
+  relatedStudyRequestId: int('relatedStudyRequestId'),
+  isRead: boolean('isRead').default(false).notNull(),
+  createdAt: timestamp('createdAt').defaultNow().notNull(),
+}, (table) => ({
+  userIdIdx: index('user_id_idx').on(table.userId),
+  typeIdx: index('type_idx').on(table.type),
+}));
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   memberships: many(memberships),
@@ -251,6 +268,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   quickQueries: many(quickQueries),
   savedLocations: many(savedLocations),
   studyUsage: many(studyUsage),
+  notifications: many(notifications),
 }));
 
 export const tenantsRelations = relations(tenants, ({ many, one }) => ({
@@ -374,6 +392,13 @@ export const studyUsageRelations = relations(studyUsage, ({ one }) => ({
   }),
 }));
 
+export const notificationsRelations = relations(notifications, ({ one }) => ({
+  user: one(users, {
+    fields: [notifications.userId],
+    references: [users.id],
+  }),
+}));
+
 /**
  * GeneratedStudy - Estudos gerados automaticamente com dados da Space API
  */
@@ -490,4 +515,6 @@ export type StudyUsage = typeof studyUsage.$inferSelect;
 export type InsertStudyUsage = typeof studyUsage.$inferInsert;
 export type StudyRequest = typeof studyRequests.$inferSelect;
 export type InsertStudyRequest = typeof studyRequests.$inferInsert;
+export type Notification = typeof notifications.$inferSelect;
+export type InsertNotification = typeof notifications.$inferInsert;
 

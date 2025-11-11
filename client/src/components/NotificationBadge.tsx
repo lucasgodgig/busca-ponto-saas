@@ -13,24 +13,23 @@ import { Badge } from "@/components/ui/badge";
 import { trpc } from "@/lib/trpc";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { useEffect } from "react";
 
 export default function NotificationBadge() {
   const { user } = useAuth();
-  const tenantId = user?.memberships?.[0]?.tenant?.id;
-  const { data: studies } = trpc.studies.list.useQuery(
-    { tenantId: tenantId! },
-    { enabled: !!tenantId }
+  const { data: notifications = [] } = trpc.notifications.getNotifications.useQuery(
+    { limit: 10, offset: 0 },
+    { enabled: !!user }
   );
   
-  // Filtrar estudos com atualizações recentes (últimas 24h)
-  const recentUpdates = studies?.filter(study => {
-    const updatedAt = new Date(study.updatedAt);
-    const now = new Date();
-    const hoursDiff = (now.getTime() - updatedAt.getTime()) / (1000 * 60 * 60);
-    return hoursDiff <= 24 && study.status !== 'aberto';
-  }) || [];
+  const markAsReadMutation = trpc.notifications.markAsRead.useMutation();
 
-  const unreadCount = recentUpdates.length;
+  // Contar notificações não lidas
+  const unreadCount = notifications.filter(n => !n.isRead).length;
+
+  const handleNotificationClick = (notificationId: number) => {
+    markAsReadMutation.mutate({ notificationId });
+  };
 
   return (
     <DropdownMenu>
@@ -51,22 +50,26 @@ export default function NotificationBadge() {
         <DropdownMenuLabel>Notificações</DropdownMenuLabel>
         <DropdownMenuSeparator />
         
-        {recentUpdates.length === 0 ? (
+        {notifications.length === 0 ? (
           <div className="p-4 text-center text-sm text-muted-foreground">
             Nenhuma notificação nova
           </div>
         ) : (
           <>
-            {recentUpdates.map((study) => (
-              <DropdownMenuItem key={study.id} className="flex flex-col items-start p-3 cursor-pointer">
-                <div className="font-medium text-sm">{study.title}</div>
-                <div className="text-xs text-muted-foreground mt-1">
-                  {study.status === 'concluido' && '✅ Estudo concluído'}
-                  {study.status === 'em_analise' && '🔄 Em análise'}
-                  {study.status === 'devolvido' && '⚠️ Devolvido'}
+            {notifications.map((notification) => (
+              <DropdownMenuItem 
+                key={notification.id} 
+                className="flex flex-col items-start p-3 cursor-pointer"
+                onClick={() => handleNotificationClick(notification.id)}
+              >
+                <div className={`font-medium text-sm ${!notification.isRead ? 'font-bold' : ''}`}>
+                  {notification.title}
                 </div>
                 <div className="text-xs text-muted-foreground mt-1">
-                  {formatDistanceToNow(new Date(study.updatedAt), { 
+                  {notification.content}
+                </div>
+                <div className="text-xs text-muted-foreground mt-1">
+                  {formatDistanceToNow(new Date(notification.createdAt), { 
                     addSuffix: true,
                     locale: ptBR 
                   })}

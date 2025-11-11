@@ -1714,3 +1714,18 @@ Substituir análise de centroide + raio fixo por análise real usando coordenada
 - Verifica se registro do mês existe, se sim incrementa, se não cria novo
 - Dashboard agora mostra contador correto de estudos utilizados
 
+
+
+
+## 🖔 Notificações de Estudos Prontos (11/11/2025)
+- [x] Adicionar notificação quando admin faz upload de PDF (CONCLUÍDO)
+- [x] Cliente recebe notificação no ícone de sino (CONCLUÍDO)
+- [x] Mensagem: "Seu estudo [Título] está pronto para download" (CONCLUÍDO)
+
+### Implementação:
+- Tabela `notifications` criada no banco com 8 colunas
+- Quando admin faz upload de PDF, notificação é criada automaticamente
+- Frontend atualizado: NotificationBadge agora lista notificações do banco
+- Badge mostra contador de notificações não lidas
+- Clique em notificação marca como lida
+
