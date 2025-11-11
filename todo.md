@@ -1110,3 +1110,14 @@
 - [ ] Aguardando publicação para verificar logs em produção
 - [ ] Após publicar, verificar logs do servidor para diagnosticar
 
+
+
+
+## 🔧 SOLUÇÃO FALLBACK PARA API SPACE (11/11/2025)
+- [x] Variáveis de ambiente não estão sendo injetadas em produção
+- [x] Adicionar fallback hardcoded para SPACE_API_BASE_URL e SPACE_API_KEY
+- [x] Manter tentativa de ler de env primeiro, fallback se não existir
+- [x] Logs indicam se está usando Env ou Fallback
+- [x] Remover verificação que retornava CONFIG_MISSING
+- [ ] Testar em produção após publicar
+

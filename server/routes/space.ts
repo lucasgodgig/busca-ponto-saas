@@ -1,8 +1,9 @@
 import { Request, Response } from 'express';
 
-// Sanitizar URL base removendo espaços e garantindo formato correto
-const BASE = process.env.SPACE_API_BASE_URL?.trim();
-const KEY = process.env.SPACE_API_KEY?.trim();
+// Fallback para credenciais da API Space
+// Prioridade: 1) Variáveis de ambiente, 2) Valores hardcoded
+const BASE = process.env.SPACE_API_BASE_URL?.trim() || 'https://gs.greatspaces.com.br/api/';
+const KEY = process.env.SPACE_API_KEY?.trim() || 'ICZN3OS030JVXKFPMWOHWYGWD6JVW7';
 const MAXR = Number(process.env.SPACE_MAX_RADIUS ?? 5000);
 
 // Validar formato da URL base
@@ -17,17 +18,20 @@ if (BASE) {
 // Validar variáveis de ambiente críticas
 console.log('[SPACE API] Inicializando...');
 console.log('[SPACE API] NODE_ENV:', process.env.NODE_ENV);
-console.log('[SPACE API] SPACE_API_BASE_URL:', BASE ? `Configurada (${BASE.substring(0, 30)}...)` : '❌ FALTANDO');
-console.log('[SPACE API] SPACE_API_KEY:', KEY ? `Configurada (${KEY.substring(0, 10)}...)` : '❌ FALTANDO');
+
+const usingEnvBase = !!process.env.SPACE_API_BASE_URL;
+const usingEnvKey = !!process.env.SPACE_API_KEY;
+
+console.log('[SPACE API] SPACE_API_BASE_URL:', usingEnvBase ? `✅ Env (${BASE.substring(0, 30)}...)` : `⚠️ Fallback (${BASE.substring(0, 30)}...)`);
+console.log('[SPACE API] SPACE_API_KEY:', usingEnvKey ? `✅ Env (${KEY.substring(0, 10)}...)` : `⚠️ Fallback (${KEY.substring(0, 10)}...)`);
 console.log('[SPACE API] SPACE_MAX_RADIUS:', MAXR);
 
-if (!BASE || !KEY) {
-  console.error('[SPACE API] ❌ ERRO CRÍTICO: Variáveis de ambiente não configuradas!');
-  console.error('[SPACE API] Configure SPACE_API_BASE_URL e SPACE_API_KEY em Settings → Secrets');
-  console.error('[SPACE API] Após configurar, publique uma nova versão para aplicar as mudanças');
-} else {
-  console.log('[SPACE API] ✅ Configuração OK');
+if (!usingEnvBase || !usingEnvKey) {
+  console.warn('[SPACE API] ⚠️ Usando valores fallback hardcoded');
+  console.warn('[SPACE API] Para usar variáveis customizadas, configure em Settings → Secrets');
 }
+
+console.log('[SPACE API] ✅ Pronto para uso');
 
 function num(v: any, d = 0) {
   const n = Number(v);
@@ -156,14 +160,7 @@ export async function handleSpaceDebug(req: Request, res: Response) {
 
 export async function handleSpaceQuery(req: Request, res: Response) {
   try {
-    // Verificar se as variáveis de ambiente estão configuradas
-    if (!BASE || !KEY) {
-      console.error('[SPACE API] Tentativa de uso sem configuração!');
-      return res.status(500).json({
-        error: 'CONFIG_MISSING',
-        message: 'API não configurada. Configure SPACE_API_BASE_URL e SPACE_API_KEY em Settings → Secrets',
-      });
-    }
+    // BASE e KEY agora sempre existem (env ou fallback), então não precisa verificar
 
     const lat = num(req.query.lat);
     const lng = num(req.query.lng);
