@@ -25,6 +25,7 @@ declare global {
 export default function AddressSearch({ onAddressSelect, loading }: AddressSearchProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const suggestionsRef = useRef<Suggestion[]>([]);
+  const placesServiceContainerRef = useRef<HTMLDivElement>(null);
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -64,9 +65,21 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
     try {
       sessionTokenRef.current = new window.google.maps.places.AutocompleteSessionToken();
       autocompleteServiceRef.current = new window.google.maps.places.AutocompleteService();
-      placesServiceRef.current = new window.google.maps.places.PlacesService(
-        document.createElement("div")
-      );
+      
+      // Usar elemento DOM real em vez de div criado dinamicamente
+      // Isso evita InvalidMapError em produção
+      if (placesServiceContainerRef.current) {
+        placesServiceRef.current = new window.google.maps.places.PlacesService(
+          placesServiceContainerRef.current
+        );
+        console.log('[AddressSearch] PlacesService inicializado com elemento DOM real');
+      } else {
+        console.warn('[AddressSearch] placesServiceContainerRef não disponível, usando fallback');
+        // Fallback: criar div temporariamente
+        const tempDiv = document.createElement("div");
+        placesServiceRef.current = new window.google.maps.places.PlacesService(tempDiv);
+      }
+      
       console.log('[AddressSearch] Google Places API inicializada com sucesso');
     } catch (err) {
       console.error("[AddressSearch] Erro ao carregar Google Places:", err);
@@ -95,50 +108,79 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
     }
 
     console.log('[AddressSearch] Chamando getPlacePredictions...');
+    console.log('[AddressSearch] sessionToken:', sessionTokenRef.current);
     setIsLoading(true);
     setError(null);
 
-    autocompleteServiceRef.current.getPlacePredictions(
-      {
-        input: inputValue,
-        sessionToken: sessionTokenRef.current,
-        componentRestrictions: { country: "br" },
-      },
-      (predictions: any[], status: string) => {
-        console.log('[AddressSearch] Callback recebido, status:', status, 'predictions:', predictions);
-        setIsLoading(false);
+    // Construir objeto de requisição
+    const requestOptions: any = {
+      input: inputValue,
+      componentRestrictions: { country: "br" },
+    };
+    
+    // Adicionar sessionToken se disponível
+    if (sessionTokenRef.current) {
+      requestOptions.sessionToken = sessionTokenRef.current;
+    }
+    
+    console.log('[AddressSearch] Requisição:', requestOptions);
 
-        if (status !== window.google.maps.places.PlacesServiceStatus.OK) {
-          console.error("[AddressSearch] Erro ao buscar sugestões:", status);
-          setError("Erro ao buscar endereços");
-          setSuggestions([]);
-          suggestionsRef.current = [];
-          return;
+    // Usar arrow function para manter o contexto correto
+    try {
+      console.log('[AddressSearch] Chamando getPlacePredictions com:', requestOptions);
+      autocompleteServiceRef.current.getPlacePredictions(
+        requestOptions,
+        (predictions: any[], status: string) => {
+          try {
+            console.log('[AddressSearch] Callback recebido, status:', status);
+            console.log('[AddressSearch] Predictions:', predictions);
+            console.log('[AddressSearch] Status OK?', status === window.google.maps.places.PlacesServiceStatus.OK);
+            setIsLoading(false);
+
+            if (status !== window.google.maps.places.PlacesServiceStatus.OK) {
+              console.error("[AddressSearch] Erro ao buscar sugestões:", status);
+              setError("Erro ao buscar endereços");
+              setSuggestions([]);
+              suggestionsRef.current = [];
+              return;
+            }
+
+            if (!predictions || predictions.length === 0) {
+              console.log('[AddressSearch] Nenhuma predição retornada');
+              setError("Nenhum endereço encontrado");
+              setSuggestions([]);
+              suggestionsRef.current = [];
+              return;
+            }
+
+            console.log('[AddressSearch] Formatando', predictions.length, 'sugestões');
+            const formattedSuggestions: Suggestion[] = predictions.map(
+              (prediction: any) => ({
+                id: prediction.place_id,
+                description: prediction.description,
+                placeId: prediction.place_id,
+              })
+            );
+
+            console.log('[AddressSearch] Sugestões formatadas:', formattedSuggestions);
+            suggestionsRef.current = formattedSuggestions;
+            startTransition(() => {
+              setSuggestions(formattedSuggestions);
+              setShowSuggestions(true);
+            });
+            setError(null);
+          } catch (callbackErr) {
+            console.error('[AddressSearch] Erro no callback:', callbackErr);
+            setIsLoading(false);
+            setError("Erro ao processar resultados");
+          }
         }
-
-        if (!predictions || predictions.length === 0) {
-          setError("Nenhum endereço encontrado");
-          setSuggestions([]);
-          suggestionsRef.current = [];
-          return;
-        }
-
-        const formattedSuggestions: Suggestion[] = predictions.map(
-          (prediction: any) => ({
-            id: prediction.place_id,
-            description: prediction.description,
-            placeId: prediction.place_id,
-          })
-        );
-
-        suggestionsRef.current = formattedSuggestions;
-        startTransition(() => {
-          setSuggestions(formattedSuggestions);
-          setShowSuggestions(true);
-        });
-        setError(null);
-      }
-    );
+      );
+    } catch (err) {
+      console.error('[AddressSearch] Erro ao chamar getPlacePredictions:', err);
+      setIsLoading(false);
+      setError("Erro ao buscar endereços");
+    }
   }, [inputValue]);
 
   // Handler para selecionar uma sugestão
@@ -212,6 +254,9 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
 
   return (
     <div className="w-full relative">
+      {/* Container oculto para PlacesService */}
+      <div ref={placesServiceContainerRef} className="hidden" />
+      
       <div className="relative">
         {/* Input com ícone */}
         <div className="relative">

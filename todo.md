@@ -1424,3 +1424,59 @@ Substituir análise de centroide + raio fixo por análise real usando coordenada
 - Cada seção tem `mb-6` para separar visualmente
 
 
+
+
+
+## 🐛 BUG CRÍTICO: BUSCA DE ENDEREÇO NÃO FUNCIONA (11/11/2025)
+
+### Problema
+- Busca de endereço não retorna resultados
+- Usuário digita endereço e nada acontece
+- Problema recorrente mesmo após correções anteriores
+
+### Investigação Necessária
+- [ ] Verificar logs do console do navegador
+- [ ] Verificar se Google Maps API está carregando
+- [ ] Verificar se autocompleteServiceRef está sendo inicializado
+- [ ] Verificar se handleSearch está sendo chamado
+- [ ] Verificar se há erros de API key ou quota
+
+### Possíveis Causas
+- Google Maps script não carregando corretamente
+- API key inválida ou com restrições
+- Problema de timing na inicialização
+- Erro no callback do getPlacePredictions
+- Problema de CORS ou network
+
+
+
+
+
+### CORREÇÃO APLICADA
+- Problema: sessionToken estava sendo passado como null
+- Solução: Construir objeto de requisição dinamicamente, adicionando sessionToken apenas se disponível
+- Status: Corrigido e deployado via hot reload
+- Próximo: Aguardando teste do usuário com novo código
+
+
+
+
+
+## ✅ CORREÇÃO FINAL: BUSCA DE ENDEREÇO (11/11/2025)
+
+### Problema Identificado
+- Funcionava em desenvolvimento mas não em produção
+- Erro: InvalidMapError ao inicializar PlacesService
+- Causa: PlacesService recebendo div criado dinamicamente
+
+### Solução Implementada
+- [x] Criar placesServiceContainerRef para elemento DOM real
+- [x] Adicionar div hidden no JSX com ref
+- [x] PlacesService usa elemento DOM real
+- [x] Fallback para div temporária
+- [x] Logs detalhados para debug
+- [x] Try-catch para erros silenciosos
+
+### Status: PRONTO PARA PUBLICAR ✅
+
+
