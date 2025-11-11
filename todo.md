@@ -1557,3 +1557,27 @@ Substituir análise de centroide + raio fixo por análise real usando coordenada
 ### Status: PRONTO PARA PUBLICAR ✅
 
 
+
+
+
+## 🚨 DIAGNÓSTICO: ENDPOINT /API/CONFIG NÃO RETORNA API KEY (11/11/2025)
+
+### Logs de Produção
+- "[Google Maps] API key não encontrada em variáveis de ambiente, buscando do servidor..."
+- "[AddressSearch] Erro ao carregar Google Maps: Error: Google Maps API key is not configured."
+
+### Teste em Desenvolvimento
+- [x] Endpoint /api/config funciona corretamente
+- [x] Retorna: { "googleMapsApiKey": "AIzaSyCMRKty6h9qmy9M_IArn1T6Cye26epmujE" }
+- [x] Variáveis de ambiente estão configuradas em desenvolvimento
+
+### Hipótese Confirmada
+- ❌ Variáveis VITE_GOOGLE_MAPS_API_KEY e GOOGLE_PLACES_API_KEY NÃO estão configuradas no servidor de PRODUÇÃO
+- Endpoint funciona, mas retorna string vazia porque process.env não tem as variáveis
+
+### Solução
+- [x] Adicionados logs de debug no endpoint /api/config
+- [ ] Publicar e verificar logs em produção
+- [ ] Se confirmar que variáveis não estão configuradas, adicionar no painel de Secrets da Manus
+
+

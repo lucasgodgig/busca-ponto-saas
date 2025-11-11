@@ -39,8 +39,16 @@ async function startServer() {
   
   // Config endpoint para frontend
   app.get("/api/config", (_req, res) => {
+    const viteKey = process.env.VITE_GOOGLE_MAPS_API_KEY;
+    const placesKey = process.env.GOOGLE_PLACES_API_KEY;
+    const finalKey = viteKey || placesKey || "";
+    
+    console.log("[API Config] VITE_GOOGLE_MAPS_API_KEY:", viteKey ? "SET (length: " + viteKey.length + ")" : "NOT SET");
+    console.log("[API Config] GOOGLE_PLACES_API_KEY:", placesKey ? "SET (length: " + placesKey.length + ")" : "NOT SET");
+    console.log("[API Config] Final key:", finalKey ? "SET (length: " + finalKey.length + ")" : "EMPTY");
+    
     res.json({
-      googleMapsApiKey: process.env.VITE_GOOGLE_MAPS_API_KEY || process.env.GOOGLE_PLACES_API_KEY || "",
+      googleMapsApiKey: finalKey,
     });
   });
   
