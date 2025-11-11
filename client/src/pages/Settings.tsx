@@ -21,9 +21,10 @@ export default function Settings() {
   }
 
   // Buscar dados do tenant
-  const { data: tenants } = trpc.tenants.list.useQuery(undefined, { enabled: !!selectedTenant });
-  const tenant = tenants?.find(t => t.id === selectedTenant);
-  const tenantLoading = false;
+  const { data: tenant, isLoading: tenantLoading } = trpc.tenants.getById.useQuery(
+    { tenantId: selectedTenant! },
+    { enabled: !!selectedTenant }
+  );
 
   // Estados do formulário
   const [name, setName] = useState("");

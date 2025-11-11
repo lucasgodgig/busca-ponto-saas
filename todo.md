@@ -1687,3 +1687,17 @@ Substituir análise de centroide + raio fixo por análise real usando coordenada
 - Estado de carregamento: Baixando...
 - Sem aviso de Site perigoso do Chrome
 
+
+
+
+## 🐛 Bug em Configurações (11/11/2025)
+- [x] Página de Configurações mostra "Nenhuma franqueadora encontrada" mesmo com empresa criada (CORRIGIDO)
+- [x] Usuário não consegue acessar configurações da empresa (CORRIGIDO)
+- [x] Botão "Criar Empresa" aparece mesmo tendo empresa ativa (CORRIGIDO)
+
+### Solução:
+- Adicionado import de useState que estava faltando
+- Alterada query para usar `trpc.tenants.getById` em vez de `trpc.tenants.list`
+- Passado `tenantId` corretamente na query
+- Agora Settings carrega dados da empresa corretamente
+
