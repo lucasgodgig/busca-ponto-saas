@@ -14,7 +14,8 @@ import { Slider } from "@/components/ui/slider";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
-import { Clock, Trash2 } from "lucide-react";
+import { Clock, Trash2, Database } from "lucide-react";
+import { getFromCache, saveToCache, getCacheStats, clearAllCache, getCacheSize } from "@/services/spaceCache";
 import type { SpaceData } from "@/services/spaceClient";
 
 interface MapShellProps {
@@ -95,11 +96,27 @@ export default function MapShell({ tenantId, loading = false, onNavigateHome }: 
       // Fetch space data
       setSpaceLoading(true);
       setSpaceError(null);
+      
+      // Tentar buscar do cache primeiro
+      const cachedData = getFromCache(lat, lng, currentRadius);
+      if (cachedData) {
+        console.log('[MapShell] Usando dados do cache (address)');
+        setSpaceData(cachedData);
+        setSpaceLoading(false);
+        toast.success('Dados carregados do cache!', {
+          description: 'Dados salvos anteriormente',
+          icon: <Database className="w-4 h-4" />,
+        });
+        return;
+      }
+      
       fetch(`/api/space?lat=${lat}&lng=${lng}&radius=${currentRadius}`)
         .then((res) => res.json())
         .then((response) => {
           if (response.ok && response.data) {
             setSpaceData(response.data);
+            // Salvar no cache
+            saveToCache(lat, lng, currentRadius, response.data);
           } else {
             setSpaceError(response.error || 'Erro ao buscar dados');
           }
@@ -143,6 +160,36 @@ export default function MapShell({ tenantId, loading = false, onNavigateHome }: 
       setSpaceLoading(true);
       setSpaceError(null);
       
+      // Tentar buscar do cache primeiro
+      const cachedData = getFromCache(newMarker.lat, newMarker.lng, radius[0]);
+      if (cachedData) {
+        console.log('[MapShell] Usando dados do cache');
+        setSpaceData(cachedData);
+        setSpaceLoading(false);
+        toast.success('Dados carregados do cache!', {
+          description: 'Dados salvos anteriormente',
+          icon: <Database className="w-4 h-4" />,
+        });
+        
+        // Adicionar ao histórico mesmo vindo do cache
+        const newPoint: AnalysisPoint = {
+          lat: newMarker.lat,
+          lng: newMarker.lng,
+          address: address || `${newMarker.lat.toFixed(5)}, ${newMarker.lng.toFixed(5)}`,
+          segment,
+          radius: radius[0],
+          timestamp: Date.now(),
+        };
+        
+        const updatedHistory = [newPoint, ...analysisHistory.filter(
+          p => !(Math.abs(p.lat - newPoint.lat) < 0.0001 && Math.abs(p.lng - newPoint.lng) < 0.0001)
+        )].slice(0, 5);
+        
+        setAnalysisHistory(updatedHistory);
+        localStorage.setItem('analysisHistory', JSON.stringify(updatedHistory));
+        return;
+      }
+      
       try {
         const url = `/api/space?lat=${newMarker.lat}&lng=${newMarker.lng}&radius=${radius[0]}`;
         console.log('[MapShell] Fetching:', url);
@@ -160,6 +207,10 @@ export default function MapShell({ tenantId, loading = false, onNavigateHome }: 
         
         if (result.ok && result.data) {
           setSpaceData(result.data);
+          
+          // Salvar no cache
+          saveToCache(newMarker.lat, newMarker.lng, radius[0], result.data);
+          
           toast.success("Dados carregados com sucesso!");
           
           // Adicionar ao histórico
@@ -331,9 +382,59 @@ export default function MapShell({ tenantId, loading = false, onNavigateHome }: 
             </Tooltip>
           </div>
 
+          {/* Botão de estatísticas de cache */}
+          <div className="absolute top-20 right-4 z-10">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="bg-white shadow-lg">
+                  <Database className="w-4 h-4 mr-2" />
+                  Cache
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-64">
+                <div className="px-2 py-2">
+                  <div className="text-sm font-medium mb-2">Estatísticas do Cache</div>
+                  <div className="space-y-1 text-xs text-muted-foreground">
+                    <div className="flex justify-between">
+                      <span>Hits:</span>
+                      <span className="font-medium">{getCacheStats().hits}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Misses:</span>
+                      <span className="font-medium">{getCacheStats().misses}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Taxa de acerto:</span>
+                      <span className="font-medium">
+                        {getCacheStats().hits + getCacheStats().misses > 0
+                          ? Math.round((getCacheStats().hits / (getCacheStats().hits + getCacheStats().misses)) * 100)
+                          : 0}%
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Entradas:</span>
+                      <span className="font-medium">{getCacheSize().storage}</span>
+                    </div>
+                  </div>
+                </div>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={() => {
+                    clearAllCache();
+                    toast.success('Cache limpo com sucesso!');
+                  }}
+                  className="text-red-600 cursor-pointer"
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Limpar Cache
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+
           {/* Dropdown de histórico */}
           {analysisHistory.length > 0 && (
-            <div className="absolute top-20 right-4 z-10">
+            <div className="absolute top-32 right-4 z-10">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm" className="bg-white shadow-lg">
@@ -366,21 +467,30 @@ export default function MapShell({ tenantId, loading = false, onNavigateHome }: 
                           });
                         }
                         
-                        // Recarregar dados
-                        setSpaceLoading(true);
-                        fetch(`/api/space?lat=${point.lat}&lng=${point.lng}&radius=${point.radius}`)
-                          .then(res => res.json())
-                          .then(response => {
-                            if (response.ok && response.data) {
-                              setSpaceData(response.data);
-                              toast.success('Análise restaurada!');
-                            }
-                            setSpaceLoading(false);
-                          })
-                          .catch(() => {
-                            setSpaceLoading(false);
-                            toast.error('Erro ao restaurar análise');
+                        // Recarregar dados (tentar cache primeiro)
+                        const cachedHistoryData = getFromCache(point.lat, point.lng, point.radius);
+                        if (cachedHistoryData) {
+                          setSpaceData(cachedHistoryData);
+                          toast.success('Análise restaurada do cache!', {
+                            icon: <Database className="w-4 h-4" />,
                           });
+                        } else {
+                          setSpaceLoading(true);
+                          fetch(`/api/space?lat=${point.lat}&lng=${point.lng}&radius=${point.radius}`)
+                            .then(res => res.json())
+                            .then(response => {
+                              if (response.ok && response.data) {
+                                setSpaceData(response.data);
+                                saveToCache(point.lat, point.lng, point.radius, response.data);
+                                toast.success('Análise restaurada!');
+                              }
+                              setSpaceLoading(false);
+                            })
+                            .catch(() => {
+                              setSpaceLoading(false);
+                              toast.error('Erro ao restaurar análise');
+                            });
+                        }
                       }}
                       className="cursor-pointer"
                     >

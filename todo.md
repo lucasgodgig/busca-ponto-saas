@@ -1078,3 +1078,18 @@
 - [x] Adicionar trim() nas variáveis de ambiente
 - [x] Validar formato da URL base
 
+
+
+
+## 🚀 CACHE LOCAL PARA API (11/11/2025)
+- [x] Criar serviço de cache (spaceCache.ts)
+- [x] Cache em memória para sessão atual
+- [x] Cache no localStorage para persistência
+- [x] Expiração automática (24 horas)
+- [x] Chave baseada em lat/lng/radius (arredondada para 4 casas decimais)
+- [x] Integrar cache no MapShell (handleMapClick, handleAddressSelect, histórico)
+- [x] Indicador visual quando dados vêm do cache (toast com ícone Database)
+- [x] Botão para limpar cache manualmente
+- [x] Estatísticas de cache (hits, misses, taxa de acerto)
+- [x] Limpeza automática de cache expirado ao inicializar
+
