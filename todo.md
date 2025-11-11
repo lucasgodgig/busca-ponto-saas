@@ -1000,3 +1000,50 @@
 - [x] Mostrar feedback visual do modo ativo (borda, cor, ícone)
 - [x] Permitir navegação livre (pan, zoom) em qualquer modo
 
+
+
+
+## 🎨 MELHORIAS DE UX DO MAPA
+
+### Cursor Customizado
+- [ ] Cursor padrão quando modo análise está desativado
+- [ ] Cursor de mira/crosshair quando modo análise está ativo
+- [ ] CSS cursor: crosshair no container do mapa
+
+### Tooltip no Botão
+- [ ] Adicionar Tooltip component do shadcn/ui
+- [ ] Tooltip "Clique para selecionar um ponto no mapa" quando ativo
+- [ ] Tooltip "Ative para selecionar pontos" quando inativo
+
+### Histórico de Pontos
+- [ ] Estado para armazenar últimos 5 pontos analisados
+- [ ] Persistir histórico no localStorage
+- [ ] Dropdown com lista de pontos (endereço + data)
+- [ ] Clicar no ponto do histórico restaura análise
+- [ ] Botão "Limpar Histórico"
+
+
+
+
+## 🎨 MELHORIAS DE UX DO MAPA (Sessão Atual)
+
+### Cursor Customizado ✅
+- [x] Cursor padrão quando modo análise está desativado
+- [x] Cursor de mira/crosshair quando modo análise está ativo
+- [x] CSS cursor: crosshair no container do mapa
+
+### Tooltip no Botão ✅
+- [x] Adicionar Tooltip component do shadcn/ui
+- [x] Tooltip "Clique para selecionar um ponto no mapa" quando ativo
+- [x] Tooltip "Ative para selecionar pontos no mapa" quando inativo
+
+### Histórico de Pontos ✅
+- [x] Estado para armazenar últimos 5 pontos analisados
+- [x] Persistir histórico no localStorage
+- [x] Dropdown com lista de pontos (endereço + data)
+- [x] Clicar no ponto do histórico restaura análise
+- [x] Botão "Limpar Histórico"
+- [x] Deduplicação de pontos por coordenadas
+- [x] Salvar automaticamente após análise bem-sucedida
+- [x] Restaurar círculo, marcador e dados ao clicar
+

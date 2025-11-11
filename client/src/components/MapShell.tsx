@@ -11,6 +11,10 @@ import AddressSearch from "@/components/AddressSearch";
 import { PDFReport } from "@/components/PDFReport";
 import { upsertAnalysisCircle, clearAnalysisCircle } from "@/lib/mapCircle";
 import { Slider } from "@/components/ui/slider";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Button } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import { Clock, Trash2 } from "lucide-react";
 import type { SpaceData } from "@/services/spaceClient";
 
 interface MapShellProps {
@@ -46,6 +50,20 @@ export default function MapShell({ tenantId, loading = false, onNavigateHome }: 
   const [spaceData, setSpaceData] = useState<SpaceData | null>(null);
   const [spaceError, setSpaceError] = useState<string | null>(null);
   const [analysisMode, setAnalysisMode] = useState(false);
+
+  // Histórico de pontos analisados (últimos 5)
+  type AnalysisPoint = {
+    lat: number;
+    lng: number;
+    address: string;
+    segment: string;
+    radius: number;
+    timestamp: number;
+  };
+  const [analysisHistory, setAnalysisHistory] = useState<AnalysisPoint[]>(() => {
+    const saved = localStorage.getItem('analysisHistory');
+    return saved ? JSON.parse(saved) : [];
+  });
 
   // Handle address selection
   const handleAddressSelect = useCallback(
@@ -132,6 +150,23 @@ export default function MapShell({ tenantId, loading = false, onNavigateHome }: 
         if (result.ok && result.data) {
           setSpaceData(result.data);
           toast.success("Dados carregados com sucesso!");
+          
+          // Adicionar ao histórico
+          const newPoint: AnalysisPoint = {
+            lat: newMarker.lat,
+            lng: newMarker.lng,
+            address: address || `${newMarker.lat.toFixed(5)}, ${newMarker.lng.toFixed(5)}`,
+            segment,
+            radius: radius[0],
+            timestamp: Date.now(),
+          };
+          
+          const updatedHistory = [newPoint, ...analysisHistory.filter(
+            p => !(Math.abs(p.lat - newPoint.lat) < 0.0001 && Math.abs(p.lng - newPoint.lng) < 0.0001)
+          )].slice(0, 5);
+          
+          setAnalysisHistory(updatedHistory);
+          localStorage.setItem('analysisHistory', JSON.stringify(updatedHistory));
         } else {
           setSpaceError("Erro ao buscar dados");
           toast.error("Erro ao buscar dados da localização");
@@ -144,7 +179,7 @@ export default function MapShell({ tenantId, loading = false, onNavigateHome }: 
         setSpaceLoading(false);
       }
     },
-    [analysisMode, radius]
+    [analysisMode, radius, address, segment, analysisHistory]
   );
 
   // Update circle when radius changes
@@ -231,6 +266,7 @@ export default function MapShell({ tenantId, loading = false, onNavigateHome }: 
             onMove={(evt) => setViewport(evt.viewState)}
             onClick={handleMapClick}
             style={{ width: "100%", height: "100%" }}
+            cursor={analysisMode ? "crosshair" : "grab"}
             mapStyle="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
           >
             {marker && (
@@ -248,24 +284,109 @@ export default function MapShell({ tenantId, loading = false, onNavigateHome }: 
 
           {/* Botão de modo de análise */}
           <div className="absolute top-4 right-4 z-10">
-            <button
-              onClick={() => setAnalysisMode(!analysisMode)}
-              className={`px-4 py-2 rounded-lg shadow-lg font-medium transition-all ${
-                analysisMode
-                  ? "bg-blue-600 text-white hover:bg-blue-700"
-                  : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-300"
-              }`}
-            >
-              {analysisMode ? (
-                <span className="flex items-center gap-2">
-                  <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
-                  Modo Análise Ativo
-                </span>
-              ) : (
-                "Ativar Análise"
-              )}
-            </button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => setAnalysisMode(!analysisMode)}
+                  className={`px-4 py-2 rounded-lg shadow-lg font-medium transition-all ${
+                    analysisMode
+                      ? "bg-blue-600 text-white hover:bg-blue-700"
+                      : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-300"
+                  }`}
+                >
+                  {analysisMode ? (
+                    <span className="flex items-center gap-2">
+                      <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
+                      Modo Análise Ativo
+                    </span>
+                  ) : (
+                    "Ativar Análise"
+                  )}
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{analysisMode ? "Clique no mapa para selecionar um ponto" : "Ative para selecionar pontos no mapa"}</p>
+              </TooltipContent>
+            </Tooltip>
           </div>
+
+          {/* Dropdown de histórico */}
+          {analysisHistory.length > 0 && (
+            <div className="absolute top-20 right-4 z-10">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="bg-white shadow-lg">
+                    <Clock className="w-4 h-4 mr-2" />
+                    Histórico ({analysisHistory.length})
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-80">
+                  {analysisHistory.map((point, idx) => (
+                    <DropdownMenuItem
+                      key={idx}
+                      onClick={() => {
+                        setMarker({ lat: point.lat, lng: point.lng });
+                        setAddress(point.address);
+                        setSegment(point.segment);
+                        setRadius([point.radius]);
+                        setViewport({
+                          latitude: point.lat,
+                          longitude: point.lng,
+                          zoom: 14,
+                        });
+                        
+                        // Restaurar círculo
+                        const map = mapRef.current?.getMap();
+                        if (map) {
+                          upsertAnalysisCircle({
+                            map,
+                            center: [point.lng, point.lat],
+                            radiusMeters: point.radius,
+                          });
+                        }
+                        
+                        // Recarregar dados
+                        setSpaceLoading(true);
+                        fetch(`/api/space?lat=${point.lat}&lng=${point.lng}&radius=${point.radius}`)
+                          .then(res => res.json())
+                          .then(response => {
+                            if (response.ok && response.data) {
+                              setSpaceData(response.data);
+                              toast.success('Análise restaurada!');
+                            }
+                            setSpaceLoading(false);
+                          })
+                          .catch(() => {
+                            setSpaceLoading(false);
+                            toast.error('Erro ao restaurar análise');
+                          });
+                      }}
+                      className="cursor-pointer"
+                    >
+                      <div className="flex flex-col gap-1 w-full">
+                        <div className="text-sm font-medium truncate">{point.address}</div>
+                        <div className="text-xs text-muted-foreground">
+                          {point.segment} • {point.radius}m • {new Date(point.timestamp).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                        </div>
+                      </div>
+                    </DropdownMenuItem>
+                  ))}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={() => {
+                      setAnalysisHistory([]);
+                      localStorage.removeItem('analysisHistory');
+                      toast.success('Histórico limpo!');
+                    }}
+                    className="text-red-600 cursor-pointer"
+                  >
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Limpar Histórico
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          )}
 
           {/* Loading overlay */}
           {spaceLoading && (
