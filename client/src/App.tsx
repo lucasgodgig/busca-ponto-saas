@@ -24,6 +24,7 @@ const GeneratedStudiesListPage = lazy(() => import("./pages/GeneratedStudiesList
 const GeneratedStudyDetailsPage = lazy(() => import("./pages/GeneratedStudyDetailsPage"));
 const StudyDetailsPage = lazy(() => import("./pages/StudyDetailsPage"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
+const AdminPanel = lazy(() => import("./pages/AdminPanel"));
 
 // Loading component
 const PageLoader = () => (
@@ -55,6 +56,11 @@ function Router() {
       <Route path={"/admin"}>
         <AppLayout>
           <AdminDashboard />
+        </AppLayout>
+      </Route>
+      <Route path={"/admin-bp"}>
+        <AppLayout>
+          <AdminPanel />
         </AppLayout>
       </Route>
       <Route path={"/historico"}>

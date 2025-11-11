@@ -1030,6 +1030,55 @@ export const appRouter = router({
           const { resetStudyUsage } = await import("./db/admin");
           return await resetStudyUsage(input.userId, input.month, input.year);
         }),
+
+      // Obter uso mensal do usuário atual
+      getCurrentUsage: protectedProcedure
+        .query(async ({ ctx }) => {
+          const dbInstance = await db.getDb();
+          if (!dbInstance) {
+            throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database não disponível" });
+          }
+
+          const { users: usersTable, studyUsage } = await import("../drizzle/schema");
+          const { eq, and } = await import("drizzle-orm");
+          
+          // Buscar usuário para obter limite
+          const [user] = await dbInstance
+            .select()
+            .from(usersTable)
+            .where(eq(usersTable.id, ctx.user.id))
+            .limit(1);
+          
+          if (!user) {
+            throw new TRPCError({ code: "NOT_FOUND", message: "Usuário não encontrado" });
+          }
+          
+          // Buscar uso atual
+          const now = new Date();
+          const currentMonth = now.getMonth() + 1;
+          const currentYear = now.getFullYear();
+          
+          const [usage] = await dbInstance
+            .select()
+            .from(studyUsage)
+            .where(
+              and(
+                eq(studyUsage.userId, ctx.user.id),
+                eq(studyUsage.month, currentMonth),
+                eq(studyUsage.year, currentYear)
+              )
+            )
+            .limit(1);
+          
+          const used = usage?.count || 0;
+          const limit = user.monthlyStudyLimit;
+          
+          return {
+            used,
+            limit,
+            remaining: Math.max(0, limit - used),
+          };
+        }),
     }),
   }),
 });

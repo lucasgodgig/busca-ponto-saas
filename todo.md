@@ -1250,3 +1250,37 @@
 - [ ] Não permitir deletar próprio usuário
 - [ ] Audit log de todas as ações admin
 
+
+
+
+## 🖥️ INTERFACE DO PAINEL ADMIN E INDICADOR DE LIMITE (11/11/2025)
+
+### Página /admin-bp
+- [x] Criar componente AdminPanel.tsx
+- [x] Rota protegida apenas para admin_bp (redirect se não for)
+- [x] Tabela de usuários com colunas: Nome, Email, Role, Limite Mensal, Uso Atual, Status
+- [x] Filtros por role e status (ativo/inativo)
+- [x] Busca por nome/email
+- [x] Botão de atualizar lista
+- [x] Item "Admin BP" no menu lateral (apenas para admin_bp)
+
+### Modais de Gestão
+- [ ] Modal de criar usuário com campos: openId, nome, email, role, limite mensal
+- [ ] Modal de editar usuário (mesmos campos)
+- [ ] Validação de formulários (limite 3-40)
+- [ ] Confirmação antes de deletar
+- [ ] Feedback visual de sucesso/erro
+
+### Indicador de Limite no Dashboard
+- [ ] Card mostrando "X/Y estudos disponíveis este mês"
+- [ ] Barra de progresso visual
+- [ ] Cores: verde (<70%), amarelo (70-90%), vermelho (>90%)
+- [ ] Link para histórico de uso
+- [ ] Tooltip explicativo
+
+### Integração
+- [ ] Adicionar rota /admin no App.tsx
+- [ ] Adicionar item "Admin BP" no menu lateral (apenas para admin_bp)
+- [ ] Procedure tRPC para obter uso atual do usuário logado
+- [ ] Atualizar indicador após criar estudo
+

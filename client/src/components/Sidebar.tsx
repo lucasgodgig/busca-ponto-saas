@@ -62,7 +62,7 @@ export default function Sidebar({ className }: SidebarProps) {
     menuItems.push({
       title: "Admin BP",
       icon: Shield,
-      href: "/admin",
+      href: "/admin-bp",
     });
   }
 

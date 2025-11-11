@@ -25,6 +25,13 @@ export default function Dashboard() {
     { tenantId: tenantId! },
     { enabled: !!tenantId }
   );
+  
+  // Buscar uso mensal e limite
+  const { data: usageData } = trpc.admin.users.getCurrentUsage.useQuery(
+    undefined,
+    { enabled: !!user }
+  );
+  
   const { exportToPDF } = useExportDashboard();
 
   const handleExport = async () => {
@@ -134,6 +141,66 @@ export default function Dashboard() {
             </Card>
           ))}
         </div>
+
+        {/* Indicador de Estudos Restantes */}
+        {usageData && (
+          <Card className="mb-6 md:mb-8 border-2 border-primary/20">
+            <CardHeader>
+              <CardTitle className="text-lg">Estudos Disponíveis Este Mês</CardTitle>
+              <CardDescription>
+                Você pode criar até {usageData.limit} estudos por mês
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">Utilizados</span>
+                  <span className="text-2xl font-bold">
+                    {usageData.used} / {usageData.limit}
+                  </span>
+                </div>
+                <div className="w-full bg-secondary rounded-full h-3 overflow-hidden">
+                  <div
+                    className={`h-full transition-all duration-300 ${
+                      usageData.used / usageData.limit >= 0.9
+                        ? "bg-red-500"
+                        : usageData.used / usageData.limit >= 0.7
+                        ? "bg-yellow-500"
+                        : "bg-green-500"
+                    }`}
+                    style={{ width: `${Math.min((usageData.used / usageData.limit) * 100, 100)}%` }}
+                  />
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Restantes</span>
+                  <span className={
+                    usageData.remaining <= 0
+                      ? "text-red-600 font-semibold"
+                      : usageData.remaining <= 3
+                      ? "text-yellow-600 font-semibold"
+                      : "text-green-600 font-semibold"
+                  }>
+                    {usageData.remaining} estudos
+                  </span>
+                </div>
+                {usageData.remaining <= 0 && (
+                  <div className="mt-3 p-3 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-md">
+                    <p className="text-sm text-red-800 dark:text-red-200">
+                      ⚠️ Você atingiu o limite mensal de estudos. Entre em contato com o administrador para aumentar seu limite.
+                    </p>
+                  </div>
+                )}
+                {usageData.remaining > 0 && usageData.remaining <= 3 && (
+                  <div className="mt-3 p-3 bg-yellow-50 dark:bg-yellow-950/30 border border-yellow-200 dark:border-yellow-800 rounded-md">
+                    <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                      ⚠️ Você está próximo do limite mensal. Restam apenas {usageData.remaining} estudos.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Action Cards */}
         <h2 className="text-xl md:text-2xl font-bold mb-4">Acesso Rápido</h2>
