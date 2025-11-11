@@ -592,30 +592,84 @@ export default function MapShell({ tenantId, loading = false, onNavigateHome }: 
                 }
               </div>
               {polygonVertices.length > 0 && (
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => {
-                      if (polygonVertices.length >= 3) {
+                <div className="flex flex-col gap-2">
+                  {/* Botões de controle do polígono */}
+                  <div className="flex gap-2">
+                    {isDrawingPolygon ? (
+                      <button
+                        onClick={() => {
+                          if (polygonVertices.length >= 3) {
+                            setIsDrawingPolygon(false);
+                            toast.success(`Polígono fechado com ${polygonVertices.length} vértices!`);
+                          } else {
+                            toast.error('Mínimo de 3 vértices necessários');
+                          }
+                        }}
+                        className="px-3 py-1.5 bg-green-600 text-white rounded-md text-xs font-medium hover:bg-green-700 transition-colors"
+                      >
+                        Fechar Polígono
+                      </button>
+                    ) : (
+                      <button
+                        onClick={async () => {
+                          // Calcular centroide do polígono
+                          const centroidLat = polygonVertices.reduce((sum, v) => sum + v.lat, 0) / polygonVertices.length;
+                          const centroidLng = polygonVertices.reduce((sum, v) => sum + v.lng, 0) / polygonVertices.length;
+                          
+                          // Por enquanto, fazer análise do centroide com raio fixo
+                          // TODO: Implementar análise real de polígono na API
+                          setSpaceLoading(true);
+                          setSpaceError(null);
+                          
+                          try {
+                            const response = await fetch(`/api/space?lat=${centroidLat}&lng=${centroidLng}&radius=1000`);
+                            const result = await response.json();
+                            
+                            if (result.ok && result.data) {
+                              setSpaceData(result.data);
+                              toast.success('Análise da área concluída!');
+                            } else {
+                              setSpaceError(result.error || 'Erro ao analisar área');
+                              toast.error('Erro ao analisar área');
+                            }
+                          } catch (err: any) {
+                            setSpaceError(err.message || 'Erro ao analisar área');
+                            toast.error('Erro ao analisar área');
+                          } finally {
+                            setSpaceLoading(false);
+                          }
+                        }}
+                        disabled={spaceLoading}
+                        className="px-3 py-1.5 bg-blue-600 text-white rounded-md text-xs font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+                      >
+                        {spaceLoading ? (
+                          <>
+                            <Loader2 className="w-3 h-3 animate-spin" />
+                            Analisando...
+                          </>
+                        ) : (
+                          'Analisar Área'
+                        )}
+                      </button>
+                    )}
+                    <button
+                      onClick={() => {
+                        setPolygonVertices([]);
                         setIsDrawingPolygon(false);
-                        toast.success(`Polígono fechado com ${polygonVertices.length} vértices!`);
-                      } else {
-                        toast.error('Mínimo de 3 vértices necessários');
-                      }
-                    }}
-                    className="px-3 py-1.5 bg-green-600 text-white rounded-md text-xs font-medium hover:bg-green-700 transition-colors"
-                  >
-                    Fechar Polígono
-                  </button>
-                  <button
-                    onClick={() => {
-                      setPolygonVertices([]);
-                      setIsDrawingPolygon(false);
-                      toast.info('Polígono limpo');
-                    }}
-                    className="px-3 py-1.5 bg-red-600 text-white rounded-md text-xs font-medium hover:bg-red-700 transition-colors"
-                  >
-                    Limpar
-                  </button>
+                        toast.info('Polígono limpo');
+                      }}
+                      className="px-3 py-1.5 bg-red-600 text-white rounded-md text-xs font-medium hover:bg-red-700 transition-colors"
+                    >
+                      Limpar
+                    </button>
+                  </div>
+                  
+                  {/* Informação adicional quando polígono está fechado */}
+                  {!isDrawingPolygon && (
+                    <div className="text-xs text-gray-600 bg-blue-50 px-2 py-1 rounded">
+                      Polígono fechado. Clique em "Analisar Área" para ver os dados.
+                    </div>
+                  )}
                 </div>
               )}
             </div>

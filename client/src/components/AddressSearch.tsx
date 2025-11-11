@@ -47,8 +47,17 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
 
   // Inicializar Google Places API uma única vez
   useEffect(() => {
+    console.log('[AddressSearch] Inicializando Google Places API...');
+    
     if (!window.google) {
+      console.error('[AddressSearch] window.google não disponível');
       setError("Google Maps API não carregada");
+      return;
+    }
+
+    if (!window.google.maps || !window.google.maps.places) {
+      console.error('[AddressSearch] Google Places API não disponível');
+      setError("Google Places API não carregada");
       return;
     }
 
@@ -58,8 +67,9 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
       placesServiceRef.current = new window.google.maps.places.PlacesService(
         document.createElement("div")
       );
+      console.log('[AddressSearch] Google Places API inicializada com sucesso');
     } catch (err) {
-      console.error("Erro ao carregar Google Places:", err);
+      console.error("[AddressSearch] Erro ao carregar Google Places:", err);
       setError("Erro ao carregar Google Places");
     }
   }, []);
@@ -71,16 +81,20 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
 
   // Handler para buscar (Enter ou botão)
   const handleSearch = useCallback(() => {
+    console.log('[AddressSearch] handleSearch chamado, inputValue:', inputValue);
+    
     if (!inputValue.trim()) {
       setError("Digite um endereço");
       return;
     }
 
     if (!autocompleteServiceRef.current) {
+      console.error('[AddressSearch] autocompleteServiceRef.current é null');
       setError("Serviço de busca não disponível");
       return;
     }
 
+    console.log('[AddressSearch] Chamando getPlacePredictions...');
     setIsLoading(true);
     setError(null);
 
@@ -91,10 +105,11 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
         componentRestrictions: { country: "br" },
       },
       (predictions: any[], status: string) => {
+        console.log('[AddressSearch] Callback recebido, status:', status, 'predictions:', predictions);
         setIsLoading(false);
 
         if (status !== window.google.maps.places.PlacesServiceStatus.OK) {
-          console.error("Erro ao buscar sugestões:", status);
+          console.error("[AddressSearch] Erro ao buscar sugestões:", status);
           setError("Erro ao buscar endereços");
           setSuggestions([]);
           suggestionsRef.current = [];

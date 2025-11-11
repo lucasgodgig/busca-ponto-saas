@@ -1333,3 +1333,27 @@
 7. Dados da Space API são carregados e exibidos no painel lateral
 
 
+
+
+
+## 🐛 NOVOS BUGS REPORTADOS (11/11/2025)
+
+### Polígono sem botão de análise
+- [x] Polígono fecha corretamente mas não aparece botão "Analisar Área" (CORRIGIDO)
+- [x] Usuário não consegue executar estudo após desenhar polígono (CORRIGIDO)
+- [x] Falta UI para confirmar e executar análise da área desenhada (CORRIGIDO)
+
+### Correções Aplicadas - Polígono
+- Adicionado botão "Analisar Área" que aparece após fechar polígono
+- Botão "Fechar Polígono" aparece apenas durante desenho
+- Botão "Analisar Área" aparece após polígono fechado
+- Análise usa centroide do polígono com raio de 1000m
+- Feedback visual: mensagem azul informando que polígono está fechado
+- Loading state durante análise
+
+### Busca de endereço - Em investigação
+- [x] Adicionados logs de debug para identificar problema
+- [x] Verificada inicialização do Google Places API
+- [ ] Aguardando teste do usuário com logs do console
+
+
