@@ -1701,3 +1701,16 @@ Substituir análise de centroide + raio fixo por análise real usando coordenada
 - Passado `tenantId` corretamente na query
 - Agora Settings carrega dados da empresa corretamente
 
+
+
+
+## 🐛 Bug no Contador de Estudos (11/11/2025)
+- [x] Dashboard mostra "0 / 10" estudos utilizados mesmo com estudo solicitado (CORRIGIDO)
+- [x] Métrica "Utilizados" não descontar quando estudo é criado (CORRIGIDO)
+- [x] Deve mostrar "1 / 10" após criar um estudo (CORRIGIDO)
+
+### Solução:
+- Adicionada lógica de incremento de `studyUsage` quando estudo é criado
+- Verifica se registro do mês existe, se sim incrementa, se não cria novo
+- Dashboard agora mostra contador correto de estudos utilizados
+

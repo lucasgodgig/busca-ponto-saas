@@ -2,7 +2,7 @@ import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { adminProcedure, protectedProcedure, router } from "../_core/trpc";
 import { getDb } from "../db";
-import { studyRequests } from "../../drizzle/schema";
+import { studyRequests, studyUsage } from "../../drizzle/schema";
 import { eq, and, desc } from "drizzle-orm";
 import { storagePut } from "../storage";
 
@@ -52,6 +52,37 @@ export const studyRequestsRouter = router({
         status: "pendente",
         priority: "media",
       });
+
+      // Incrementar contador de uso mensal
+      const now = new Date();
+      const currentMonth = now.getMonth() + 1;
+      const currentYear = now.getFullYear();
+
+      const [existingUsage] = await db
+        .select()
+        .from(studyUsage)
+        .where(
+          and(
+            eq(studyUsage.userId, ctx.user.id),
+            eq(studyUsage.month, currentMonth),
+            eq(studyUsage.year, currentYear)
+          )
+        )
+        .limit(1);
+
+      if (existingUsage) {
+        await db
+          .update(studyUsage)
+          .set({ count: existingUsage.count + 1 })
+          .where(eq(studyUsage.id, existingUsage.id));
+      } else {
+        await db.insert(studyUsage).values({
+          userId: ctx.user.id,
+          month: currentMonth,
+          year: currentYear,
+          count: 1,
+        });
+      }
 
       return {
         success: true,
