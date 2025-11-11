@@ -1506,3 +1506,27 @@ Substituir análise de centroide + raio fixo por análise real usando coordenada
 - Aguardando deploy para testar em produção
 
 
+
+
+
+## 🐛 NOVO BUG: API KEY NÃO ENCONTRADA EM PRODUÇÃO (11/11/2025)
+
+### Erro
+- "Google Maps API key is not configured. Set VITE_GOOGLE_MAPS_API_KEY or VITE_GOOGLE_PLACES_API_KEY"
+- Aparece ao clicar no mapa em produção
+- loadGoogleMapsScript() não encontra a variável de ambiente
+
+### Causa Raiz
+- [x] import.meta.env só funciona em tempo de build
+- [x] Em produção, variáveis VITE_* não estão disponíveis no runtime
+- [x] Servidor precisa injetar API key no HTML
+
+### Solução Implementada
+- [x] Adicionado fallback em google.ts para window.GOOGLE_MAPS_API_KEY
+- [x] Servidor injeta API key no HTML em desenvolvimento (vite.ts linha 42-47)
+- [x] Servidor injeta API key no HTML em produção (vite.ts linha 76-89)
+- [x] API key agora disponível via window.GOOGLE_MAPS_API_KEY
+
+### Status: PRONTO PARA PUBLICAR ✅
+
+

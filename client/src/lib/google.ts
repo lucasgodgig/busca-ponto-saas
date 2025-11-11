@@ -1,4 +1,9 @@
-const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || import.meta.env.VITE_GOOGLE_PLACES_API_KEY || "";
+// Tentar múltiplas fontes para API key
+const GOOGLE_API_KEY = 
+  import.meta.env.VITE_GOOGLE_MAPS_API_KEY || 
+  import.meta.env.VITE_GOOGLE_PLACES_API_KEY || 
+  (typeof window !== 'undefined' && (window as any).GOOGLE_MAPS_API_KEY) ||
+  "";
 
 let mapsScriptPromise: Promise<typeof window.google> | null = null;
 
