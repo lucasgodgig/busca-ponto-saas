@@ -115,9 +115,11 @@ function DataPanel({ data, loading, segment }: DataPanelProps) {
   }));
 
   return (
-    <div className="space-y-2 md:space-y-4 p-2 md:p-4">
+    <div className="space-y-6 p-4 md:p-6">
       {/* Cards de Informações Principais */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 md:gap-4">
+      <div className="mb-6">
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">Visão Geral</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Card className="bg-gradient-to-br from-orange-50 to-orange-100">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
@@ -170,10 +172,13 @@ function DataPanel({ data, loading, segment }: DataPanelProps) {
             </div>
           </CardContent>
         </Card>
+        </div>
       </div>
 
       {/* Gráficos de Classe Social e Faixa Etária */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 md:gap-4">
+      <div className="mb-6">
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">Distribuição Demográfica</h2>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Gráfico de Classe Social */}
         <Card>
           <CardHeader>
@@ -242,15 +247,19 @@ function DataPanel({ data, loading, segment }: DataPanelProps) {
             </ResponsiveContainer>
           </CardContent>
         </Card>
+        </div>
       </div>
 
       {/* Gráfico de Categorias de Consumo */}
       {data && (
-        <div className="overflow-x-auto">
-          <ConsumptionCategoriesChart
-            data={data as SpaceData}
-            segment={segment || 'outros'}
-          />
+        <div className="mb-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Análise de Consumo</h2>
+          <div className="overflow-x-auto">
+            <ConsumptionCategoriesChart
+              data={data as SpaceData}
+              segment={segment || 'outros'}
+            />
+          </div>
         </div>
       )}
     </div>
