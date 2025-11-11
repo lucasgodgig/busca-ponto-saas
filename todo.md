@@ -1581,3 +1581,10 @@ Substituir análise de centroide + raio fixo por análise real usando coordenada
 - [ ] Se confirmar que variáveis não estão configuradas, adicionar no painel de Secrets da Manus
 
 
+
+
+
+## 🐛 Bug Reportado (11/11/2025 - Sessão Atual)
+- [x] Busca de endereço funciona mas mapa não centraliza na localização encontrada (CORRIGIDO - adicionado flyTo())
+- [x] Mapa permanece em São Paulo mesmo após selecionar endereço em Joinville/SC (CORRIGIDO - animação suave de 1.5s)
+

@@ -96,22 +96,29 @@ export default function MapShell({ tenantId, loading = false, onNavigateHome }: 
       setMarker(newMarker);
       setAddress(addressStr);
 
-      // Centralizar mapa no endereço
-      setViewport({
-        latitude: lat,
-        longitude: lng,
-        zoom: 14,
-      });
-
-      // Update circle on map com selectedRadius
+      // Centralizar mapa no endereço usando flyTo para animação suave
       const map = mapRef.current?.getMap();
       if (map) {
+        map.flyTo({
+          center: [lng, lat],
+          zoom: 14,
+          duration: 1500, // Animação de 1.5 segundos
+        });
+        
+        // Update circle on map com selectedRadius
         upsertAnalysisCircle({
           map,
           center: [lng, lat],
           radiusMeters: selectedRadius,
         });
       }
+      
+      // Atualizar viewport (fallback se flyTo não funcionar)
+      setViewport({
+        latitude: lat,
+        longitude: lng,
+        zoom: 14,
+      });
 
       // Atualizar radius com selectedRadius
       setRadius([selectedRadius]);
