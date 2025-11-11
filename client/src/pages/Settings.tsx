@@ -85,7 +85,7 @@ export default function Settings() {
           </CardHeader>
           <CardContent>
             <Button onClick={() => setLocation("/onboarding")} className="w-full">
-              Criar Franqueadora
+              Criar Empresa
             </Button>
           </CardContent>
         </Card>

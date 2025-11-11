@@ -26,6 +26,7 @@ export const tenants = mysqlTable("tenants", {
   id: int("id").autoincrement().primaryKey(),
   name: varchar("name", { length: 255 }).notNull(),
   slug: varchar("slug", { length: 255 }).notNull().unique(),
+  segment: varchar("segment", { length: 100 }),
   logoUrl: text("logoUrl"),
   colorPrimary: varchar("colorPrimary", { length: 7 }).default("#0F172A"),
   colorDark: varchar("colorDark", { length: 7 }).default("#020617"),

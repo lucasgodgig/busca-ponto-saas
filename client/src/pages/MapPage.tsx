@@ -98,7 +98,7 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             <Button onClick={() => setLocation("/onboarding")}>
-              Criar Franqueadora
+              Criar Empresa
             </Button>
           </CardContent>
         </Card>

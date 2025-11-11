@@ -16,17 +16,17 @@ export default function Onboarding() {
   const [formData, setFormData] = useState({
     name: "",
     slug: "",
-    logoUrl: "",
+    segment: "",
     colorPrimary: "#0F172A",
   });
 
   const createTenantMutation = trpc.tenants.create.useMutation({
     onSuccess: () => {
-      toast.success("Franqueadora criada com sucesso!");
+      toast.success("Empresa criada com sucesso!");
       setLocation("/app");
     },
     onError: (error) => {
-      toast.error(error.message || "Erro ao criar franqueadora");
+      toast.error(error.message || "Erro ao criar empresa");
     },
   });
 
@@ -34,12 +34,12 @@ export default function Onboarding() {
     e.preventDefault();
 
     if (!formData.name.trim()) {
-      toast.error("Digite o nome da franqueadora");
+      toast.error("Digite o nome da empresa");
       return;
     }
 
     if (!formData.slug.trim()) {
-      toast.error("Digite o slug da franqueadora");
+      toast.error("Digite o slug da empresa");
       return;
     }
 
@@ -101,18 +101,18 @@ export default function Onboarding() {
     <div className="min-h-screen flex items-center justify-center bg-muted/30">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>Criar Franqueadora</CardTitle>
+          <CardTitle>Criar Empresa</CardTitle>
           <CardDescription>
-            Configure sua franqueadora para começar a usar o Sistema Busca Ponto
+            Configure sua empresa para começar a usar o Sistema Busca Ponto
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Nome da Franqueadora *</Label>
+              <Label htmlFor="name">Nome da Empresa *</Label>
               <Input
                 id="name"
-                placeholder="Ex: Minha Franquia"
+                placeholder="Ex: Minha Empresa"
                 value={formData.name}
                 onChange={(e) => handleNameChange(e.target.value)}
                 disabled={createTenantMutation.isPending}
@@ -123,7 +123,7 @@ export default function Onboarding() {
               <Label htmlFor="slug">Slug (identificador único) *</Label>
               <Input
                 id="slug"
-                placeholder="Ex: minha-franquia"
+                placeholder="Ex: minha-empresa"
                 value={formData.slug}
                 onChange={(e) =>
                   setFormData({ ...formData, slug: e.target.value })
@@ -136,14 +136,13 @@ export default function Onboarding() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="logoUrl">URL do Logo (opcional)</Label>
+              <Label htmlFor="segment">Segmento do Negócio</Label>
               <Input
-                id="logoUrl"
-                type="url"
-                placeholder="https://exemplo.com/logo.png"
-                value={formData.logoUrl}
+                id="segment"
+                placeholder="Ex: Academia, PetShop, Farmácia"
+                value={formData.segment}
                 onChange={(e) =>
-                  setFormData({ ...formData, logoUrl: e.target.value })
+                  setFormData({ ...formData, segment: e.target.value })
                 }
                 disabled={createTenantMutation.isPending}
               />
@@ -186,7 +185,7 @@ export default function Onboarding() {
                     Criando...
                   </>
                 ) : (
-                  "Criar Franqueadora"
+                  "Criar Empresa"
                 )}
               </Button>
 

@@ -1617,3 +1617,16 @@ Substituir análise de centroide + raio fixo por análise real usando coordenada
 - Listagem do admin filtra apenas usuários ativos
 - Mensagem de erro clara: "User account is deactivated"
 
+
+
+## 📝 Ajustes no Formulário de Criação (11/11/2025)
+- [x] Trocar "Franqueadora" por "Empresa" em todos os textos (CONCLUÍDO)
+- [x] Remover campo "URL do Logo (opcional)" (REMOVIDO)
+- [x] Adicionar campo "Segmento do Negócio" (ADICIONADO)
+
+### Alterações Implementadas:
+- Schema: Adicionada coluna `segment` na tabela `tenants`
+- Formulário: Campo "Segmento do Negócio" com placeholder "Ex: Academia, PetShop, Farmácia"
+- Backend: Input `segment` adicionado ao procedure `tenants.create`
+- Textos: Todas as referências a "Franqueadora" substituídas por "Empresa"
+

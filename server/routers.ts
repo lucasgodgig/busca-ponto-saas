@@ -97,7 +97,7 @@ export const appRouter = router({
       .input(z.object({
         name: z.string().min(3),
         slug: z.string().min(3).regex(/^[a-z0-9-]+$/),
-        logoUrl: z.string().url().optional(),
+        segment: z.string().optional(),
         colorPrimary: z.string().regex(/^#[0-9A-F]{6}$/i).optional(),
       }))
       .mutation(async ({ ctx, input }) => {
@@ -112,7 +112,8 @@ export const appRouter = router({
         const [newTenant] = await dbInstance.insert(tenants).values({
           name: input.name,
           slug: input.slug,
-          logoUrl: input.logoUrl,
+          segment: input.segment,
+          logoUrl: null,
           colorPrimary: input.colorPrimary || "#0F172A",
           colorDark: "#020617",
           plan: "start",
