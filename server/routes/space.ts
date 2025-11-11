@@ -15,11 +15,18 @@ if (BASE) {
 }
 
 // Validar variáveis de ambiente críticas
+console.log('[SPACE API] Inicializando...');
+console.log('[SPACE API] NODE_ENV:', process.env.NODE_ENV);
+console.log('[SPACE API] SPACE_API_BASE_URL:', BASE ? `Configurada (${BASE.substring(0, 30)}...)` : '❌ FALTANDO');
+console.log('[SPACE API] SPACE_API_KEY:', KEY ? `Configurada (${KEY.substring(0, 10)}...)` : '❌ FALTANDO');
+console.log('[SPACE API] SPACE_MAX_RADIUS:', MAXR);
+
 if (!BASE || !KEY) {
-  console.error('[SPACE API] ERRO CRÍTICO: Variáveis de ambiente não configuradas!');
-  console.error('[SPACE API] SPACE_API_BASE_URL:', BASE ? 'OK' : 'FALTANDO');
-  console.error('[SPACE API] SPACE_API_KEY:', KEY ? 'OK' : 'FALTANDO');
-  console.error('[SPACE API] Configure as variáveis em Settings → Secrets no painel de gerenciamento');
+  console.error('[SPACE API] ❌ ERRO CRÍTICO: Variáveis de ambiente não configuradas!');
+  console.error('[SPACE API] Configure SPACE_API_BASE_URL e SPACE_API_KEY em Settings → Secrets');
+  console.error('[SPACE API] Após configurar, publique uma nova versão para aplicar as mudanças');
+} else {
+  console.log('[SPACE API] ✅ Configuração OK');
 }
 
 function num(v: any, d = 0) {

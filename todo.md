@@ -1093,3 +1093,20 @@
 - [x] Estatísticas de cache (hits, misses, taxa de acerto)
 - [x] Limpeza automática de cache expirado ao inicializar
 
+
+
+
+## 🐛 BUG KEY PROP (11/11/2025 - FALSO ALARME)
+- [x] Erro "Each child in a list should have a unique key prop" no Dashboard
+- [x] Verificar todos os .map() no Dashboard.tsx - Todos com keys corretas
+- [x] Verificar componentes filhos do Dashboard - Todos corretos
+- [x] Erro era cache do navegador, resolvido com hard refresh
+
+## 🐛 API SPACE FUNCIONA LOCAL MAS NÃO EM PRODUÇÃO (11/11/2025)
+- [x] API funciona perfeitamente em desenvolvimento local
+- [x] Em produção retorna CONFIG_MISSING
+- [x] Adicionar logs detalhados de inicialização
+- [x] Logs mostram NODE_ENV, variáveis configuradas, etc
+- [ ] Aguardando publicação para verificar logs em produção
+- [ ] Após publicar, verificar logs do servidor para diagnosticar
+
