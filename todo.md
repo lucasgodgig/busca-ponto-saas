@@ -1745,3 +1745,16 @@ Substituir análise de centroide + raio fixo por análise real usando coordenada
 - Loading state enquanto verifica autenticação
 - Agora é impossível acessar rotas privadas sem login
 
+
+
+
+## 🏷️ Ajuste de Branding - Logo Sidebar (11/11/2025)
+- [x] Corrigir "Sistema Busca Ponto SaaS" no PDFReport (CONCLUÍDO)
+- [ ] Atualizar variável VITE_APP_TITLE em Settings → Secrets (MANUAL - usuário precisa fazer)
+
+### Instruções para o Usuário:
+1. Vá em Settings → Secrets no painel da Manus
+2. Localize VITE_APP_TITLE
+3. Altere de "Busca Ponto SaaS" para "Sistema Busca Ponto"
+4. Salve e republique
+

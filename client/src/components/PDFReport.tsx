@@ -169,7 +169,7 @@ export function PDFReport({ address, segment, data }: PDFReportProps) {
 
         <!-- Rodapé -->
         <div style="margin-top: 40px; padding-top: 20px; border-top: 2px solid #e2e8f0; text-align: center; color: #999; font-size: 11px;">
-          <p style="margin: 0;">Relatório gerado automaticamente pelo Sistema Busca Ponto SaaS</p>
+          <p style="margin: 0;">Relatório gerado automaticamente pelo Sistema Busca Ponto</p>
           <p style="margin: 5px 0 0 0;">© 2025 Sistema Busca Ponto. Todos os direitos reservados.</p>
         </div>
       </div>
