@@ -348,8 +348,8 @@ export default function MapShell({ tenantId, loading = false, onNavigateHome }: 
             Math.pow(newMarker.lng - firstVertex.lng, 2)
           );
           
-          // Se clicar a menos de 0.002 graus (~200m) do primeiro ponto, fechar polígono
-          if (distance < 0.002) {
+          // Se clicar a menos de 0.005 graus (~500m) do primeiro ponto, fechar polígono
+          if (distance < 0.005) {
             setIsDrawingPolygon(false);
             toast.success(`Polígono fechado com ${polygonVertices.length} vértices!`, {
               description: 'Clique em "Analisar Área" para ver os dados',
@@ -555,8 +555,7 @@ export default function MapShell({ tenantId, loading = false, onNavigateHome }: 
                     type="line"
                     paint={{
                       'line-color': '#3b82f6',
-                      'line-width': 2,
-                      'line-dasharray': [4, 4],
+                      'line-width': 3,
                     }}
                   />
                 </Source>
@@ -583,8 +582,7 @@ export default function MapShell({ tenantId, loading = false, onNavigateHome }: 
                       type="line"
                       paint={{
                         'line-color': '#3b82f6',
-                        'line-width': 2,
-                        'line-dasharray': [4, 4],
+                        'line-width': 3,
                       }}
                     />
                   </Source>

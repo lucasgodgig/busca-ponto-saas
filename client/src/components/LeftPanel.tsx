@@ -93,6 +93,28 @@ export default function LeftPanel({
               Consulte um raio
             </button>
             
+            {/* Seleção de Raio (apenas quando modo radius ativo) */}
+            {activeMode === 'radius' && (
+              <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                <div className="text-xs font-semibold text-blue-900 mb-2">Selecione o Raio</div>
+                <div className="grid grid-cols-3 gap-2">
+                  {[500, 1000, 1500, 2000, 3000, 5000].map(r => (
+                    <button
+                      key={r}
+                      onClick={() => onSelectedRadiusChange(r)}
+                      className={`px-2 py-1.5 rounded-md text-xs font-medium transition-all ${
+                        selectedRadius === r
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
+                      }`}
+                    >
+                      {r >= 1000 ? `${r/1000}km` : `${r}m`}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+            
             {/* Modo: Adicionar Ponto */}
             <button
               onClick={() => onModeChange(activeMode === 'point' ? null : 'point')}
@@ -122,35 +144,6 @@ export default function LeftPanel({
             </button>
           </CardContent>
         </Card>
-        
-        {/* Seleção de Raio (apenas quando modo radius ativo) */}
-        {activeMode === 'radius' && (
-          <Card className="border-blue-200 bg-blue-50">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm">Selecione o Raio</CardTitle>
-              <CardDescription className="text-xs">
-                Escolha o raio de análise
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-3 gap-2">
-                {[500, 1000, 1500, 2000, 3000, 5000].map(r => (
-                  <button
-                    key={r}
-                    onClick={() => onSelectedRadiusChange(r)}
-                    className={`px-3 py-2 rounded-md text-xs font-medium transition-all ${
-                      selectedRadius === r
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
-                    }`}
-                  >
-                    {r >= 1000 ? `${r/1000}km` : `${r}m`}
-                  </button>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
 
         {/* Botão de Análise */}
         {hasAddress && onAnalyze && (

@@ -1795,3 +1795,12 @@ Substituir análise de centroide + raio fixo por análise real usando coordenada
 - [x] Exibir raio selecionado quando modo "radius" está ativo
 - [x] Design discreto mas visível com cores correspondentes ao modo (azul/verde/roxo)
 
+
+
+
+## Ajustes Solicitados (11/11/2025 - Sessão 19)
+- [x] Mover card "Selecione o Raio" mais para cima no painel lateral (agora dentro do card de Modos)
+- [x] Melhorar estilo do polígono: bordas azul sólido 3px (removido tracejado)
+- [x] Garantir fechamento automático ao clicar próximo ao primeiro ponto do polígono
+- [x] Verificar raio de detecção para fechamento (aumentado de 200m para 500m)
+
