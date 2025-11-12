@@ -186,7 +186,7 @@ export default function Dashboard() {
         </div>
 
         {/* Indicador de Estudos Restantes */}
-        {usageData && (
+        {usageData && user?.role !== 'admin_bp' && (
           <Card className="mb-6 md:mb-8 border-2 border-primary/20">
             <CardHeader>
               <CardTitle className="text-lg">Estudos Disponíveis Este Mês</CardTitle>
