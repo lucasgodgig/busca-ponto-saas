@@ -1804,3 +1804,12 @@ Substituir análise de centroide + raio fixo por análise real usando coordenada
 - [x] Garantir fechamento automático ao clicar próximo ao primeiro ponto do polígono
 - [x] Verificar raio de detecção para fechamento (aumentado de 200m para 500m)
 
+
+
+
+## Bug - Erros MapLibre (12/11/2025)
+- [x] Corrigir erro "sources.polygon-fill: unknown property 'data-loc'"
+- [x] Corrigir erro "sources.polygon-closing-line: unknown property 'data-loc'"
+- [x] Corrigir erro "sources.polygon-lines: unknown property 'data-loc'"
+- [x] Investigar e remover props inválidas dos componentes Source (adicionadas keys únicas)
+

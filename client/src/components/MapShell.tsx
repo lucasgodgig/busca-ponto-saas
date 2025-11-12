@@ -539,6 +539,7 @@ export default function MapShell({ tenantId, loading = false, onNavigateHome }: 
             {polygonVertices.length > 1 && (
               <>
                 <Source
+                  key="polygon-lines-source"
                   id="polygon-lines"
                   type="geojson"
                   data={{
@@ -563,6 +564,7 @@ export default function MapShell({ tenantId, loading = false, onNavigateHome }: 
                 {/* Linha de fechamento (do último vértice ao primeiro) */}
                 {!isDrawingPolygon && polygonVertices.length >= 3 && (
                   <Source
+                    key="polygon-closing-line-source"
                     id="polygon-closing-line"
                     type="geojson"
                     data={{
@@ -591,6 +593,7 @@ export default function MapShell({ tenantId, loading = false, onNavigateHome }: 
                 {/* Preenchimento do polígono fechado */}
                 {!isDrawingPolygon && polygonVertices.length >= 3 && (
                   <Source
+                    key="polygon-fill-source"
                     id="polygon-fill"
                     type="geojson"
                     data={{
