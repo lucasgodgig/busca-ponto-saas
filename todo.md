@@ -2148,3 +2148,41 @@ data={{
   - polygon-closing-line: Feature → FeatureCollection
   - polygon-fill: Feature → FeatureCollection
 
+
+
+
+## Bug - Dados Antigos Não Limpam ao Digitar Novo Endereço (12/11/2025)
+
+- [ ] Quando usuário digita novo endereço, dados antigos continuam visíveis na tela
+- [ ] Exemplo: Consulta endereço A, retorna dados. Digita endereço B, dados de A continuam visíveis
+- [ ] Esperado: Limpar dados ao usuário começar a digitar novo endereço
+- [ ] Implementar limpeza de spaceData quando input de busca muda
+- [ ] Testar que dados limpam corretamente
+
+**Contexto:**
+O painel de dados (Análise de Dados, Visão Geral, etc) continua exibindo resultados antigos enquanto usuário digita novo endereço. Precisa limpar quando o input muda.
+
+
+## Bug - Dados Antigos Não Limpam ao Digitar Novo Endereço (12/11/2025) - ✅ RESOLVIDO
+
+- [x] Quando usuário digita novo endereço, dados antigos continuam visíveis na tela
+- [x] Exemplo: Consulta endereço A, retorna dados. Digita endereço B, dados de A continuam visíveis
+- [x] Esperado: Limpar dados ao usuário começar a digitar novo endereço
+- [x] Implementar limpeza de spaceData quando input de busca muda
+- [x] Testar que dados limpam corretamente
+
+**Solução:**
+1. Adicionado callback `onInputChange` na interface `AddressSearchProps` (AddressSearch.tsx)
+2. Implementado callback no `handleInputChange` para chamar `onInputChange(value)` quando usuário digita
+3. No MapShell, adicionado handler ao `onInputChange` que limpa `spaceData` quando valor não está vazio
+4. Dados antigos agora desaparecem imediatamente quando usuário digita novo endereço
+
+**Arquivos Modificados:**
+- `client/src/components/AddressSearch.tsx` (linhas 7-9, 27, 90-97)
+- `client/src/components/MapShell.tsx` (linhas 584-593)
+
+**Resultado:**
+✅ Dados antigos limpam imediatamente ao digitar novo endereço
+✅ Painel de dados desaparece quando usuário começa nova busca
+✅ Sem impacto visual ou funcional
+

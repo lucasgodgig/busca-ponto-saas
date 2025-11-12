@@ -6,6 +6,7 @@ import { loadGoogleMapsScript } from "@/lib/google";
 
 interface AddressSearchProps {
   onAddressSelect: (lat: number, lng: number, address: string) => void;
+  onInputChange?: (value: string) => void;
   loading?: boolean;
 }
 
@@ -23,7 +24,7 @@ declare global {
   }
 }
 
-export default function AddressSearch({ onAddressSelect, loading }: AddressSearchProps) {
+export default function AddressSearch({ onAddressSelect, onInputChange, loading }: AddressSearchProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const suggestionsRef = useRef<Suggestion[]>([]);
   const placesServiceContainerRef = useRef<HTMLDivElement>(null);
@@ -89,7 +90,11 @@ export default function AddressSearch({ onAddressSelect, loading }: AddressSearc
   // Handler para input - apenas atualiza o valor
   const handleInputChange = useCallback((value: string) => {
     setInputValue(value);
-  }, []);
+    // Chamar callback quando usuário digita para limpar dados antigos
+    if (onInputChange) {
+      onInputChange(value);
+    }
+  }, [onInputChange]);
 
   // Handler para buscar (Enter ou botão)
   const handleSearch = useCallback(() => {

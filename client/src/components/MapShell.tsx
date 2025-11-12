@@ -581,7 +581,16 @@ const MapShell = forwardRef<MapShellRef, MapShellProps>(({ tenantId, loading = f
               className="w-full"
             />
           </div>
-          <AddressSearch onAddressSelect={handleAddressSelect} loading={spaceLoading} />
+          <AddressSearch 
+            onAddressSelect={handleAddressSelect} 
+            onInputChange={(value) => {
+              // Limpar dados quando usuário digita novo endereço
+              if (value && spaceData) {
+                setSpaceData(null);
+              }
+            }}
+            loading={spaceLoading} 
+          />
         </div>
 
         {/* Map */}
