@@ -680,12 +680,15 @@ const MapShell = forwardRef<MapShellRef, MapShellProps>(({ tenantId, loading = f
                   id="polygon-lines"
                   type="geojson"
                   data={{
-                    type: 'Feature',
-                    properties: {},
-                    geometry: {
-                      type: 'LineString',
-                      coordinates: polygonVertices.map(v => [v.lng, v.lat]),
-                    },
+                    type: 'FeatureCollection',
+                    features: [{
+                      type: 'Feature',
+                      properties: {},
+                      geometry: {
+                        type: 'LineString',
+                        coordinates: polygonVertices.map(v => [v.lng, v.lat]),
+                      },
+                    }],
                   }}
                 >
                   <Layer
@@ -704,15 +707,18 @@ const MapShell = forwardRef<MapShellRef, MapShellProps>(({ tenantId, loading = f
                     id="polygon-closing-line"
                     type="geojson"
                     data={{
-                      type: 'Feature',
-                      properties: {},
-                      geometry: {
-                        type: 'LineString',
-                        coordinates: [
-                          [polygonVertices[polygonVertices.length - 1].lng, polygonVertices[polygonVertices.length - 1].lat],
-                          [polygonVertices[0].lng, polygonVertices[0].lat],
-                        ],
-                      },
+                      type: 'FeatureCollection',
+                      features: [{
+                        type: 'Feature',
+                        properties: {},
+                        geometry: {
+                          type: 'LineString',
+                          coordinates: [
+                            [polygonVertices[polygonVertices.length - 1].lng, polygonVertices[polygonVertices.length - 1].lat],
+                            [polygonVertices[0].lng, polygonVertices[0].lat],
+                          ],
+                        },
+                      }],
                     }}
                   >
                     <Layer
@@ -732,12 +738,15 @@ const MapShell = forwardRef<MapShellRef, MapShellProps>(({ tenantId, loading = f
                     id="polygon-fill"
                     type="geojson"
                     data={{
-                      type: 'Feature',
-                      properties: {},
-                      geometry: {
-                        type: 'Polygon',
-                        coordinates: [[...polygonVertices.map(v => [v.lng, v.lat]), [polygonVertices[0].lng, polygonVertices[0].lat]]],
-                      },
+                      type: 'FeatureCollection',
+                      features: [{
+                        type: 'Feature',
+                        properties: {},
+                        geometry: {
+                          type: 'Polygon',
+                          coordinates: [[...polygonVertices.map(v => [v.lng, v.lat]), [polygonVertices[0].lng, polygonVertices[0].lat]]],
+                        },
+                      }],
                     }}
                   >
                     <Layer

@@ -2102,3 +2102,49 @@ Para atualizar o favicon (aba do navegador):
 ✅ Tipografia clara e legível
 ✅ Sem erros de compilação
 
+
+## Erro MapLibre - Propriedade "data-loc" Inválida (12/11/2025) - ✅ RESOLVIDO
+
+- [x] Erro: sources.polygon-fill: unknown property "data-loc"
+- [x] Erro: sources.polygon-closing-line: unknown property "data-loc"
+- [x] Erro: sources.polygon-lines: unknown property "data-loc"
+- [x] Remover propriedade "data-loc" das definições das fontes
+- [x] Verificar onde as fontes estão sendo criadas (MapShell ou mapPolygon.ts)
+- [x] Testar se erros desaparecem após correção
+
+**Solução:**
+O problema era que o react-map-gl estava adicionando propriedades internas ao objeto `data` das fontes. 
+A solução foi alterar o formato de `Feature` para `FeatureCollection` no objeto `data`:
+
+**Antes:**
+```tsx
+data={{
+  type: 'Feature',
+  properties: {},
+  geometry: {...}
+}}
+```
+
+**Depois:**
+```tsx
+data={{
+  type: 'FeatureCollection',
+  features: [{
+    type: 'Feature',
+    properties: {},
+    geometry: {...}
+  }]
+}}
+```
+
+**Resultado:**
+✅ Todos os erros "unknown property data-loc" desapareceram
+✅ Polígonos continuam funcionando normalmente
+✅ Sem impacto visual ou funcional
+
+**Arquivos Modificados:**
+- `client/src/components/MapShell.tsx` (linhas 679-763)
+  - polygon-lines: Feature → FeatureCollection
+  - polygon-closing-line: Feature → FeatureCollection
+  - polygon-fill: Feature → FeatureCollection
+
