@@ -2351,3 +2351,10 @@ Time interno precisa de um perfil intermediário entre admin (controle total) e 
 - [x] HMR do Vite falhando (CORRIGIDO - desabilitar hmr: false)
 - [x] Erro de keys faltando em Dashboard (CORRIGIDO - template string dinamico no Onboarding)
 
+
+
+
+## Bugs Encontrados (12/11/2025 - Sessão 11)
+- [x] HMR do Vite falhando (CORRIGIDO - configurado com timeout e middlewareMode)
+- [x] Erro de keys faltando (CORRIGIDO - template string dinâmico no Onboarding)
+
