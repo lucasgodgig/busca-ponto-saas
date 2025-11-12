@@ -535,52 +535,66 @@ export default function MapShell({ tenantId, loading = false, onNavigateHome }: 
               </Marker>
             ))}
             
-            {/* Linhas do polígono */}
-            {polygonVertices.length > 1 && (
-              <>
-                <Source
-                  key="polygon-lines-source"
-                  id="polygon-lines"
-                  type="geojson"
-                  data={{
-                    type: 'Feature',
-                    properties: {},
-                    geometry: {
-                      type: 'LineString',
-                      coordinates: polygonVertices.map(v => [v.lng, v.lat]),
-                    },
-                  }}
-                >
-                  <Layer
-                    id="polygon-lines-layer"
-                    type="line"
-                    paint={{
-                      'line-color': '#3b82f6',
-                      'line-width': 3,
-                    }}
-                  />
-                </Source>
-                
-                {/* Linha de fechamento (do último vértice ao primeiro) */}
-                {!isDrawingPolygon && polygonVertices.length >= 3 && (
+            {/* Marcadores dos vértices do polígono */}
+            {polygonVertices.map((vertex, index) => (
+              <Marker
+                key={`polygon-vertex-${index}`}
+                longitude={vertex.lng}
+                latitude={vertex.lat}
+                anchor="center"
+              >
+                <div
+                  className="w-3 h-3 bg-white rounded-full border-2 border-blue-600 shadow-md cursor-pointer hover:scale-125 transition-transform"
+                  style={{ boxShadow: '0 2px 4px rgba(0,0,0,0.3)' }}
+                />
+              </Marker>
+            ))}
+            
+            {/* Dados GeoJSON memoizados para evitar re-renders */}
+            {useMemo(() => {
+              if (polygonVertices.length < 2) return null;
+              
+              const lineData = {
+                type: 'Feature' as const,
+                properties: {},
+                geometry: {
+                  type: 'LineString' as const,
+                  coordinates: polygonVertices.map(v => [v.lng, v.lat]),
+                },
+              };
+              
+              const closingLineData = !isDrawingPolygon && polygonVertices.length >= 3 ? {
+                type: 'Feature' as const,
+                properties: {},
+                geometry: {
+                  type: 'LineString' as const,
+                  coordinates: [
+                    [polygonVertices[polygonVertices.length - 1].lng, polygonVertices[polygonVertices.length - 1].lat],
+                    [polygonVertices[0].lng, polygonVertices[0].lat],
+                  ],
+                },
+              } : null;
+              
+              const fillData = !isDrawingPolygon && polygonVertices.length >= 3 ? {
+                type: 'Feature' as const,
+                properties: {},
+                geometry: {
+                  type: 'Polygon' as const,
+                  coordinates: [[...polygonVertices.map(v => [v.lng, v.lat]), [polygonVertices[0].lng, polygonVertices[0].lat]]],
+                },
+              } : null;
+              
+              return (
+                <>
+                  {/* Linhas do polígono */}
                   <Source
-                    key="polygon-closing-line-source"
-                    id="polygon-closing-line"
+                    key="polygon-lines-source"
+                    id="polygon-lines"
                     type="geojson"
-                    data={{
-                      type: 'Feature',
-                      properties: {},
-                      geometry: {
-                        type: 'LineString',
-                        coordinates: [
-                          [polygonVertices[polygonVertices.length - 1].lng, polygonVertices[polygonVertices.length - 1].lat],
-                          [polygonVertices[0].lng, polygonVertices[0].lat],
-                        ],
-                      },
-                    }}
+                    data={lineData}
                   >
                     <Layer
-                      id="polygon-closing-line-layer"
+                      id="polygon-lines-layer"
                       type="line"
                       paint={{
                         'line-color': '#3b82f6',
@@ -588,35 +602,48 @@ export default function MapShell({ tenantId, loading = false, onNavigateHome }: 
                       }}
                     />
                   </Source>
-                )}
-                
-                {/* Preenchimento do polígono fechado */}
-                {!isDrawingPolygon && polygonVertices.length >= 3 && (
-                  <Source
-                    key="polygon-fill-source"
-                    id="polygon-fill"
-                    type="geojson"
-                    data={{
-                      type: 'Feature',
-                      properties: {},
-                      geometry: {
-                        type: 'Polygon',
-                        coordinates: [[...polygonVertices.map(v => [v.lng, v.lat]), [polygonVertices[0].lng, polygonVertices[0].lat]]],
-                      },
-                    }}
-                  >
-                    <Layer
-                      id="polygon-fill-layer"
-                      type="fill"
-                      paint={{
-                        'fill-color': '#3b82f6',
-                        'fill-opacity': 0.25,
-                      }}
-                    />
-                  </Source>
-                )}
-              </>
-            )}
+                  
+                  {/* Linha de fechamento */}
+                  {closingLineData && (
+                    <Source
+                      key="polygon-closing-line-source"
+                      id="polygon-closing-line"
+                      type="geojson"
+                      data={closingLineData}
+                    >
+                      <Layer
+                        id="polygon-closing-line-layer"
+                        type="line"
+                        paint={{
+                          'line-color': '#3b82f6',
+                          'line-width': 3,
+                        }}
+                      />
+                    </Source>
+                  )}
+                  
+                  {/* Preenchimento do polígono */}
+                  {fillData && (
+                    <Source
+                      key="polygon-fill-source"
+                      id="polygon-fill"
+                      type="geojson"
+                      data={fillData}
+                    >
+                      <Layer
+                        id="polygon-fill-layer"
+                        type="fill"
+                        paint={{
+                          'fill-color': '#3b82f6',
+                          'fill-opacity': 0.25,
+                        }}
+                      />
+                    </Source>
+                  )}
+                </>
+              );
+            }, [polygonVertices, isDrawingPolygon])}
+
           </Map>
 
           {/* Menu movido para LeftPanel */}

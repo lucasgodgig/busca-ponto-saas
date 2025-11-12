@@ -1813,3 +1813,21 @@ Substituir análise de centroide + raio fixo por análise real usando coordenada
 - [x] Corrigir erro "sources.polygon-lines: unknown property 'data-loc'"
 - [x] Investigar e remover props inválidas dos componentes Source (adicionadas keys únicas)
 
+
+
+
+## Nova Feature - Marcadores Visuais nos Vértices (12/11/2025)
+- [x] Adicionar círculos brancos com borda azul nos vértices do polígono
+- [x] Usar componente Marker do react-map-gl para cada vértice
+- [x] Estilo: círculo branco (12px) com borda azul (2px) + sombra
+- [x] Garantir que marcadores apareçam durante e após desenho do polígono
+
+
+
+
+## Bug Crítico - Polígono Invisível (12/11/2025)
+- [x] Linhas do polígono não estavam visíveis (apenas marcadores de vértices apareciam)
+- [x] Preenchimento azul translúcido não estava renderizando
+- [x] Investigar componentes Source e Layer do MapLibre
+- [x] Verificar se dados GeoJSON estão corretos (useMemo resolveu re-renders)
+
