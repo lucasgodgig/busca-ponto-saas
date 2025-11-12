@@ -102,10 +102,7 @@ export function normalizeSpace(raw: SpaceRawData): NormalizedSpace {
     ['cons_6_health', 'Saúde', 6],
     ['cons_7_education', 'Educação', 7],
     ['cons_8_recreation', 'Lazer', 8],
-    ['cons_9_tobacco', 'Fumo', 9],
     ['cons_10_personal_services', 'Serviços Pessoais', 10],
-    ['cons_12_others', 'Outros', 12],
-    ['cons_13_asset_increase', 'Aumento de Ativos', 13],
     ['cons_14_liability_reduction', 'Redução de Passivos', 14],
   ].map(([k, rotulo, ord]: any) => ({
     chave: k as string,

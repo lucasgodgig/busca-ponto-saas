@@ -1871,3 +1871,13 @@ Substituir análise de centroide + raio fixo por análise real usando coordenada
 - [x] Atualizar área automaticamente a cada novo vértice (useMemo)
 - [x] Mostrar "Área: calculando..." quando < 3 vértices (polígono inválido)
 
+
+
+
+## Limpeza de Categorias de Consumo (12/11/2025)
+- [x] Remover categoria "Fumo" (cons_9_tobacco) do gráfico
+- [x] Remover categoria "Aumento de Ativos" (cons_13_asset_increase) do gráfico
+- [x] Remover categoria "Outros" (cons_12_others) do gráfico
+- [x] Deixar apenas 10 categorias principais visíveis (+ Redução de Passivos)
+- [x] Manter categorias nos cálculos de segmento (backend) - removidas apenas da exibição
+
