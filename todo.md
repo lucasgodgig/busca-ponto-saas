@@ -2414,3 +2414,10 @@ Time interno precisa de um perfil intermediário entre admin (controle total) e 
   - [x] Gráfico de tendência de upgrades
   - [x] Previsão de receita para próximos 3 meses
 
+
+
+
+## Bugs Encontrados (12/11/2025 - Sessão 16)
+- [x] Admins BP tém limite de estudos - devem ter acesso ilimitado (CORRIGIDO - adicionado check de role)
+- [x] AdminPanel não está exibindo usuários - query retorna 0 usuários (CORRIGIDO - criada procedure list)
+

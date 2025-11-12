@@ -259,7 +259,8 @@ export default function Dashboard() {
         <h2 className="text-xl md:text-2xl font-bold mb-4">Acesso Rápido</h2>
         <div className="grid gap-4 md:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 mb-6 md:mb-8">
           {actionCards.map((card) => {
-            const isLimitReached = usageData && usageData.remaining <= 0 && card.title === 'Solicitar Estudo';
+            const isAdmin = user?.role === 'admin_bp';
+            const isLimitReached = !isAdmin && usageData && usageData.remaining <= 0 && card.title === 'Solicitar Estudo';
             const cardContent = (
               <Card className={`group transition-all border-2 ${
                 isLimitReached 

@@ -135,6 +135,45 @@ export const usersRouter = router({
       }
     }),
 
+  // Listar todos os usuários (apenas para admins)
+  list: protectedProcedure.query(async ({ ctx }) => {
+    // Apenas admins BP podem listar usuários
+    if (ctx.user.role !== 'admin_bp') {
+      throw new TRPCError({
+        code: "FORBIDDEN",
+        message: "Apenas admins podem listar usuários",
+      });
+    }
+
+    const db = await getDb();
+    if (!db) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Database not available",
+      });
+    }
+
+    try {
+      const allUsers = await db.select().from(users);
+      return allUsers.map(u => ({
+        id: u.id,
+        openId: u.openId,
+        name: u.name,
+        email: u.email,
+        role: u.role,
+        isActive: u.isActive,
+        createdAt: u.createdAt,
+        lastSignedIn: u.lastSignedIn,
+      }));
+    } catch (error) {
+      console.error("Error listing users:", error);
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Erro ao listar usuários",
+      });
+    }
+  }),
+
   // Obter dados do perfil do usuário
   getProfile: protectedProcedure.query(async ({ ctx }) => {
     const db = await getDb();
