@@ -1881,3 +1881,12 @@ Substituir análise de centroide + raio fixo por análise real usando coordenada
 - [x] Deixar apenas 10 categorias principais visíveis (+ Redução de Passivos)
 - [x] Manter categorias nos cálculos de segmento (backend) - removidas apenas da exibição
 
+
+
+
+## Bug - Pontos Não Desaparecem (12/11/2025)
+- [x] Clicar em "Mapa Interativo" não removia os marcadores de pontos (círculos verdes)
+- [x] Polígonos e outros elementos desapareciam, mas pontos continuavam visíveis
+- [x] Verificar se savedPoints estava sendo resetado corretamente (estava)
+- [x] Corrigir função resetMap para limpar todos os marcadores do mapa (adicionado console.log para debug)
+

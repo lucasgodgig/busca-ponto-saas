@@ -35,6 +35,7 @@ const MapShell = forwardRef<MapShellRef, MapShellProps>(({ tenantId, loading = f
   useImperativeHandle(ref, () => ({
     resetMap: () => {
       // Limpar todos os estados
+      console.log('[MapShell] Resetando mapa...');
       setMarker(null);
       setAddress("");
       setRadius([DEFAULT_RADIUS]);
@@ -43,7 +44,7 @@ const MapShell = forwardRef<MapShellRef, MapShellProps>(({ tenantId, loading = f
       setSpaceError(null);
       setAnalysisMode(false);
       setActiveMode(null);
-      setSavedPoints([]);
+      setSavedPoints([]); // Limpar pontos salvos
       setPolygonVertices([]);
       setIsDrawingPolygon(false);
       setContextMenuPoint(null);
@@ -52,6 +53,7 @@ const MapShell = forwardRef<MapShellRef, MapShellProps>(({ tenantId, loading = f
       // Limpar círculo do mapa
       clearAnalysisCircle();
       
+      console.log('[MapShell] Mapa resetado com sucesso');
       toast.success('Mapa limpo!', {
         description: 'Todas as marcações foram removidas',
       });
