@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import { useState, useRef } from "react";
 import { ArrowLeft, MapPin, Users, DollarSign, Home, TrendingUp, TrendingDown, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import MapShell from "@/components/MapShell";
+import MapShell, { MapShellRef } from "@/components/MapShell";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 
 interface AnalysisData {
@@ -52,6 +52,8 @@ const AGE_GROUP_COLORS = {
 };
 
 export default function AnalysisDashboard() {
+  const mapShellRef = useRef<MapShellRef>(null);
+  
   const navigate = (path: string) => {
     window.location.href = path;
   };
@@ -151,7 +153,7 @@ export default function AnalysisDashboard() {
     <div className="flex flex-col md:flex-row h-screen bg-gray-50">
       {/* Mapa à esquerda */}
       <div className="w-full md:flex-1 md:border-r border-b md:border-b-0 border-gray-200 relative h-[50vh] md:h-auto">
-        <MapShell tenantId={data?.tenantId || ""} />
+        <MapShell ref={mapShellRef} tenantId={data?.tenantId || 0} />
       </div>
 
       {/* Dashboard à direita */}
@@ -162,7 +164,7 @@ export default function AnalysisDashboard() {
             <div>
               <h1 
                 className="text-2xl md:text-3xl font-bold text-gray-900 cursor-pointer hover:text-primary transition-colors"
-                onClick={() => window.location.reload()} // Recarrega página para limpar tudo
+                onClick={() => mapShellRef.current?.resetMap()}
                 title="Clique para limpar todas as marcações"
               >
                 Mapa Interativo

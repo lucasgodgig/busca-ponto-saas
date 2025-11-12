@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback, useEffect, useMemo } from "react";
+import { useState, useRef, useCallback, useEffect, useMemo, forwardRef, useImperativeHandle } from "react";
 import { debounce } from "lodash-es";
 import { MAX_RADIUS, DEFAULT_RADIUS, DEBOUNCE_SLIDER_MS } from "@shared/constants";
 import Map, { MapRef, Marker, Source, Layer } from "react-map-gl/maplibre";
@@ -24,8 +24,39 @@ interface MapShellProps {
   onNavigateHome?: () => void;
 }
 
-export default function MapShell({ tenantId, loading = false, onNavigateHome }: MapShellProps) {
+export interface MapShellRef {
+  resetMap: () => void;
+}
+
+const MapShell = forwardRef<MapShellRef, MapShellProps>(({ tenantId, loading = false, onNavigateHome }, ref) => {
   const mapRef = useRef<MapRef>(null);
+
+  // Função de reset exposta para componentes pais
+  useImperativeHandle(ref, () => ({
+    resetMap: () => {
+      // Limpar todos os estados
+      setMarker(null);
+      setAddress("");
+      setRadius([DEFAULT_RADIUS]);
+      setSelectedRadius(DEFAULT_RADIUS);
+      setSpaceData(null);
+      setSpaceError(null);
+      setAnalysisMode(false);
+      setActiveMode(null);
+      setSavedPoints([]);
+      setPolygonVertices([]);
+      setIsDrawingPolygon(false);
+      setContextMenuPoint(null);
+      setContextMenuPosition(null);
+      
+      // Limpar círculo do mapa
+      clearAnalysisCircle();
+      
+      toast.success('Mapa limpo!', {
+        description: 'Todas as marcações foram removidas',
+      });
+    },
+  }));
   const themeCleanupRef = useRef<(() => void) | null>(null);
 
 
@@ -1102,5 +1133,8 @@ export default function MapShell({ tenantId, loading = false, onNavigateHome }: 
       </div>
     </div>
   );
-}
+});
 
+MapShell.displayName = 'MapShell';
+
+export default MapShell;

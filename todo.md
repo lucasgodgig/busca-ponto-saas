@@ -1851,3 +1851,12 @@ Substituir análise de centroide + raio fixo por análise real usando coordenada
 - [x] Título "Mapa Interativo" clicável limpa TODAS as marcações (window.location.reload)
 - [x] Reset completo do estado ao clicar no título (recarrega página)
 
+
+
+
+## Bug - Limpeza de Mapa Não Funciona (12/11/2025)
+- [x] Clicar em "Mapa Interativo" NÃO limpava marcações (window.location.reload não funciona)
+- [x] Polígonos, pontos e círculos continuavam visíveis após clique
+- [x] Implementar função de reset que limpa todos os estados sem reload (useImperativeHandle)
+- [x] Resetar: polygonVertices, isDrawingPolygon, activeMode, savedPoints, marker, address, spaceData
+
