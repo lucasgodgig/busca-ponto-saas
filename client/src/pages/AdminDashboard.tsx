@@ -157,7 +157,7 @@ export default function AdminDashboard() {
                   dataKey="value"
                 >
                   {statusChartData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                    <Cell key={`status-cell-${index}-${entry.name}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
                   ))}
                 </Pie>
                 <Tooltip />

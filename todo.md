@@ -98,6 +98,7 @@
 ## Novos Bugs Reportados
 - [x] Consulta rápida não está exibindo resultados visualmente completos (RESOLVIDO - painel agora mostra tudo)
 - [x] Botão "Busca Ponto" no header dá erro 404 (corrigido - criado Settings)
+- [x] Erro de chaves (keys) faltando em listas do Dashboard (CORRIGIDO - adicionada key única no Cell do gráfico)
 
 ## Novas Features Solicitadas
 - [x] Criar painel administrativo para configurações do tenant (nome, logo, cores)
