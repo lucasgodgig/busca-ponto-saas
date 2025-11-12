@@ -38,7 +38,7 @@ export default function Sidebar({ className }: SidebarProps) {
     {
       title: "Mapa Interativo",
       icon: Map,
-      href: "/mapa",
+      href: "/mapa?reset=" + Date.now(), // Adiciona timestamp para forçar reset
     },
     {
       title: "Meus Estudos",

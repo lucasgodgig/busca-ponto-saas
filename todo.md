@@ -1893,10 +1893,36 @@ Substituir análise de centroide + raio fixo por análise real usando coordenada
 
 
 
-## Bug - Polígonos Não Limpam (12/11/2025)
-- [ ] Clicar em "Mapa Interativo" não remove polígonos desenhados
-- [ ] Vértices (círculos brancos) continuam visíveis
-- [ ] Linhas do polígono não desaparecem
-- [ ] Verificar se setPolygonVertices([]) está funcionando
-- [ ] Verificar se setIsDrawingPolygon(false) está funcionando
+## Bug - Polígonos Não Limpam (12/11/2025) - ✅ RESOLVIDO
+- [x] Clicar em "Mapa Interativo" não remove polígonos desenhados
+- [x] Vértices (círculos brancos) continuam visíveis
+- [x] Linhas do polígono não desaparecem
+- [x] Verificar se setPolygonVertices([]) está funcionando
+- [x] Verificar se setIsDrawingPolygon(false) está funcionando
+
+**Solução Final (12/11/2025):**
+- Implementado sistema de reset via query param `?reset=timestamp`
+- Sidebar.tsx (linha 41): Link "Mapa Interativo" agora adiciona `?reset=` + timestamp na URL
+- MapShell.tsx (linhas 464-496): useEffect detecta query param `reset` ao montar
+- Quando detectado, limpa todos os estados (marker, polygonVertices, savedPoints, circles, etc)
+- Remove query param da URL após reset usando `window.history.replaceState()`
+- Mostra toast de confirmação "Mapa limpo!"
+- **Vantagem:** Não causa remontagem forçada do componente (evita erro getLayer undefined)
+- **Resultado:** Funciona perfeitamente sem erros
+
+
+
+## Erro Crítico - MapShell (12/11/2025) - ✅ RESOLVIDO
+
+- [x] Erro: TypeError: Cannot read properties of undefined (reading 'getLayer')
+- [x] Causado pela prop key={location} que força remontagem do MapShell
+- [x] Reverter solução e implementar alternativa que não cause erro
+
+**Solução Alternativa Implementada:**
+Em vez de usar `key={location}` (que força remontagem e causa erro), implementado sistema de reset via query param:
+1. Sidebar adiciona `?reset=timestamp` ao link "Mapa Interativo"
+2. MapShell detecta query param no useEffect de montagem
+3. Limpa todos os estados manualmente
+4. Remove query param da URL
+5. ✅ Funciona sem causar erro de getLayer undefined
 

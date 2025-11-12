@@ -461,6 +461,40 @@ const MapShell = forwardRef<MapShellRef, MapShellProps>(({ tenantId, loading = f
     }
   }, [radius, marker]);
 
+  // Detectar query param reset e limpar mapa
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const shouldReset = urlParams.get('reset');
+    
+    if (shouldReset) {
+      console.log('[MapShell] Reset detectado via query param');
+      // Limpar todos os estados
+      setMarker(null);
+      setAddress("");
+      setRadius([DEFAULT_RADIUS]);
+      setSelectedRadius(DEFAULT_RADIUS);
+      setSpaceData(null);
+      setSpaceError(null);
+      setAnalysisMode(false);
+      setActiveMode(null);
+      setSavedPoints([]);
+      setPolygonVertices([]);
+      setIsDrawingPolygon(false);
+      setContextMenuPoint(null);
+      setContextMenuPosition(null);
+      clearAnalysisCircle();
+      
+      // Remover o query param da URL sem recarregar a página
+      const newUrl = window.location.pathname;
+      window.history.replaceState({}, '', newUrl);
+      
+      toast.success('Mapa limpo!', {
+        description: 'Todas as marcações foram removidas',
+        duration: 2000,
+      });
+    }
+  }, []); // Roda apenas uma vez ao montar
+
   // Update circle when selectedRadius changes (modo radius ativo)
   useEffect(() => {
     if (marker && activeMode === 'radius') {
