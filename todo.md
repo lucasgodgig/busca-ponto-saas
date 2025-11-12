@@ -1786,3 +1786,12 @@ Substituir análise de centroide + raio fixo por análise real usando coordenada
 - [x] Botões "Analisar Área" e "Limpar" não aparecem mais ao desenhar polígono
 - [x] Restaurar painel flutuante que aparece quando modo "area" está ativo (props adicionadas ao LeftPanel)
 
+
+
+
+## Nova Feature - Indicador Visual de Modo (11/11/2025)
+- [x] Adicionar badge no canto superior direito do mapa
+- [x] Mostrar modo ativo: "Consultar Raio", "Adicionar Ponto", "Desenhar Área"
+- [x] Exibir raio selecionado quando modo "radius" está ativo
+- [x] Design discreto mas visível com cores correspondentes ao modo (azul/verde/roxo)
+

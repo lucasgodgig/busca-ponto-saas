@@ -728,6 +728,59 @@ export default function MapShell({ tenantId, loading = false, onNavigateHome }: 
             </div>
           )}
 
+          {/* Indicador de Modo Ativo */}
+          {activeMode && (
+            <div className="absolute top-4 right-4 z-10">
+              <div className={`bg-white rounded-lg shadow-lg px-4 py-2 border-l-4 ${
+                activeMode === 'radius' ? 'border-blue-600' :
+                activeMode === 'point' ? 'border-green-600' :
+                'border-purple-600'
+              }`}>
+                <div className="flex items-center gap-2">
+                  {activeMode === 'radius' && (
+                    <>
+                      <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="8" strokeWidth="2" />
+                        <circle cx="12" cy="12" r="2" fill="currentColor" />
+                      </svg>
+                      <div>
+                        <div className="text-xs font-semibold text-blue-900">Modo: Consultar Raio</div>
+                        <div className="text-xs text-blue-600">
+                          Raio: {selectedRadius >= 1000 ? `${selectedRadius/1000}km` : `${selectedRadius}m`}
+                        </div>
+                      </div>
+                    </>
+                  )}
+                  {activeMode === 'point' && (
+                    <>
+                      <MapPin className="w-4 h-4 text-green-600" />
+                      <div>
+                        <div className="text-xs font-semibold text-green-900">Modo: Adicionar Ponto</div>
+                        <div className="text-xs text-green-600">Clique no mapa para marcar</div>
+                      </div>
+                    </>
+                  )}
+                  {activeMode === 'area' && (
+                    <>
+                      <svg className="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path d="M3 3l7 7m4 4l7 7M3 21l7-7m4-4l7-7" strokeWidth="2" strokeLinecap="round" />
+                      </svg>
+                      <div>
+                        <div className="text-xs font-semibold text-purple-900">Modo: Desenhar Área</div>
+                        <div className="text-xs text-purple-600">
+                          {polygonVertices.length === 0 
+                            ? 'Clique para iniciar' 
+                            : `${polygonVertices.length} vértice(s)`
+                          }
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Botão de estatísticas de cache */}
           <div className="absolute top-20 right-4 z-10">
             <DropdownMenu>
