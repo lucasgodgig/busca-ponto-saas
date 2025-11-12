@@ -2434,3 +2434,9 @@ Time interno precisa de um perfil intermediário entre admin (controle total) e 
 ## Bugs Encontrados (12/11/2025 - Sessão 18)
 - [x] AdminPanel não exibindo usuários - procedure list faltava no admin.users router (CORRIGIDO - adicionada procedure list)
 
+
+
+
+## Novas Features (12/11/2025 - Sessão 19)
+- [x] Adicionar botão de logout no header/sidebar (IMPLEMENTADO - Botão "Sair" abaixo do "Tema Escuro" na sidebar)
+

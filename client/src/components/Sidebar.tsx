@@ -10,7 +10,8 @@ import {
   X,
   Moon,
   Sun,
-  Shield
+  Shield,
+  LogOut
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { APP_LOGO, APP_TITLE } from "@/const";
@@ -27,7 +28,7 @@ export default function Sidebar({ className }: SidebarProps) {
   const [location] = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
 
   const menuItems = [
     {
@@ -136,7 +137,7 @@ export default function Sidebar({ className }: SidebarProps) {
         </nav>
 
         {/* Theme Toggle */}
-        <div className="p-4 border-t">
+        <div className="p-4 border-t space-y-2">
           <Button
             variant="outline"
             className="w-full justify-start gap-3"
@@ -153,6 +154,14 @@ export default function Sidebar({ className }: SidebarProps) {
                 Tema Escuro
               </>
             )}
+          </Button>
+          <Button
+            variant="outline"
+            className="w-full justify-start gap-3 text-destructive hover:text-destructive"
+            onClick={logout}
+          >
+            <LogOut className="h-5 w-5" />
+            Sair
           </Button>
         </div>
       </aside>
