@@ -47,7 +47,7 @@ export const memberships = mysqlTable("memberships", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("userId").notNull(),
   tenantId: int("tenantId").notNull(),
-  role: mysqlEnum("role", ["tenant_admin", "member"]).default("member").notNull(),
+  role: mysqlEnum("role", ["tenant_admin", "analyst", "member"]).default("member").notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 }, (table) => ({

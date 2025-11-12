@@ -1,0 +1,1 @@
+ALTER TABLE `memberships` MODIFY COLUMN `role` enum('tenant_admin','analyst','member') NOT NULL DEFAULT 'member';

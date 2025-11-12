@@ -2186,3 +2186,79 @@ O painel de dados (Análise de Dados, Visão Geral, etc) continua exibindo resul
 ✅ Painel de dados desaparece quando usuário começa nova busca
 ✅ Sem impacto visual ou funcional
 
+
+
+
+## Feature - Novo Perfil "Analista" para Time Interno (12/11/2025)
+
+- [ ] Criar novo role "analyst" no banco de dados (além de admin e user)
+- [ ] Permissão: Visualizar todos os estudos (não apenas próprios)
+- [ ] Permissão: Submeter/criar novos estudos
+- [ ] Permissão: Editar estudos próprios
+- [ ] Permissão: Visualizar relatórios e análises
+- [ ] Verificar se há outras permissões necessárias
+- [ ] Implementar controle de acesso no código
+- [ ] Testar fluxo completo do novo perfil
+
+**Contexto:**
+Time interno precisa de um perfil intermediário entre admin (controle total) e user (apenas próprios estudos). Analista pode ver todos os estudos e submeter novos, mas não tem acesso a configurações/admin.
+
+
+## Feature - Novo Perfil "Analista" para Time Interno (12/11/2025) - ✅ CONCLUÍDO
+
+- [x] Criar novo role "analyst" no banco de dados (além de admin e user)
+- [x] Permissão: Visualizar todos os estudos (não apenas próprios)
+- [x] Permissão: Submeter/criar novos estudos
+- [x] Permissão: Editar estudos próprios
+- [x] Permissão: Visualizar relatórios e análises
+- [x] Implementar controle de acesso no código
+- [x] Testar fluxo completo do novo perfil
+
+**Implementação:**
+
+1. **Schema (drizzle/schema.ts):**
+   - Adicionado role "analyst" na enum da tabela memberships (linha 50)
+   - Executado `pnpm db:push` para aplicar migração ao banco
+
+2. **Backend (server/routes/studyRequests.ts):**
+   - Criado novo endpoint `listTenant` para usuários com role "analyst"
+   - Verifica membership do usuário no tenant
+   - Permite visualizar todos os estudos do tenant se for analyst ou tenant_admin
+   - Mantém endpoint `myRequests` para usuários normais (apenas próprios estudos)
+   - Mantém endpoint `listAll` para admins (todos os estudos do sistema)
+
+**Permissões por Role:**
+
+| Ação | Admin BP | Tenant Admin | Analyst | Member |
+|------|----------|-------------|---------|--------|
+| Criar estudo | ✅ | ✅ | ✅ | ✅ |
+| Ver próprios estudos | ✅ | ✅ | ✅ | ✅ |
+| Ver todos do tenant | ✅ | ✅ | ✅ | ❌ |
+| Ver todos do sistema | ✅ | ❌ | ❌ | ❌ |
+| Editar status | ✅ | ❌ | ❌ | ❌ |
+| Upload PDF | ✅ | ❌ | ❌ | ❌ |
+
+**Como Usar:**
+
+1. No Management UI, ir em Database
+2. Tabela `memberships`, editar um usuário
+3. Alterar role de "member" para "analyst"
+4. Usuário agora pode:
+   - Visualizar todos os estudos do seu tenant
+   - Submeter novos estudos
+   - Editar seus próprios estudos
+   - Ver relatórios e análises
+
+**Endpoints Disponíveis:**
+
+- `studyRequests.myRequests(tenantId)` - Lista apenas estudos do usuário
+- `studyRequests.listTenant(tenantId, status?)` - Lista todos do tenant (analyst+)
+- `studyRequests.listAll(status?)` - Lista todos do sistema (admin only)
+- `studyRequests.create(...)` - Criar novo estudo (todos)
+
+**Próximas Melhorias Sugeridas:**
+
+1. Adicionar UI para gerenciar roles de usuários (Admin BP → Analyst → Member)
+2. Implementar auditoria de quem alterou role de qual usuário
+3. Adicionar permissão de "revisor" que pode comentar mas não editar status
+

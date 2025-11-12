@@ -123,6 +123,82 @@ export const studyRequestsRouter = router({
     }),
 
   /**
+   * Analyst lista todas as solicitações do seu tenant
+   */
+  listTenant: protectedProcedure
+    .input(
+      z.object({
+        tenantId: z.number(),
+        status: z.enum(["pendente", "em_analise", "concluido", "cancelado"]).optional(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const db = await getDb();
+      if (!db) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Database não disponível",
+        });
+      }
+
+      // Verificar se usuário é analyst ou admin
+      const { memberships } = await import("../../drizzle/schema");
+      const membership = await db
+        .select()
+        .from(memberships)
+        .where(
+          and(
+            eq(memberships.userId, ctx.user.id),
+            eq(memberships.tenantId, input.tenantId)
+          )
+        )
+        .limit(1);
+
+      // Permitir se for analyst ou tenant_admin do tenant
+      if (
+        !membership ||
+        membership.length === 0 ||
+        (membership[0].role !== "analyst" &&
+          membership[0].role !== "tenant_admin")
+      ) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Sem permissão para acessar estudos deste tenant",
+        });
+      }
+
+      const { users, tenants } = await import("../../drizzle/schema");
+
+      let query = db
+        .select({
+          request: studyRequests,
+          creator: {
+            id: users.id,
+            name: users.name,
+            email: users.email,
+          },
+          tenant: {
+            id: tenants.id,
+            name: tenants.name,
+            slug: tenants.slug,
+          },
+        })
+        .from(studyRequests)
+        .leftJoin(users, eq(studyRequests.createdBy, users.id))
+        .leftJoin(tenants, eq(studyRequests.tenantId, tenants.id))
+        .where(eq(studyRequests.tenantId, input.tenantId))
+        .$dynamic();
+
+      if (input.status) {
+        query = query.where(eq(studyRequests.status, input.status));
+      }
+
+      const results = await query.orderBy(desc(studyRequests.createdAt));
+
+      return results;
+    }),
+
+  /**
    * Admin BP lista todas as solicitações
    */
   listAll: adminProcedure
