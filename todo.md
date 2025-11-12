@@ -1841,3 +1841,13 @@ Substituir análise de centroide + raio fixo por análise real usando coordenada
 - [x] Verificar se Source/Layer estão sendo montados no DOM (corrigido)
 - [x] Corrigido: removido useMemo de JSX e adicionado polygonVertices às dependências
 
+
+
+
+## Melhorias de UX - Polígono e Limpeza (12/11/2025)
+- [x] Clicar EXATAMENTE no primeiro marcador (círculo branco) fecha o polígono (onClick no Marker)
+- [x] Não precisa estar "próximo" - detecta clique direto no marcador (stopPropagation)
+- [x] Polígono fechado muda de cor verde (#10b981) - azul durante desenho, verde quando fechado
+- [x] Título "Mapa Interativo" clicável limpa TODAS as marcações (window.location.reload)
+- [x] Reset completo do estado ao clicar no título (recarrega página)
+

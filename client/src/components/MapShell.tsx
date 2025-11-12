@@ -546,6 +546,16 @@ export default function MapShell({ tenantId, loading = false, onNavigateHome }: 
                 <div
                   className="w-3 h-3 bg-white rounded-full border-2 border-blue-600 shadow-md cursor-pointer hover:scale-125 transition-transform"
                   style={{ boxShadow: '0 2px 4px rgba(0,0,0,0.3)' }}
+                  onClick={(e) => {
+                    e.stopPropagation(); // Evita propagação para handleMapClick
+                    // Se clicar no primeiro marcador E já tem pelo menos 2 vértices, fechar polígono
+                    if (index === 0 && polygonVertices.length >= 2 && isDrawingPolygon) {
+                      setIsDrawingPolygon(false);
+                      toast.success(`Polígono fechado com ${polygonVertices.length} vértices!`, {
+                        description: 'Clique em "Analisar Área" para ver os dados',
+                      });
+                    }
+                  }}
                 />
               </Marker>
             ))}
@@ -569,7 +579,7 @@ export default function MapShell({ tenantId, loading = false, onNavigateHome }: 
                     id="polygon-lines-layer"
                     type="line"
                     paint={{
-                      'line-color': '#3b82f6',
+                      'line-color': isDrawingPolygon ? '#3b82f6' : '#10b981', // Azul durante desenho, verde quando fechado
                       'line-width': 3,
                     }}
                   />
@@ -596,7 +606,7 @@ export default function MapShell({ tenantId, loading = false, onNavigateHome }: 
                       id="polygon-closing-line-layer"
                       type="line"
                       paint={{
-                        'line-color': '#3b82f6',
+                        'line-color': '#10b981', // Verde para linha de fechamento
                         'line-width': 3,
                       }}
                     />
@@ -621,7 +631,7 @@ export default function MapShell({ tenantId, loading = false, onNavigateHome }: 
                       id="polygon-fill-layer"
                       type="fill"
                       paint={{
-                        'fill-color': '#3b82f6',
+                        'fill-color': '#10b981', // Verde para preenchimento
                         'fill-opacity': 0.25,
                       }}
                     />

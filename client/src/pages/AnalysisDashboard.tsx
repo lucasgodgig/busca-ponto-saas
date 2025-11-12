@@ -160,7 +160,13 @@ export default function AnalysisDashboard() {
           {/* Header */}
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Mapa Interativo</h1>
+              <h1 
+                className="text-2xl md:text-3xl font-bold text-gray-900 cursor-pointer hover:text-primary transition-colors"
+                onClick={() => window.location.reload()} // Recarrega página para limpar tudo
+                title="Clique para limpar todas as marcações"
+              >
+                Mapa Interativo
+              </h1>
               <p className="text-xs md:text-sm text-gray-600 mt-1">Dashboard de dados demográficos e de mercado</p>
             </div>
 
