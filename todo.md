@@ -1893,20 +1893,10 @@ Substituir análise de centroide + raio fixo por análise real usando coordenada
 
 
 
-## Bug - Polígonos Não Limpam (12/11/2025) - ✅ RESOLVIDO
-- [x] Clicar em "Mapa Interativo" não remove polígonos desenhados
-- [x] Vértices (círculos brancos) continuam visíveis
-- [x] Linhas do polígono não desaparecem
-- [x] Verificar se setPolygonVertices([]) está funcionando
-- [x] Verificar se setIsDrawingPolygon(false) está funcionando
-
-**Solução:** Adicionado `key={location}` prop no MapShell (MapPage.tsx linha 168). Isso força o React a desmontar e remontar o componente quando a rota muda, limpando automaticamente todos os estados (marcadores, polígonos, pontos salvos, círculos, etc).
-
-## Bug Reportado - Sessão Atual (Limpeza de Mapa) - ✅ RESOLVIDO
-
-- [x] Clicar em "Mapa Interativo" na sidebar não limpa pontos/polígonos do mapa
-- [x] Implementar função de reset que limpe todos os estados
-- [x] Testar que limpeza funciona ao clicar na sidebar
-
-**Solução:** Implementado usando React key prop. Quando usuário clica em "Mapa Interativo" na sidebar, a rota muda e o MapShell é remontado do zero.
+## Bug - Polígonos Não Limpam (12/11/2025)
+- [ ] Clicar em "Mapa Interativo" não remove polígonos desenhados
+- [ ] Vértices (círculos brancos) continuam visíveis
+- [ ] Linhas do polígono não desaparecem
+- [ ] Verificar se setPolygonVertices([]) está funcionando
+- [ ] Verificar se setIsDrawingPolygon(false) está funcionando
 
