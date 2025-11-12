@@ -13,6 +13,7 @@ import { leadsRouter } from "./routes/leads";
 import { studyRequestsRouter, notificationsRouter } from "./routes/studyRequests";
 import { usersRouter } from "./routes/users";
 import { usageRouter } from "./routes/usage";
+import { sendEmail, generateLimitAlertEmail, generateLimitReachedEmail } from "./services/emailService";
 
 export const appRouter = router({
   system: systemRouter,
@@ -1000,6 +1001,27 @@ export const appRouter = router({
             limit,
             remaining,
           };
+        }),
+
+      sendLimitAlertEmail: protectedProcedure
+        .input(z.object({
+          userId: z.number(),
+          email: z.string().email(),
+          userName: z.string(),
+          used: z.number(),
+          limit: z.number(),
+        }))
+        .mutation(async ({ input }) => {
+          const percentage = Math.round((input.used / input.limit) * 100);
+          const html = generateLimitAlertEmail(input.userName, input.used, input.limit, percentage);
+          
+          const success = await sendEmail({
+            to: input.email,
+            subject: `Alerta: Você utilizou ${percentage}% do seu limite mensal`,
+            html,
+          });
+
+          return { success };
         }),
     }),
   }),

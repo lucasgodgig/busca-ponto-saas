@@ -2379,3 +2379,21 @@ Time interno precisa de um perfil intermediário entre admin (controle total) e 
   - [x] Mostrar comparação com meses anteriores
   - [x] Adicionar link no Dashboard para acessar histórico
 
+
+
+
+## Novas Features em Progresso (12/11/2025 - Sessão 14)
+- [x] Implementar bloqueio de criação de estudos quando limite é atingido
+  - [x] Desabilitar botão "Solicitar Estudo" quando remaining <= 0
+  - [x] Mostrar tooltip explicativo sobre upgrade
+  - [x] Bloquear também via API (validação no backend)
+- [x] Criar sistema de notificações por email
+  - [x] Integrar com serviço de email (Resend ou SendGrid)
+  - [x] Enviar email quando usuário atinge 80% do limite
+  - [x] Incluir link direto para página de upgrade
+  - [x] Adicionar template de email profissional
+- [x] Adicionar previsão de esgotamento no Dashboard
+  - [x] Calcular taxa de consumo diário
+  - [x] Estimar data de esgotamento
+  - [x] Mostrar aviso proativo no Dashboard
+

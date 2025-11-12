@@ -1,4 +1,3 @@
-import { useAuth } from "@/_core/hooks/useAuth";
 import { useWebSocketNotifications } from "@/hooks/useWebSocketNotifications";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -20,6 +19,23 @@ import StudiesChart from "@/components/StudiesChart";
 import { useExportDashboard } from "@/hooks/useExportDashboard";
 import { Download } from "lucide-react";
 import { toast } from "sonner";
+import { useAuth } from "@/_core/hooks/useAuth";
+
+function calculateExhaustionDate(used: number, totalStudies: number): string {
+  if (totalStudies === 0 || used === 0) return "Sem dados";
+  
+  const daysInMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate();
+  const currentDay = new Date().getDate();
+  const daysRemaining = daysInMonth - currentDay;
+  
+  const dailyRate = used / currentDay;
+  const estimatedDaysToExhaust = Math.ceil((3 - (used % 3)) / dailyRate) || daysRemaining;
+  
+  const exhaustionDate = new Date();
+  exhaustionDate.setDate(exhaustionDate.getDate() + estimatedDaysToExhaust);
+  
+  return exhaustionDate.toLocaleDateString('pt-BR', { month: 'short', day: 'numeric' });
+}
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -222,6 +238,11 @@ export default function Dashboard() {
                     <p className="text-sm text-yellow-800 dark:text-yellow-200">
                       ⚠️ Você está próximo do limite mensal. Restam apenas {usageData.remaining} estudos.
                     </p>
+                    {studies && studies.length > 0 && (
+                      <p className="text-xs text-yellow-700 dark:text-yellow-300 mt-2">
+                        Estimativa de esgotamento: {calculateExhaustionDate(usageData.used, studies.length)}
+                      </p>
+                    )}
                   </div>
                 )}
                 <Link href="/historico-uso" className="mt-4">
@@ -237,25 +258,48 @@ export default function Dashboard() {
         {/* Action Cards */}
         <h2 className="text-xl md:text-2xl font-bold mb-4">Acesso Rápido</h2>
         <div className="grid gap-4 md:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 mb-6 md:mb-8">
-          {actionCards.map((card) => (
-            <Link key={card.title} href={card.href}>
-              <Card className="group cursor-pointer transition-all hover:shadow-lg hover:scale-[1.02] border-2 hover:border-primary/50">
+          {actionCards.map((card) => {
+            const isLimitReached = usageData && usageData.remaining <= 0 && card.title === 'Solicitar Estudo';
+            const cardContent = (
+              <Card className={`group transition-all border-2 ${
+                isLimitReached 
+                  ? "cursor-not-allowed opacity-60 hover:shadow-none" 
+                  : "cursor-pointer hover:shadow-lg hover:scale-[1.02] hover:border-primary/50"
+              }`}>
                 <CardHeader className="pb-3">
-                  <div className={`w-14 h-14 rounded-xl ${card.bgColor} flex items-center justify-center mb-4 transition-transform group-hover:scale-110`}>
+                  <div className={`w-14 h-14 rounded-xl ${card.bgColor} flex items-center justify-center mb-4 transition-transform ${
+                    isLimitReached ? "" : "group-hover:scale-110"
+                  }`}>
                     <card.icon className={`h-7 w-7 ${card.color}`} />
                   </div>
                   <CardTitle className="text-lg mb-2">{card.title}</CardTitle>
                   <CardDescription className="text-sm">{card.description}</CardDescription>
                 </CardHeader>
                 <CardContent className="pt-0">
-                  <Button variant="ghost" className="w-full justify-between group-hover:text-primary transition-colors">
-                    Acessar
-                    <span className="ml-2 transition-transform group-hover:translate-x-1">→</span>
+                  <Button 
+                    variant="ghost" 
+                    className="w-full justify-between transition-colors"
+                    disabled={isLimitReached}
+                  >
+                    {isLimitReached ? "Limite Atingido" : "Acessar"}
+                    <span className={`ml-2 transition-transform ${
+                      isLimitReached ? "" : "group-hover:translate-x-1"
+                    }`}>→</span>
                   </Button>
                 </CardContent>
               </Card>
-            </Link>
-          ))}
+            );
+
+            return isLimitReached ? (
+              <div key={card.title} title="Você atingiu o limite mensal de estudos. Solicite um upgrade para continuar.">
+                {cardContent}
+              </div>
+            ) : (
+              <Link key={card.title} href={card.href}>
+                {cardContent}
+              </Link>
+            );
+          })}
         </div>
 
         {/* Chart */}
