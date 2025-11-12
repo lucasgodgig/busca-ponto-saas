@@ -198,13 +198,18 @@ export default function AdminPanel() {
             <h1 className="text-3xl font-bold">Painel de Administração</h1>
             <p className="text-muted-foreground">Gerencie usuários e limites de estudos</p>
           </div>
-          <Button onClick={() => {
-            resetForm();
-            setCreateModalOpen(true);
-          }}>
-            <Plus className="w-4 h-4 mr-2" />
-            Novo Usuário
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => setLocation('/analytics')}>
+              Analytics
+            </Button>
+            <Button onClick={() => {
+              resetForm();
+              setCreateModalOpen(true);
+            }}>
+              <Plus className="w-4 h-4 mr-2" />
+              Novo Usuário
+            </Button>
+          </div>
         </div>
 
         {/* Filtros */}

@@ -2397,3 +2397,20 @@ Time interno precisa de um perfil intermediário entre admin (controle total) e 
   - [x] Estimar data de esgotamento
   - [x] Mostrar aviso proativo no Dashboard
 
+
+
+
+## Novas Features em Progresso (12/11/2025 - Sessão 15)
+- [x] Criar procedures de analytics no backend
+  - [x] getTenantConsumptionStats - consumo total por tenant
+  - [x] getTenantUsageTrends - tendências de uso nos últimos 30 dias
+  - [x] getRevenueProjection - previsão de receita baseado em upgrades
+- [x] Criar página de analytics para admins BP
+  - [x] Layout com cards de KPIs principais
+  - [x] Tabela de consumo por tenant
+  - [x] Gráficos de tendências de uso
+- [x] Adicionar gráficos de tendências e previsões
+  - [x] Gráfico de consumo mensal por tenant
+  - [x] Gráfico de tendência de upgrades
+  - [x] Previsão de receita para próximos 3 meses
+
