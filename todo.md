@@ -2304,3 +2304,19 @@ Time interno precisa de um perfil intermediário entre admin (controle total) e 
 - [ ] Adicionar link na sidebar para Gerenciamento de Membros
 - [ ] Testar fluxo completo de gerenciamento
 
+
+
+
+## Novas Features em Progresso (12/11/2025 - Sessão 6)
+- [x] Implementar validação de email único no backend
+  - [x] Verificar duplicatas ao atualizar perfil
+  - [x] Retornar erro específico se email já existe
+  - [x] Adicionar validação no Zod schema
+- [x] Criar sistema de notificações em tempo real com WebSocket
+  - [x] Instalar ws (WebSocket library)
+  - [x] Criar servidor WebSocket integrado ao Express
+  - [x] Implementar broadcast de eventos de estudos
+  - [x] Adicionar listener no frontend para notificações
+  - [x] Notificar admins quando novo estudo é criado
+  - [x] Notificar quando status de estudo muda
+

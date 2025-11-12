@@ -530,6 +530,29 @@ export const appRouter = router({
           targetId: newStudy.id,
         });
 
+        // Notificar admins sobre novo estudo criado
+        try {
+          const { getNotificationManager } = await import("../_core/websocket");
+          const notificationManager = getNotificationManager();
+          if (notificationManager) {
+            notificationManager.notifyAdmins({
+              type: "study_created",
+              data: {
+                studyId: newStudy.id,
+                title: input.title,
+                segment: input.segment,
+                address: input.address,
+                tenantId: tenantCtx.tenantId,
+                createdBy: ctx.user.name || "Usuário",
+              },
+              timestamp: new Date(),
+            });
+            console.log(`[Notification] Novo estudo criado: ${newStudy.id}`);
+          }
+        } catch (error) {
+          console.error("[Notification] Erro ao notificar admins:", error);
+        }
+
         return { studyId: newStudy.id };
       }),
 
@@ -560,6 +583,13 @@ export const appRouter = router({
         if (input.assignedBpUserId !== undefined) updateData.assignedBpUserId = input.assignedBpUserId;
         if (input.dueAt) updateData.dueAt = input.dueAt;
 
+        // Buscar estudo atual para notificacao
+        const currentStudy = await dbInstance
+          .select()
+          .from(studies)
+          .where(eq(studies.id, input.studyId))
+          .limit(1);
+
         await dbInstance
           .update(studies)
           .set(updateData)
@@ -573,6 +603,31 @@ export const appRouter = router({
           targetId: input.studyId,
           metaJson: updateData,
         });
+
+        // Notificar sobre mudanca de status
+        if (input.status && currentStudy.length > 0) {
+          try {
+            const { getNotificationManager } = await import("../_core/websocket");
+            const notificationManager = getNotificationManager();
+            if (notificationManager) {
+              notificationManager.notifyAdmins({
+                type: "study_status_changed",
+                data: {
+                  studyId: input.studyId,
+                  title: currentStudy[0].title,
+                  oldStatus: currentStudy[0].status,
+                  newStatus: input.status,
+                  tenantId: input.tenantId,
+                  changedBy: ctx.user.name || "Usuario",
+                },
+                timestamp: new Date(),
+              });
+              console.log(`[Notification] Status do estudo ${input.studyId} alterado para ${input.status}`);
+            }
+          } catch (error) {
+            console.error("[Notification] Erro ao notificar mudanca de status:", error);
+          }
+        }
 
         return { success: true };
       }),

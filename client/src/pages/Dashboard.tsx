@@ -1,4 +1,5 @@
 import { useAuth } from "@/_core/hooks/useAuth";
+import { useWebSocketNotifications } from "@/hooks/useWebSocketNotifications";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { 
@@ -26,13 +27,8 @@ export default function Dashboard() {
     { enabled: !!tenantId }
   );
   
-  // Buscar uso mensal e limite
-  const { data: usageData } = trpc.admin.users.getCurrentUsage.useQuery(
-    undefined,
-    { enabled: !!user }
-  );
-  
   const { exportToPDF } = useExportDashboard();
+  const utils = trpc.useUtils();
 
   const handleExport = async () => {
     toast.loading("Gerando PDF...");
@@ -44,8 +40,23 @@ export default function Dashboard() {
       toast.error("Erro ao exportar dashboard");
     }
   };
+  
+  const handleStudyNotification = (notification: any) => {
+    if (notification.type === "study_created") {
+      utils.studies.list.invalidate();
+    } else if (notification.type === "study_status_changed") {
+      utils.studies.list.invalidate();
+    }
+  };
+  
+  useWebSocketNotifications(handleStudyNotification);
+  
+  const { data: usageData } = trpc.admin.users.getCurrentUsage.useQuery(
+    undefined,
+    { enabled: !!user }
+  );
 
-  const pendingStudies = studies?.filter(s => s.status === 'aberto' || s.status === 'em_analise').length || 0;
+  const pendingStudies = studies?.filter((s) => s.status === 'aberto' || s.status === 'em_analise').length || 0;
   const completedStudies = studies?.filter(s => s.status === 'concluido').length || 0;
 
   const actionCards = [

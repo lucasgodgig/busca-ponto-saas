@@ -25,6 +25,23 @@ export const usersRouter = router({
       }
 
       try {
+        // Validar email único se está sendo atualizado
+        if (input.email) {
+          const existingUser = await db
+            .select()
+            .from(users)
+            .where(eq(users.email, input.email))
+            .limit(1);
+          
+          // Se encontrou um usuário com este email e não é o usuário atual
+          if (existingUser.length > 0 && existingUser[0].id !== ctx.user.id) {
+            throw new TRPCError({
+              code: "CONFLICT",
+              message: "Este email já está registrado no sistema",
+            });
+          }
+        }
+
         // Preparar dados para atualizar
         const updateData: any = { updatedAt: new Date() };
         if (input.name) updateData.name = input.name;
@@ -42,6 +59,7 @@ export const usersRouter = router({
         };
       } catch (error) {
         console.error("Error updating user profile:", error);
+        if (error instanceof TRPCError) throw error;
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Erro ao atualizar perfil",
