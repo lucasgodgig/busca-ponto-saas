@@ -461,6 +461,36 @@ const MapShell = forwardRef<MapShellRef, MapShellProps>(({ tenantId, loading = f
     }
   }, [radius, marker]);
 
+  // Reset map on mount (quando usuário clica em "Mapa Interativo" na sidebar)
+  useEffect(() => {
+    console.log('[MapShell] Componente montado - resetando mapa');
+    // Limpar todos os estados ao montar
+    setMarker(null);
+    setAddress("");
+    setRadius([DEFAULT_RADIUS]);
+    setSelectedRadius(DEFAULT_RADIUS);
+    setSpaceData(null);
+    setSpaceError(null);
+    setAnalysisMode(false);
+    setActiveMode(null);
+    setSavedPoints([]);
+    setPolygonVertices([]);
+    setIsDrawingPolygon(false);
+    setContextMenuPoint(null);
+    setContextMenuPosition(null);
+    clearAnalysisCircle();
+    
+    // Mostrar toast apenas se não for a primeira montagem
+    const isFirstMount = sessionStorage.getItem('mapShellMounted');
+    if (isFirstMount) {
+      toast.success('Mapa limpo!', {
+        description: 'Todas as marcações foram removidas',
+        duration: 2000,
+      });
+    }
+    sessionStorage.setItem('mapShellMounted', 'true');
+  }, []); // Empty array = roda apenas ao montar
+
   // Update circle when selectedRadius changes (modo radius ativo)
   useEffect(() => {
     if (marker && activeMode === 'radius') {

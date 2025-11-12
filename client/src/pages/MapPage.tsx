@@ -12,7 +12,7 @@ import { useEffect } from "react";
 
 export default function Dashboard() {
   const { user, loading: authLoading } = useAuth();
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
   const [selectedTenant, setSelectedTenant] = useState<number | null>(null);
   const [queryLoading, setQueryLoading] = useState(false);
 
@@ -165,6 +165,7 @@ export default function Dashboard() {
       {/* Mapa */}
       {selectedTenant && (
         <MapShell
+          key={location} // Força remontagem quando rota muda, limpando todos os estados
           tenantId={selectedTenant}
           onNavigateHome={() => setLocation("/")}
         />
