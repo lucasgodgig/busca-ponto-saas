@@ -1942,3 +1942,31 @@ Em vez de usar `key={location}` (que força remontagem e causa erro), implementa
 4. Se mapa não estiver pronto, função retorna sem fazer nada (sem erro)
 5. ✅ Funciona perfeitamente sem erros
 
+
+
+## Melhorias de UX - Histórico e Gráficos (12/11/2025) - ✅ CONCLUÍDO
+
+### Histórico
+- [x] Remover palavra "academia" do histórico de análises
+- [x] Substituir por descrição genérica baseada no segmento detectado
+- [x] Exemplo: "Localização • 500m • 12/11, 10:01" ao invés de "academia • 500m..."
+
+**Implementação:**
+- Modificado `MapShell.tsx` linha 1043
+- Removido `{point.segment}` da exibição do histórico
+- Agora mostra apenas: `{raio}m • {data/hora}`
+
+### Gráfico de Potencial de Consumo
+- [x] Remover categoria "Fumo" (cons_9_tobacco) do gráfico
+- [x] Remover categoria "Redução de Passivos" (cons_11_debt_reduction) do gráfico
+- [x] Manter apenas categorias relevantes para análise de ponto comercial
+
+**Implementação:**
+1. `ConsumptionCategoriesChart.tsx` (linhas 38-43):
+   - Adicionado array `EXCLUDED_CATEGORIES` com categorias a excluir
+   - Filtro agora verifica: `!EXCLUDED_CATEGORIES.includes(cat.chave)`
+   
+2. `PDFReport.tsx` (linhas 35-46):
+   - Removida linha com "Fumo" do array de categorias
+   - PDF agora não exibe mais essa categoria
+

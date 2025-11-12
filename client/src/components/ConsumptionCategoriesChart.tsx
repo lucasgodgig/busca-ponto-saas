@@ -35,9 +35,12 @@ function ConsumptionCategoriesChart({
     return null;
   }
 
-  // Mostrar TODAS as categorias de consumo (sem filtro de segmento)
+  // Categorias a serem excluídas do gráfico
+  const EXCLUDED_CATEGORIES = ['cons_9_tobacco', 'cons_11_debt_reduction'];
+  
+  // Mostrar TODAS as categorias de consumo (sem filtro de segmento), exceto as excluídas
   const chartData = data.categorias
-    .filter(cat => cat.valor > 0) // Apenas categorias com valor
+    .filter(cat => cat.valor > 0 && !EXCLUDED_CATEGORIES.includes(cat.chave)) // Filtrar categorias indesejadas
     .map(cat => ({
       name: cat.rotulo,
       valor: cat.valor || 0,

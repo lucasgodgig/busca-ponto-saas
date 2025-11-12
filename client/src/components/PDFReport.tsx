@@ -41,7 +41,6 @@ export function PDFReport({ address, segment, data }: PDFReportProps) {
       { label: "Saúde", value: data.head?.cons_saude || 0 },
       { label: "Educação", value: data.head?.cons_educacao || 0 },
       { label: "Lazer", value: data.head?.cons_lazer || 0 },
-      { label: "Fumo", value: data.head?.cons_fumo || 0 },
       { label: "Serviços Pessoais", value: data.head?.cons_servicos || 0 },
       { label: "Outros", value: data.head?.cons_outros || 0 },
     ].filter(c => c.value > 0);

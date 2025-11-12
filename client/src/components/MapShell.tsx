@@ -1040,7 +1040,7 @@ const MapShell = forwardRef<MapShellRef, MapShellProps>(({ tenantId, loading = f
                       <div className="flex flex-col gap-1 w-full">
                         <div className="text-sm font-medium truncate">{point.address}</div>
                         <div className="text-xs text-muted-foreground">
-                          {point.segment} • {point.radius}m • {new Date(point.timestamp).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                          {point.radius}m • {new Date(point.timestamp).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
                         </div>
                       </div>
                     </DropdownMenuItem>
