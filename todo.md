@@ -1890,3 +1890,13 @@ Substituir análise de centroide + raio fixo por análise real usando coordenada
 - [x] Verificar se savedPoints estava sendo resetado corretamente (estava)
 - [x] Corrigir função resetMap para limpar todos os marcadores do mapa (adicionado console.log para debug)
 
+
+
+
+## Bug - Polígonos Não Limpam (12/11/2025)
+- [ ] Clicar em "Mapa Interativo" não remove polígonos desenhados
+- [ ] Vértices (círculos brancos) continuam visíveis
+- [ ] Linhas do polígono não desaparecem
+- [ ] Verificar se setPolygonVertices([]) está funcionando
+- [ ] Verificar se setIsDrawingPolygon(false) está funcionando
+
