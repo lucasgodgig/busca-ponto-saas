@@ -1778,3 +1778,11 @@ Substituir análise de centroide + raio fixo por análise real usando coordenada
 - [x] Remover filtro de segmento do gráfico de consumo
 - [x] Sempre mostrar TODAS as categorias de consumo (sem filtro por segmento)
 
+
+
+
+## Bug Reportado (11/11/2025 - Sessão 19)
+- [x] Painel flutuante de controle do polígono foi removido acidentalmente
+- [x] Botões "Analisar Área" e "Limpar" não aparecem mais ao desenhar polígono
+- [x] Restaurar painel flutuante que aparece quando modo "area" está ativo (props adicionadas ao LeftPanel)
+

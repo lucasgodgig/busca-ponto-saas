@@ -426,6 +426,10 @@ export default function MapShell({ tenantId, loading = false, onNavigateHome }: 
           onNavigateHome={onNavigateHome}
           hasAddress={!!marker}
           onAnalyze={handleAnalyzeCurrentLocation}
+          activeMode={activeMode}
+          onModeChange={setActiveMode}
+          selectedRadius={selectedRadius}
+          onSelectedRadiusChange={setSelectedRadius}
         />
       </div>
 
