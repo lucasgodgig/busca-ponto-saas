@@ -2059,3 +2059,46 @@ Para atualizar o favicon (aba do navegador):
 ✅ Design discreto e integrado ao tema da aplicação
 ✅ Sem erros ou quebras de funcionalidade
 
+
+
+## Ajuste de Design Mobile (12/11/2025)
+
+- [ ] Analisar diferenças entre mobile e desktop
+- [ ] Ajustar header mobile para ficar consistente
+- [ ] Ajustar sidebar mobile para ficar consistente
+- [ ] Ajustar cores e tipografia mobile
+- [ ] Testar responsividade em diferentes tamanhos
+
+## Ajuste de Design Mobile (12/11/2025) - ✅ CONCLUÍDO
+
+- [x] Analisar diferenças entre mobile e desktop
+- [x] Ajustar header mobile para ficar consistente
+- [x] Ajustar sidebar mobile para ficar consistente
+- [x] Ajustar cores e tipografia mobile
+- [x] Testar responsividade em diferentes tamanhos
+
+**Implementação:**
+
+1. **Arquivo modificado:** `client/src/pages/MapPage.tsx`
+   - Aumentado padding mobile: `px-2` → `px-4`
+   - Melhorado espaçamento: gaps aumentados
+   - Tipografia: `text-lg` → `text-base` em mobile
+   - Ícones: aumentados de 3x3 para 4x4 em mobile
+   - Altura dos botões: `h-9` em mobile, `h-10` em desktop
+   - Adicionado `min-w-0` e `truncate` para melhor responsividade
+   - Adicionado `flex-shrink-0` para ícones não encolherem
+
+2. **Melhorias visuais:**
+   - Header mais profissional e consistente
+   - Melhor distribuição de espaço
+   - Tipografia mais legível em mobile
+   - Ícones com tamanho apropriado para toque
+   - Padding confortável em todos os lados
+
+**Resultado:**
+✅ Design mobile agora é consistente com desktop
+✅ Melhor usabilidade em dispositivos móveis
+✅ Espaçamento profissional
+✅ Tipografia clara e legível
+✅ Sem erros de compilação
+

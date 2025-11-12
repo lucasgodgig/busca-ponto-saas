@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import MapShell from "@/components/MapShell";
@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { Loader2, History, TrendingUp, FileText } from "lucide-react";
 import { toast } from "sonner";
 import { useLocation } from "wouter";
-import { useEffect } from "react";
 
 export default function Dashboard() {
   const { user, loading: authLoading } = useAuth();
@@ -110,20 +109,20 @@ export default function Dashboard() {
     <div className="flex flex-col h-screen">
       {/* Header - Fixed on mobile */}
       <header className="sticky top-0 z-50 border-b bg-background md:relative">
-        <div className="flex items-center justify-between px-2 md:px-6 py-2 md:py-4">
-          <div className="flex items-center gap-2 md:gap-4">
-            <h1 className="text-lg md:text-2xl font-bold cursor-pointer hover:text-primary transition-colors" onClick={() => setLocation("/")}>Sistema Busca Ponto</h1>
+        <div className="flex items-center justify-between px-4 md:px-6 py-3 md:py-4 gap-4">
+          <div className="flex items-center gap-3 md:gap-4 min-w-0">
+            <h1 className="text-base md:text-2xl font-bold cursor-pointer hover:text-primary transition-colors truncate" onClick={() => setLocation("/")}>Sistema Busca Ponto</h1>
             {tenantData?.tenant && (
-              <Badge variant="secondary" className="text-xs md:text-sm">{tenantData.tenant.name}</Badge>
+              <Badge variant="secondary" className="text-xs md:text-sm whitespace-nowrap">{tenantData.tenant.name}</Badge>
             )}
           </div>
 
-          <div className="flex items-center gap-1 md:gap-4">
+          <div className="flex items-center gap-2 md:gap-4">
             {/* Uso do plano */}
             {tenantData && (
               <div className="hidden sm:flex items-center gap-2 text-xs md:text-sm">
-                <TrendingUp className="w-3 h-3 md:w-4 md:h-4" />
-                <span className="text-muted-foreground">
+                <TrendingUp className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0" />
+                <span className="text-muted-foreground whitespace-nowrap">
                   {tenantData.usage?.quickQueriesUsed || 0} / {tenantData.tenant?.limitsJson.quickQueriesPerMonth} consultas
                 </span>
               </div>
@@ -132,27 +131,27 @@ export default function Dashboard() {
             <Button
               variant="outline"
               size="sm"
-              className="text-xs md:text-sm px-2 md:px-4"
+              className="text-xs md:text-sm px-3 md:px-4 h-9 md:h-10"
               onClick={() => setLocation("/studies")}
             >
-              <FileText className="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
+              <FileText className="w-4 h-4 md:w-5 md:h-5 mr-1 md:mr-2 flex-shrink-0" />
               <span className="hidden sm:inline">Estudos</span>
             </Button>
 
             <Button
               variant="outline"
               size="sm"
-              className="text-xs md:text-sm px-2 md:px-4"
+              className="text-xs md:text-sm px-3 md:px-4 h-9 md:h-10"
               onClick={() => setLocation("/history")}
             >
-              <History className="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
+              <History className="w-4 h-4 md:w-5 md:h-5 mr-1 md:mr-2 flex-shrink-0" />
               <span className="hidden sm:inline">Histórico</span>
             </Button>
 
             <Button
               variant="ghost"
               size="sm"
-              className="text-xs md:text-sm px-1 md:px-4"
+              className="text-xs md:text-sm px-2 md:px-4 h-9 md:h-10"
               onClick={() => setLocation("/settings")}
             >
               <span className="hidden sm:inline">{user.name}</span>
