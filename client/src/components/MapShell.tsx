@@ -482,7 +482,12 @@ const MapShell = forwardRef<MapShellRef, MapShellProps>(({ tenantId, loading = f
       setIsDrawingPolygon(false);
       setContextMenuPoint(null);
       setContextMenuPosition(null);
-      clearAnalysisCircle();
+      
+      // Limpar círculo do mapa (se mapa já estiver pronto)
+      const map = mapRef.current?.getMap();
+      if (map) {
+        clearAnalysisCircle(map);
+      }
       
       // Remover o query param da URL sem recarregar a página
       const newUrl = window.location.pathname;

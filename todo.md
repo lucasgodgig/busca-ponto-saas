@@ -1926,3 +1926,19 @@ Em vez de usar `key={location}` (que força remontagem e causa erro), implementa
 4. Remove query param da URL
 5. ✅ Funciona sem causar erro de getLayer undefined
 
+
+
+## Bug - clearAnalysisCircle no Reset (12/11/2025) - ✅ RESOLVIDO
+
+- [x] Erro: Cannot read properties of undefined (reading 'getLayer')
+- [x] Ocorre quando clearAnalysisCircle() é chamado no useEffect de reset
+- [x] Mapa ainda não está pronto quando useEffect executa
+- [x] Adicionar verificação de mapa antes de chamar clearAnalysisCircle
+
+**Solução:**
+1. Modificado `clearAnalysisCircle` em `mapCircle.ts` para aceitar `map?: MapLibreMap | null`
+2. Adicionado `if (!map) return;` no início da função para segurança
+3. No useEffect de reset do MapShell, agora passa o mapa: `clearAnalysisCircle(mapRef.current?.getMap())`
+4. Se mapa não estiver pronto, função retorna sem fazer nada (sem erro)
+5. ✅ Funciona perfeitamente sem erros
+

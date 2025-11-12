@@ -36,7 +36,8 @@ export function upsertAnalysisCircle({ map, center, radiusMeters }: CircleParams
   }
 }
 
-export function clearAnalysisCircle(map: MapLibreMap) {
+export function clearAnalysisCircle(map?: MapLibreMap | null) {
+  if (!map) return; // Segurança: não fazer nada se mapa não existir
   if (map.getLayer("analysis-circle-line")) map.removeLayer("analysis-circle-line");
   if (map.getLayer("analysis-circle-fill")) map.removeLayer("analysis-circle-fill");
   if (map.getSource("analysis-circle-source")) map.removeSource("analysis-circle-source");
