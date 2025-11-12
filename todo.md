@@ -2439,4 +2439,5 @@ Time interno precisa de um perfil intermediário entre admin (controle total) e 
 
 ## Novas Features (12/11/2025 - Sessão 19)
 - [x] Adicionar botão de logout no header/sidebar (IMPLEMENTADO - Botão "Sair" abaixo do "Tema Escuro" na sidebar)
+- [x] Adicionar botão de login na Landing Page para usuários já cadastrados (IMPLEMENTADO - Botões "Começar Agora" e "Entrar" adicionados)
 

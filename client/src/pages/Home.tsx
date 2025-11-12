@@ -11,12 +11,8 @@ export default function Home() {
   const { user, loading, isAuthenticated, logout } = useAuth();
   const [, setLocation] = useLocation();
 
-  // Redirecionar para dashboard se ja estiver autenticado
-  useEffect(() => {
-    if (isAuthenticated && user) {
-      setLocation("/app");
-    }
-  }, [isAuthenticated, user, loading, setLocation]);
+  // Permitir que usuários autenticados vejam a landing page
+  // Eles podem clicar em "Acessar Dashboard" se quiserem ir para /app
 
   if (loading) {
     return (
@@ -69,9 +65,14 @@ export default function Home() {
                   Acessar Dashboard
                 </Button>
               ) : (
-                <Button size="lg" onClick={() => setLocation("/cadastro")}>
-                  Começar Agora
-                </Button>
+                <>
+                  <Button size="lg" onClick={() => setLocation("/cadastro")}>
+                    Começar Agora
+                  </Button>
+                  <Button size="lg" variant="outline" onClick={() => window.location.href = getLoginUrl()}>
+                    Entrar
+                  </Button>
+                </>
               )}
             </div>
           </div>
