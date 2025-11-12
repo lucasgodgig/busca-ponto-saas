@@ -50,8 +50,8 @@ export default function StudiesChart() {
           <AreaChart data={chartData}>
             <defs>
               <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
-                <stop key="start" offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3}/>
-                <stop key="end" offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
+                <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3}/>
+                <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />

@@ -46,14 +46,6 @@ export function useWebSocketNotifications(
         console.log("[WebSocket] Conectado com sucesso");
         reconnectAttemptsRef.current = 0;
 
-        // Enviar autenticação
-        const authMessage = {
-          type: "auth",
-          userId: user.id,
-          isAdmin: user.role === "admin_bp",
-        };
-        ws.send(JSON.stringify(authMessage));
-
         // Enviar ping periodicamente para manter conexão viva
         const pingInterval = setInterval(() => {
           if (ws.readyState === WebSocket.OPEN) {
@@ -70,8 +62,19 @@ export function useWebSocketNotifications(
           const message = JSON.parse(event.data);
           console.log("[WebSocket] Mensagem recebida:", message);
 
-          if (message.type === "connection_established") {
-            console.log("[WebSocket]", message.message);
+          if (message.type === "auth_required") {
+            console.log("[WebSocket] Servidor pedindo autenticação");
+            const authMessage = {
+              type: "auth",
+              userId: user.id,
+              isAdmin: user.role === "admin_bp",
+            };
+            ws.send(JSON.stringify(authMessage));
+            return;
+          }
+
+          if (message.type === "auth_success") {
+            console.log("[WebSocket] Autenticação bem-sucedida");
             return;
           }
 
@@ -82,8 +85,7 @@ export function useWebSocketNotifications(
           // Processar notificações de estudos
           if (
             message.type === "study_created" ||
-            message.type === "study_status_changed" ||
-            message.type === "study_updated"
+            message.type === "study_status_changed"
           ) {
             const notification: StudyNotification = message;
 

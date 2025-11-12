@@ -26,32 +26,15 @@ class NotificationManager {
     this.wss.on("connection", (ws: WebSocket, req) => {
       console.log("[WebSocket] Nova conexão recebida");
 
-      // Extrair userId e isAdmin do header de autenticação
-      const authHeader = req.headers["authorization"];
-      const userId = req.headers["x-user-id"];
-      const isAdmin = req.headers["x-is-admin"] === "true";
+      let userId: number | null = null;
+      let isAdmin = false;
+      let clientId: string | null = null;
 
-      if (!userId) {
-        console.log("[WebSocket] Conexão rejeitada: sem autenticação");
-        ws.close(1008, "Unauthorized");
-        return;
-      }
-
-      const clientId = `${userId}-${Date.now()}`;
-      const clientConnection: ClientConnection = {
-        ws,
-        userId: Number(userId),
-        isAdmin: Boolean(isAdmin),
-      };
-
-      this.clients.set(clientId, clientConnection);
-      console.log(`[WebSocket] Cliente conectado: ${clientId} (Admin: ${isAdmin})`);
-
-      // Enviar mensagem de confirmação de conexão
+      // Enviar mensagem pedindo autenticação
       ws.send(
         JSON.stringify({
-          type: "connection_established",
-          message: "Conectado ao servidor de notificações",
+          type: "auth_required",
+          message: "Por favor, envie dados de autenticação",
           timestamp: new Date(),
         })
       );
@@ -60,6 +43,38 @@ class NotificationManager {
       ws.on("message", (data: string) => {
         try {
           const message = JSON.parse(data);
+          
+          // Primeira mensagem deve ser autenticação
+          if (message.type === "auth" && !userId) {
+            userId = message.userId;
+            isAdmin = message.isAdmin || false;
+            clientId = `${userId}-${Date.now()}`;
+            
+            const clientConnection: ClientConnection = {
+              ws,
+              userId,
+              isAdmin,
+            };
+            
+            this.clients.set(clientId, clientConnection);
+            console.log(`[WebSocket] Cliente autenticado: ${clientId} (Admin: ${isAdmin})`);
+            
+            // Confirmar autenticação
+            ws.send(
+              JSON.stringify({
+                type: "auth_success",
+                message: "Autenticado com sucesso",
+                timestamp: new Date(),
+              })
+            );
+            return;
+          }
+          
+          if (!userId) {
+            console.log("[WebSocket] Mensagem rejeitada: cliente não autenticado");
+            return;
+          }
+          
           console.log(`[WebSocket] Mensagem recebida de ${clientId}:`, message);
 
           // Responder com pong se receber ping
@@ -73,14 +88,27 @@ class NotificationManager {
 
       // Lidar com desconexão
       ws.on("close", () => {
-        this.clients.delete(clientId);
-        console.log(`[WebSocket] Cliente desconectado: ${clientId}`);
+        if (clientId) {
+          this.clients.delete(clientId);
+          console.log(`[WebSocket] Cliente desconectado: ${clientId}`);
+        }
       });
 
       // Lidar com erros
       ws.on("error", (error) => {
-        console.error(`[WebSocket] Erro no cliente ${clientId}:`, error);
+        console.error(`[WebSocket] Erro no cliente ${clientId || 'desconhecido'}:`, error);
       });
+      
+      // Timeout de autenticação (5 segundos)
+      const authTimeout = setTimeout(() => {
+        if (!userId) {
+          console.log("[WebSocket] Conexão fechada: timeout de autenticação");
+          ws.close(1008, "Authentication timeout");
+        }
+      }, 5000);
+      
+      // Guardar timeout para limpeza
+      (ws as any).authTimeout = authTimeout;
     });
   }
 

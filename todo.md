@@ -2320,3 +2320,11 @@ Time interno precisa de um perfil intermediário entre admin (controle total) e 
   - [x] Notificar admins quando novo estudo é criado
   - [x] Notificar quando status de estudo muda
 
+
+
+
+## Bugs Encontrados (12/11/2025 - Sessão 7)
+- [x] WebSocket não consegue conectar - erro de autenticação (CORRIGIDO - implementado handshake de auth)
+- [x] Erro de keys faltando em lista do Dashboard (CORRIGIDO - removidas keys duplicadas em stop elements)
+- [x] Problema de HMR do Vite - WebSocket do Vite não conecta (CORRIGIDO - configurado HMR com wss)
+
