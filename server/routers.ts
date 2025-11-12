@@ -1025,6 +1025,27 @@ export const appRouter = router({
 
           return { success };
         }),
+
+      list: adminProcedure.query(async ({ ctx }) => {
+        const dbInstance = await db.getDb();
+        if (!dbInstance) {
+          throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Database nao disponivel' });
+        }
+
+        const { users: usersTable } = await import('../drizzle/schema');
+        const allUsers = await dbInstance.select().from(usersTable);
+        
+        return allUsers.map(u => ({
+          id: u.id,
+          openId: u.openId,
+          name: u.name,
+          email: u.email,
+          role: u.role,
+          isActive: u.isActive,
+          createdAt: u.createdAt,
+          lastSignedIn: u.lastSignedIn,
+        }));
+      }),
     }),
   }),
 

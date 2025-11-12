@@ -2428,3 +2428,9 @@ Time interno precisa de um perfil intermediário entre admin (controle total) e 
 - [x] HMR do Vite falhando novamente (CORRIGIDO - desabilitado hmr: false)
 - [x] Erro de keys faltando no Dashboard (CORRIGIDO - refatorado condicional para ter key única)
 
+
+
+
+## Bugs Encontrados (12/11/2025 - Sessão 18)
+- [x] AdminPanel não exibindo usuários - procedure list faltava no admin.users router (CORRIGIDO - adicionada procedure list)
+
