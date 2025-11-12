@@ -1769,3 +1769,12 @@ Substituir análise de centroide + raio fixo por análise real usando coordenada
 - [x] Tooltip "Clique aqui para fechar" no primeiro vértice durante desenho
 - [x] Toast com descrição ao fechar polígono ("Clique em 'Analisar Área' para ver os dados")
 
+
+
+
+## Nova Solicitação (11/11/2025 - Sessão 19)
+- [x] Mover menu "MODOS DE ANÁLISE" do canto superior esquerdo para painel lateral esquerdo
+- [x] Remover slider de raio e seletor de segmento do painel esquerdo
+- [x] Remover filtro de segmento do gráfico de consumo
+- [x] Sempre mostrar TODAS as categorias de consumo (sem filtro por segmento)
+

@@ -3,7 +3,9 @@ import { MIN_RADIUS, MAX_RADIUS } from '@shared/constants';
 import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2 } from 'lucide-react';
+import { Loader2, MapPin } from 'lucide-react';
+
+type AnalysisMode = 'radius' | 'point' | 'area' | null;
 
 interface LeftPanelProps {
   radius: number[];
@@ -15,6 +17,10 @@ interface LeftPanelProps {
   onNavigateHome?: () => void;
   hasAddress?: boolean;
   onAnalyze?: () => void;
+  activeMode: AnalysisMode;
+  onModeChange: (mode: AnalysisMode) => void;
+  selectedRadius: number;
+  onSelectedRadiusChange: (radius: number) => void;
 }
 
 const SEGMENTS = [
@@ -35,6 +41,10 @@ export default function LeftPanel({
   onNavigateHome,
   hasAddress = false,
   onAnalyze,
+  activeMode,
+  onModeChange,
+  selectedRadius,
+  onSelectedRadiusChange,
 }: LeftPanelProps) {
   return (
     <div className="w-full md:w-80 bg-white shadow-lg flex flex-col h-full overflow-y-auto">
@@ -58,54 +68,89 @@ export default function LeftPanel({
 
       {/* Content */}
       <div className="flex-1 p-2 md:p-4 space-y-3 md:space-y-6">
-        {/* Raio de Análise */}
+        {/* Modos de Análise */}
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm">Raio de Análise</CardTitle>
+            <CardTitle className="text-sm">Modos de Análise</CardTitle>
             <CardDescription className="text-xs">
-              {radius[0]}m ({(radius[0] / 1000).toFixed(2)}km)
+              Selecione como deseja analisar
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <Slider
-              value={radius}
-              onValueChange={onRadiusChange}
-              min={MIN_RADIUS}
-              max={MAX_RADIUS}
-              step={100}
-              disabled={loading}
-              className="w-full"
-            />
-            <div className="flex justify-between text-xs text-gray-500 mt-2">
-              <span>{MIN_RADIUS}m</span>
-              <span>{MAX_RADIUS / 1000}km</span>
-            </div>
+          <CardContent className="space-y-2">
+            {/* Modo: Consultar Raio */}
+            <button
+              onClick={() => onModeChange(activeMode === 'radius' ? null : 'radius')}
+              className={`w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all ${
+                activeMode === 'radius'
+                  ? 'bg-blue-600 text-white'
+                  : 'text-gray-700 hover:bg-gray-100 border border-gray-200'
+              }`}
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="8" strokeWidth="2" />
+                <circle cx="12" cy="12" r="2" fill="currentColor" />
+              </svg>
+              Consulte um raio
+            </button>
+            
+            {/* Modo: Adicionar Ponto */}
+            <button
+              onClick={() => onModeChange(activeMode === 'point' ? null : 'point')}
+              className={`w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all ${
+                activeMode === 'point'
+                  ? 'bg-blue-600 text-white'
+                  : 'text-gray-700 hover:bg-gray-100 border border-gray-200'
+              }`}
+            >
+              <MapPin className="w-4 h-4" />
+              Adicione um ponto
+            </button>
+            
+            {/* Modo: Desenhar Área */}
+            <button
+              onClick={() => onModeChange(activeMode === 'area' ? null : 'area')}
+              className={`w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all ${
+                activeMode === 'area'
+                  ? 'bg-blue-600 text-white'
+                  : 'text-gray-700 hover:bg-gray-100 border border-gray-200'
+              }`}
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M3 3l7 7m4 4l7 7M3 21l7-7m4-4l7-7" strokeWidth="2" strokeLinecap="round" />
+              </svg>
+              Desenhe uma área
+            </button>
           </CardContent>
         </Card>
-
-        {/* Segmento */}
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm">Segmento do Negócio</CardTitle>
-            <CardDescription className="text-xs">
-              Selecione o tipo de negócio
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Select value={segment} onValueChange={onSegmentChange} disabled={loading}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Escolha um segmento" />
-              </SelectTrigger>
-              <SelectContent>
-                {SEGMENTS.map((seg) => (
-                  <SelectItem key={seg.value} value={seg.value}>
-                    {seg.label}
-                  </SelectItem>
+        
+        {/* Seleção de Raio (apenas quando modo radius ativo) */}
+        {activeMode === 'radius' && (
+          <Card className="border-blue-200 bg-blue-50">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm">Selecione o Raio</CardTitle>
+              <CardDescription className="text-xs">
+                Escolha o raio de análise
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-3 gap-2">
+                {[500, 1000, 1500, 2000, 3000, 5000].map(r => (
+                  <button
+                    key={r}
+                    onClick={() => onSelectedRadiusChange(r)}
+                    className={`px-3 py-2 rounded-md text-xs font-medium transition-all ${
+                      selectedRadius === r
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
+                    }`}
+                  >
+                    {r >= 1000 ? `${r/1000}km` : `${r}m`}
+                  </button>
                 ))}
-              </SelectContent>
-            </Select>
-          </CardContent>
-        </Card>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Botão de Análise */}
         {hasAddress && onAnalyze && (

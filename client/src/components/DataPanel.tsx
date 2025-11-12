@@ -257,7 +257,6 @@ function DataPanel({ data, loading, segment }: DataPanelProps) {
           <div className="overflow-x-auto">
             <ConsumptionCategoriesChart
               data={data as SpaceData}
-              segment={segment || 'outros'}
             />
           </div>
         </div>

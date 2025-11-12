@@ -614,84 +614,11 @@ export default function MapShell({ tenantId, loading = false, onNavigateHome }: 
             )}
           </Map>
 
-          {/* Menu de modos de análise */}
-          <div className="absolute top-4 left-4 z-10 bg-white rounded-lg shadow-lg p-2 space-y-1">
-            <div className="text-xs font-semibold text-gray-500 px-2 py-1">MODOS DE ANÁLISE</div>
+          {/* Menu movido para LeftPanel */}
             
-            {/* Modo: Consultar Raio */}
-            <button
-              onClick={() => setActiveMode(activeMode === 'radius' ? null : 'radius')}
-              className={`w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all ${
-                activeMode === 'radius'
-                  ? 'bg-blue-600 text-white'
-                  : 'text-gray-700 hover:bg-gray-100'
-              }`}
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <circle cx="12" cy="12" r="8" strokeWidth="2" />
-                <circle cx="12" cy="12" r="2" fill="currentColor" />
-              </svg>
-              Consulte um raio
-            </button>
-            
-            {/* Modo: Adicionar Ponto */}
-            <button
-              onClick={() => setActiveMode(activeMode === 'point' ? null : 'point')}
-              className={`w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all ${
-                activeMode === 'point'
-                  ? 'bg-blue-600 text-white'
-                  : 'text-gray-700 hover:bg-gray-100'
-              }`}
-            >
-              <MapPin className="w-4 h-4" />
-              Adicione um ponto
-            </button>
-            
-            {/* Modo: Desenhar Área */}
-            <button
-              onClick={() => setActiveMode(activeMode === 'area' ? null : 'area')}
-              className={`w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all ${
-                activeMode === 'area'
-                  ? 'bg-blue-600 text-white'
-                  : 'text-gray-700 hover:bg-gray-100'
-              }`}
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path d="M3 3l7 7m4 4l7 7M3 21l7-7m4-4l7-7" strokeWidth="2" strokeLinecap="round" />
-              </svg>
-              Desenhe uma área
-            </button>
-          </div>
+
           
-          {/* Painel de opções do modo ativo */}
-          {activeMode === 'radius' && (
-            <div className="absolute top-4 left-56 z-10 bg-white rounded-lg shadow-lg p-3">
-              <div className="text-xs font-semibold text-gray-500 mb-2">SELECIONE O RAIO</div>
-              <div className="flex gap-2">
-                {[500, 1000, 1500, 2000, 3000, 5000].map(r => (
-                  <button
-                    key={r}
-                    onClick={() => setSelectedRadius(r)}
-                    className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
-                      selectedRadius === r
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
-                  >
-                    {r >= 1000 ? `${r/1000}km` : `${r}m`}
-                  </button>
-                ))}
-              </div>
-              <div className="text-xs text-gray-500 mt-2">Clique no mapa para analisar</div>
-            </div>
-          )}
-          
-          {activeMode === 'point' && (
-            <div className="absolute top-4 left-56 z-10 bg-white rounded-lg shadow-lg p-3">
-              <div className="text-xs font-semibold text-gray-500 mb-2">ADICIONAR PONTO</div>
-              <div className="text-xs text-gray-600">Clique no mapa para adicionar um marcador</div>
-            </div>
-          )}
+
           
           {activeMode === 'area' && (
             <div className="absolute top-4 left-56 z-10 bg-white rounded-lg shadow-lg p-3 space-y-2">

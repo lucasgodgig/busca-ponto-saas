@@ -13,30 +13,9 @@ interface ConsumptionCategoriesChartProps {
     }>;
     [key: string]: any;
   };
-  segment: string;
 }
 
-// Mapeamento de segmentos para categorias adicionais
-const segmentCategoryMap: Record<string, { chave: string; rotulo: string; color: string }[]> = {
-  academia: [
-    { chave: "cons_8_recreation", rotulo: "Recreação e Esportes", color: "#f59e0b" },
-  ],
-  farmacia: [
-    { chave: "cons_6_health", rotulo: "Remédios", color: "#ef4444" },
-  ],
-  restaurante: [
-    { chave: "cons_1_food", rotulo: "Alimentos", color: "#8b5cf6" },
-  ],
-  petshop: [
-    { chave: "cons_8_recreation", rotulo: "Recreação e Esportes", color: "#f59e0b" },
-  ],
-  salao: [
-    { chave: "cons_5_hygiene_care", rotulo: "Higiene e Cuidados", color: "#06b6d4" },
-  ],
-  delivery: [
-    { chave: "cons_1_food", rotulo: "Alimentação fora do domicílio", color: "#8b5cf6" },
-  ],
-};
+// Removido: filtro de segmento - agora mostra TODAS as categorias
 
 const CATEGORY_COLORS: Record<string, string> = {
   cons_a_total: "#3b82f6",
@@ -51,50 +30,21 @@ const CATEGORY_COLORS: Record<string, string> = {
 
 function ConsumptionCategoriesChart({
   data,
-  segment,
 }: ConsumptionCategoriesChartProps) {
   if (!data || !data.categorias) {
     return null;
   }
 
-  // Preparar dados com categorias padrão
-  const standardKeys = [
-    "cons_a_total",
-    "cons_1_food",
-    "cons_3_clothing",
-    "cons_4_transport",
-    "cons_5_hygiene_care",
-    "cons_6_health",
-    "cons_7_education",
-  ];
-
+  // Mostrar TODAS as categorias de consumo (sem filtro de segmento)
   const chartData = data.categorias
-    .filter(cat => standardKeys.includes(cat.chave) && cat.valor > 0)
+    .filter(cat => cat.valor > 0) // Apenas categorias com valor
     .map(cat => ({
       name: cat.rotulo,
       valor: cat.valor || 0,
       fill: CATEGORY_COLORS[cat.chave] || "#3b82f6",
       chave: cat.chave,
-    }));
-
-  // Adicionar categoria específica do segmento se existir e não for duplicata
-  const segmentCategories = segmentCategoryMap[segment.toLowerCase()] || [];
-  for (const category of segmentCategories) {
-    const existingCategory = data.categorias.find(c => c.chave === category.chave);
-    
-    // Verificar se já existe na lista padrão
-    const alreadyExists = chartData.some(d => d.chave === category.chave);
-    
-    // Adicionar apenas se existir, tiver valor > 0 e não for duplicata
-    if (existingCategory && existingCategory.valor > 0 && !alreadyExists) {
-      chartData.push({
-        name: category.rotulo,
-        valor: existingCategory.valor,
-        fill: category.color,
-        chave: category.chave,
-      });
-    }
-  }
+    }))
+    .sort((a, b) => b.valor - a.valor); // Ordenar por valor decrescente
 
   // Se não há dados, retornar null
   if (chartData.length === 0) {
