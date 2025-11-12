@@ -14,14 +14,20 @@ export function registerOAuthRoutes(app: Express) {
     const code = getQueryParam(req, "code");
     const state = getQueryParam(req, "state");
 
+    console.log("[OAuth] Callback received", { code: code ? "present" : "missing", state: state ? "present" : "missing" });
+
     if (!code || !state) {
+      console.error("[OAuth] Missing code or state", { code, state });
       res.status(400).json({ error: "code and state are required" });
       return;
     }
 
     try {
+      console.log("[OAuth] Exchanging code for token...");
       const tokenResponse = await sdk.exchangeCodeForToken(code, state);
+      console.log("[OAuth] Token exchange successful");
       const userInfo = await sdk.getUserInfo(tokenResponse.accessToken);
+      console.log("[OAuth] User info retrieved", { openId: userInfo.openId });
 
       if (!userInfo.openId) {
         res.status(400).json({ error: "openId missing from user info" });
