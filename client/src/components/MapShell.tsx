@@ -1006,7 +1006,7 @@ const MapShell = forwardRef<MapShellRef, MapShellProps>(({ tenantId, loading = f
                 <DropdownMenuContent align="end" className="w-80">
                   {analysisHistory.map((point, idx) => (
                     <DropdownMenuItem
-                      key={idx}
+                      key={`analysis-${point.timestamp}-${idx}`}
                       onClick={() => {
                         setMarker({ lat: point.lat, lng: point.lng });
                         setAddress(point.address);

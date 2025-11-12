@@ -9,6 +9,20 @@ import { vitePluginManusRuntime } from "vite-plugin-manus-runtime";
 
 const plugins = [react(), tailwindcss(), jsxLocPlugin(), vitePluginManusRuntime()];
 
+// Detectar ambiente e configurar HMR apropriadamente
+const hmrConfig = (() => {
+  if (process.env.NODE_ENV === "production") {
+    return undefined; // Desabilitar HMR em produção
+  }
+  
+  // Em desenvolvimento local
+  return {
+    protocol: "ws",
+    host: "localhost",
+    port: 5173,
+  };
+})();
+
 export default defineConfig({
   plugins,
   resolve: {
@@ -40,10 +54,10 @@ export default defineConfig({
       strict: true,
       deny: ["**/.*"],
     },
-    hmr: {
-      protocol: "wss",
-      host: "3000-id585axpxaqf480hd0ixe-c2524acc.manusvm.computer",
-      port: 443,
-    },
+    hmr: process.env.NODE_ENV === "development" ? {
+      protocol: "ws",
+      host: "localhost",
+      port: 5173,
+    } : undefined,
   },
 });

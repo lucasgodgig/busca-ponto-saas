@@ -2328,3 +2328,10 @@ Time interno precisa de um perfil intermediário entre admin (controle total) e 
 - [x] Erro de keys faltando em lista do Dashboard (CORRIGIDO - removidas keys duplicadas em stop elements)
 - [x] Problema de HMR do Vite - WebSocket do Vite não conecta (CORRIGIDO - configurado HMR com wss)
 
+
+
+
+## Bugs Encontrados (12/11/2025 - Sessão 8)
+- [x] HMR do Vite ainda falhando com configuração hardcoded (CORRIGIDO - implementado HMR dinâmico baseado em NODE_ENV)
+- [x] Erro de keys em analysisHistory do MapShell (CORRIGIDO - usando timestamp + idx como key)
+
