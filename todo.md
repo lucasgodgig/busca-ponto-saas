@@ -2358,3 +2358,9 @@ Time interno precisa de um perfil intermediário entre admin (controle total) e 
 - [x] HMR do Vite falhando (CORRIGIDO - configurado com timeout e middlewareMode)
 - [x] Erro de keys faltando (CORRIGIDO - template string dinâmico no Onboarding)
 
+
+
+
+## Bugs Encontrados (12/11/2025 - Sessão 12)
+- [x] getCurrentUsage retornando 300 estudos em vez de contar realmente (CORRIGIDO - usar simultaneousStudies em vez de quickQueriesPerMonth)
+

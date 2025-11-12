@@ -989,7 +989,8 @@ export const appRouter = router({
             );
 
           const used = monthlyStudies[0]?.count || 0;
-          const limit = tenant[0].limitsJson?.quickQueriesPerMonth || ctx.user.monthlyStudyLimit || 10;
+          // Usar limite de estudos do plano, nao de consultas rapidas
+          const limit = tenant[0].limitsJson?.simultaneousStudies || ctx.user.monthlyStudyLimit || 10;
           const remaining = Math.max(0, limit - used);
 
           return {
