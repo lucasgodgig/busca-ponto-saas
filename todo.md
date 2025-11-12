@@ -1831,3 +1831,13 @@ Substituir análise de centroide + raio fixo por análise real usando coordenada
 - [x] Investigar componentes Source e Layer do MapLibre
 - [x] Verificar se dados GeoJSON estão corretos (useMemo resolveu re-renders)
 
+
+
+
+## Bug Persistente - Polígono Ainda Invisível (12/11/2025)
+- [x] Linhas do polígono AINDA não apareciam (useMemo com JSX não funciona)
+- [x] Fechamento automático ao clicar no primeiro ponto NÃO funcionava (faltava polygonVertices nas deps)
+- [x] useMemo estava retornando JSX (erro - deve retornar apenas dados)
+- [x] Verificar se Source/Layer estão sendo montados no DOM (corrigido)
+- [x] Corrigido: removido useMemo de JSX e adicionado polygonVertices às dependências
+
