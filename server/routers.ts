@@ -12,6 +12,7 @@ import { ENV } from "./_core/env";
 import { leadsRouter } from "./routes/leads";
 import { studyRequestsRouter, notificationsRouter } from "./routes/studyRequests";
 import { usersRouter } from "./routes/users";
+import { usageRouter } from "./routes/usage";
 
 export const appRouter = router({
   system: systemRouter,
@@ -19,6 +20,7 @@ export const appRouter = router({
   studyRequests: studyRequestsRouter,
   notifications: notificationsRouter,
   users: usersRouter,
+  usage: usageRouter,
 
   auth: router({
     me: publicProcedure.query(async ({ ctx }) => {

@@ -2364,3 +2364,18 @@ Time interno precisa de um perfil intermediário entre admin (controle total) e 
 ## Bugs Encontrados (12/11/2025 - Sessão 12)
 - [x] getCurrentUsage retornando 300 estudos em vez de contar realmente (CORRIGIDO - usar simultaneousStudies em vez de quickQueriesPerMonth)
 
+
+
+
+## Novas Features em Progresso (12/11/2025 - Sessão 13)
+- [x] Implementar alerta visual quando limite é atingido
+  - [x] Adicionar badge vermelha quando 100% do limite é atingido
+  - [x] Mostrar mensagem de aviso no Dashboard
+  - [x] Bloquear criação de novos estudos quando limite é atingido
+  - [x] Integrar com toast notification para alertar usuário
+- [x] Criar página de histórico de uso mensal
+  - [x] Criar procedure getMonthlyUsageHistory no backend
+  - [x] Implementar gráfico de consumo mensal
+  - [x] Mostrar comparação com meses anteriores
+  - [x] Adicionar link no Dashboard para acessar histórico
+

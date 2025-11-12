@@ -2,6 +2,8 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { useWebSocketNotifications } from "@/hooks/useWebSocketNotifications";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useEffect, useRef } from "react";
 import { 
   Map, 
   FileText, 
@@ -55,6 +57,20 @@ export default function Dashboard() {
     undefined,
     { enabled: !!user }
   );
+  
+  // Notificar quando limite eh atingido
+  const hasNotifiedRef = useRef(false);
+  useEffect(() => {
+    if (usageData && usageData.remaining <= 0 && !hasNotifiedRef.current) {
+      toast.error("Voce atingiu o limite mensal de estudos!", {
+        description: "Entre em contato com o administrador para aumentar seu limite.",
+        duration: 5000,
+      });
+      hasNotifiedRef.current = true;
+    } else if (usageData && usageData.remaining > 0) {
+      hasNotifiedRef.current = false;
+    }
+  }, [usageData?.remaining]);
 
   const pendingStudies = studies?.filter((s) => s.status === 'aberto' || s.status === 'em_analise').length || 0;
   const completedStudies = studies?.filter(s => s.status === 'concluido').length || 0;
@@ -208,6 +224,11 @@ export default function Dashboard() {
                     </p>
                   </div>
                 )}
+                <Link href="/historico-uso" className="mt-4">
+                  <Button variant="outline" className="w-full">
+                    Ver Histórico de Uso
+                  </Button>
+                </Link>
               </div>
             </CardContent>
           </Card>
