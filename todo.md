@@ -2335,3 +2335,11 @@ Time interno precisa de um perfil intermediário entre admin (controle total) e 
 - [x] HMR do Vite ainda falhando com configuração hardcoded (CORRIGIDO - implementado HMR dinâmico baseado em NODE_ENV)
 - [x] Erro de keys em analysisHistory do MapShell (CORRIGIDO - usando timestamp + idx como key)
 
+
+
+
+## Bugs Encontrados (12/11/2025 - Sessão 9)
+- [x] Procedure admin.users.getCurrentUsage nao existe (CORRIGIDO - criado users router com procedure)
+- [x] HMR do Vite falhando em producao (CORRIGIDO - desabilitar HMR quando NODE_ENV != development)
+- [x] Erro de keys faltando em Dashboard (INVESTIGADO - todas as listas tem keys corretas)
+

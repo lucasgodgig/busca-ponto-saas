@@ -10,9 +10,22 @@ import { vitePluginManusRuntime } from "vite-plugin-manus-runtime";
 const plugins = [react(), tailwindcss(), jsxLocPlugin(), vitePluginManusRuntime()];
 
 // Detectar ambiente e configurar HMR apropriadamente
-const hmrConfig = (() => {
-  if (process.env.NODE_ENV === "production") {
-    return undefined; // Desabilitar HMR em produção
+const getHmrConfig = () => {
+  // Em produção ou quando NODE_ENV nao eh development, desabilitar HMR
+  if (process.env.NODE_ENV !== "development") {
+    return undefined;
+  }
+  
+  // Detectar se estamos em ambiente de sandbox/producao baseado no hostname
+  const isProduction = typeof window !== "undefined" && 
+    (window.location.hostname.includes(".manusvm.computer") ||
+     window.location.hostname.includes(".manus.computer") ||
+     window.location.hostname.includes(".manus-asia.computer") ||
+     window.location.hostname.includes(".manuscomputer.ai"));
+  
+  if (isProduction) {
+    // Em produção, desabilitar HMR completamente
+    return undefined;
   }
   
   // Em desenvolvimento local
@@ -21,7 +34,7 @@ const hmrConfig = (() => {
     host: "localhost",
     port: 5173,
   };
-})();
+};
 
 export default defineConfig({
   plugins,
@@ -54,10 +67,6 @@ export default defineConfig({
       strict: true,
       deny: ["**/.*"],
     },
-    hmr: process.env.NODE_ENV === "development" ? {
-      protocol: "ws",
-      host: "localhost",
-      port: 5173,
-    } : undefined,
+    hmr: process.env.NODE_ENV === "development" ? false : undefined,
   },
 });

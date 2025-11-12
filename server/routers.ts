@@ -942,6 +942,63 @@ export const appRouter = router({
           })),
         };
       }),
+
+    // Users sub-router
+    users: router({
+      // Obter uso mensal de estudos do usuario atual
+      getCurrentUsage: protectedProcedure
+        .query(async ({ ctx }) => {
+          const dbInstance = await db.getDb();
+          if (!dbInstance) {
+            throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database nao disponivel" });
+          }
+
+          const { generatedStudies, tenants } = await import("../drizzle/schema");
+          const { eq, and, count, sql } = await import("drizzle-orm");
+
+          // Obter tenant do usuario
+          const memberships = await db.getUserMemberships(ctx.user.id);
+          if (!memberships.length) {
+            throw new TRPCError({ code: "FORBIDDEN", message: "Usuario nao pertence a nenhum tenant" });
+          }
+
+          const tenantId = memberships[0].membership.tenantId;
+          const tenant = await dbInstance
+            .select()
+            .from(tenants)
+            .where(eq(tenants.id, tenantId))
+            .limit(1);
+
+          if (!tenant.length) {
+            throw new TRPCError({ code: "NOT_FOUND", message: "Tenant nao encontrado" });
+          }
+
+          // Contar estudos do mes atual
+          const now = new Date();
+          const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+          const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+
+          const monthlyStudies = await dbInstance
+            .select({ count: count() })
+            .from(generatedStudies)
+            .where(
+              and(
+                eq(generatedStudies.tenantId, tenantId),
+                sql`DATE(${generatedStudies.createdAt}) >= DATE(${monthStart}) AND DATE(${generatedStudies.createdAt}) <= DATE(${monthEnd})`
+              )
+            );
+
+          const used = monthlyStudies[0]?.count || 0;
+          const limit = tenant[0].limitsJson?.quickQueriesPerMonth || ctx.user.monthlyStudyLimit || 10;
+          const remaining = Math.max(0, limit - used);
+
+          return {
+            used,
+            limit,
+            remaining,
+          };
+        }),
+    }),
   }),
 
   // Saved Locations (Pontos e Polígonos salvos)
