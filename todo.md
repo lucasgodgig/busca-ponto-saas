@@ -2343,3 +2343,11 @@ Time interno precisa de um perfil intermediário entre admin (controle total) e 
 - [x] HMR do Vite falhando em producao (CORRIGIDO - desabilitar HMR quando NODE_ENV != development)
 - [x] Erro de keys faltando em Dashboard (INVESTIGADO - todas as listas tem keys corretas)
 
+
+
+
+## Bugs Encontrados (12/11/2025 - Sessão 10)
+- [x] WebSocket falhando em producao (CORRIGIDO - desabilitar completamente em .manusvm.computer)
+- [x] HMR do Vite falhando (CORRIGIDO - desabilitar hmr: false)
+- [x] Erro de keys faltando em Dashboard (CORRIGIDO - template string dinamico no Onboarding)
+

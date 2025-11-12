@@ -67,6 +67,6 @@ export default defineConfig({
       strict: true,
       deny: ["**/.*"],
     },
-    hmr: process.env.NODE_ENV === "development" ? false : undefined,
+    hmr: false,
   },
 });

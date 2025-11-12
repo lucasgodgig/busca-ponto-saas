@@ -76,13 +76,21 @@ export default function Onboarding() {
 
   const step = steps[currentStep];
   const Icon = step.icon;
+  
+  // Mapa de cores para backgrounds
+  const colorBgMap: Record<string, string> = {
+    'text-green-600': 'bg-green-50 dark:bg-green-950/30',
+    'text-blue-600': 'bg-blue-50 dark:bg-blue-950/30',
+    'text-purple-600': 'bg-purple-50 dark:bg-purple-950/30',
+    'text-orange-600': 'bg-orange-50 dark:bg-orange-950/30',
+  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <div className="flex items-center justify-center mb-4">
-            <div className={`w-16 h-16 rounded-full bg-${step.color.split('-')[1]}-50 dark:bg-${step.color.split('-')[1]}-950/30 flex items-center justify-center`}>
+            <div className={`w-16 h-16 rounded-full ${colorBgMap[step.color]} flex items-center justify-center`}>
               <Icon className={`h-8 w-8 ${step.color}`} />
             </div>
           </div>

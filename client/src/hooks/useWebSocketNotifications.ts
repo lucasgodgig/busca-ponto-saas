@@ -32,6 +32,16 @@ export function useWebSocketNotifications(
 
   const connect = useCallback(() => {
     if (!user) return;
+    
+    // Desabilitar WebSocket em producao
+    if (typeof window !== "undefined" && 
+        (window.location.hostname.includes(".manusvm.computer") ||
+         window.location.hostname.includes(".manus.computer") ||
+         window.location.hostname.includes(".manus-asia.computer") ||
+         window.location.hostname.includes(".manuscomputer.ai"))) {
+      console.log("[WebSocket] Desabilitar em producao");
+      return;
+    }
 
     try {
       // Determinar protocolo correto (ws ou wss)
