@@ -2013,3 +2013,49 @@ Para atualizar o favicon (aba do navegador):
 2. Upload do arquivo `logo-busca-ponto.png` no campo "Favicon"
 3. Salvar
 
+
+
+## Rodapé Profissional (12/11/2025)
+
+- [ ] Criar componente Footer reutilizável
+- [ ] Incluir informações da empresa:
+  - Desenvolvido por Busca Ponto Consultoria LTDA
+  - CNPJ 60.940.401/0001-53
+  - contato@buscapontooficial.com.br
+- [ ] Exibir versão do sistema
+- [ ] Integrar em todas as páginas (DashboardLayout, MapPage, etc)
+- [ ] Design profissional e discreto
+
+
+
+## Rodapé Profissional (12/11/2025) - ✅ CONCLUÍDO
+
+- [x] Criar componente Footer reutilizável
+- [x] Incluir informações da empresa:
+  - Desenvolvido por Busca Ponto Consultoria LTDA
+  - CNPJ 60.940.401/0001-53
+  - contato@buscapontooficial.com.br
+- [x] Exibir versão do sistema
+- [x] Integrar em DashboardLayout (usado por todas as páginas internas)
+- [x] Design profissional e discreto
+
+**Implementação:**
+1. Criado `client/src/components/Footer.tsx` com:
+   - Informações da empresa (nome, CNPJ)
+   - Link de contato por email
+   - Versão do sistema (1.0.0)
+   - Copyright com ano dinâmico
+   - Design responsivo (flex-col em mobile, flex-row em desktop)
+   - Cores semânticas (muted-foreground, primary)
+
+2. Integrado em `client/src/components/DashboardLayout.tsx`:
+   - Adicionado após <main> e antes de </SidebarInset>
+   - Aparece em todas as páginas que usam DashboardLayout
+   - Responsive e acessível
+
+**Resultado:**
+✅ Footer profissional aparece em todas as páginas internas
+✅ Informações de contato e créditos visíveis
+✅ Design discreto e integrado ao tema da aplicação
+✅ Sem erros ou quebras de funcionalidade
+
