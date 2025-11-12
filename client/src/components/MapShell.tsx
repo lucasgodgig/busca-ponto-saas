@@ -103,6 +103,47 @@ const MapShell = forwardRef<MapShellRef, MapShellProps>(({ tenantId, loading = f
   const [polygonVertices, setPolygonVertices] = useState<Array<{ lat: number; lng: number }>>([]);
   const [isDrawingPolygon, setIsDrawingPolygon] = useState(false);
 
+  // Função para calcular área do polígono usando algoritmo de Shoelace geodésico
+  const calculatePolygonArea = useCallback((vertices: Array<{ lat: number; lng: number }>): number => {
+    if (vertices.length < 3) return 0;
+
+    // Converter lat/lng para coordenadas planas (projeção Web Mercator simplificada)
+    // 1 grau de latitude ≈ 111.32 km
+    // 1 grau de longitude varia com latitude: 111.32 * cos(lat)
+    const toMeters = (lat: number, lng: number) => {
+      const latMeters = lat * 111320; // metros por grau de latitude
+      const lngMeters = lng * 111320 * Math.cos(lat * Math.PI / 180); // ajustado pela latitude
+      return { x: lngMeters, y: latMeters };
+    };
+
+    // Converter todos os vértices para metros
+    const points = vertices.map(v => toMeters(v.lat, v.lng));
+
+    // Algoritmo de Shoelace para calcular área
+    let area = 0;
+    for (let i = 0; i < points.length; i++) {
+      const j = (i + 1) % points.length;
+      area += points[i].x * points[j].y;
+      area -= points[j].x * points[i].y;
+    }
+
+    return Math.abs(area / 2); // Retorna área em m²
+  }, []);
+
+  // Calcular área atual do polígono
+  const polygonArea = useMemo(() => {
+    return calculatePolygonArea(polygonVertices);
+  }, [polygonVertices, calculatePolygonArea]);
+
+  // Formatar área para exibição (m² ou km²)
+  const formatArea = useCallback((areaM2: number): string => {
+    if (areaM2 === 0) return 'calculando...';
+    if (areaM2 >= 1000000) {
+      return `${(areaM2 / 1000000).toFixed(2)} km²`;
+    }
+    return `${areaM2.toLocaleString('pt-BR', { maximumFractionDigits: 0 })} m²`;
+  }, []);
+
   // Histórico de pontos analisados (últimos 5)
   type AnalysisPoint = {
     lat: number;
@@ -682,11 +723,18 @@ const MapShell = forwardRef<MapShellRef, MapShellProps>(({ tenantId, loading = f
           {activeMode === 'area' && (
             <div className="absolute top-4 left-56 z-10 bg-white rounded-lg shadow-lg p-3 space-y-2">
               <div className="text-xs font-semibold text-gray-500">DESENHAR ÁREA</div>
-              <div className="text-xs text-gray-600 mb-2">
-                {polygonVertices.length === 0 
-                  ? 'Clique no mapa para iniciar o polígono'
-                  : `${polygonVertices.length} vértice(s) adicionado(s)`
-                }
+              <div className="text-xs text-gray-600 mb-2 space-y-1">
+                <div>
+                  {polygonVertices.length === 0 
+                    ? 'Clique no mapa para iniciar o polígono'
+                    : `${polygonVertices.length} vértice(s) adicionado(s)`
+                  }
+                </div>
+                {polygonVertices.length > 0 && (
+                  <div className="font-semibold text-blue-600">
+                    Área: {formatArea(polygonArea)}
+                  </div>
+                )}
               </div>
               {polygonVertices.length > 0 && (
                 <div className="flex flex-col gap-2">

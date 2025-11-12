@@ -1860,3 +1860,14 @@ Substituir análise de centroide + raio fixo por análise real usando coordenada
 - [x] Implementar função de reset que limpa todos os estados sem reload (useImperativeHandle)
 - [x] Resetar: polygonVertices, isDrawingPolygon, activeMode, savedPoints, marker, address, spaceData
 
+
+
+
+## Nova Feature - Medição de Área em Tempo Real (12/11/2025)
+- [x] Criar função calculatePolygonArea() usando algoritmo de Shoelace geodésico
+- [x] Converter coordenadas lat/lng para metros usando projeção Web Mercator (111.32 km/grau)
+- [x] Calcular área em m² e formatar para km² quando >= 1.000.000 m²
+- [x] Exibir área no painel flutuante do polígono (abaixo de "X vértice(s) adicionado(s)")
+- [x] Atualizar área automaticamente a cada novo vértice (useMemo)
+- [x] Mostrar "Área: calculando..." quando < 3 vértices (polígono inválido)
+
