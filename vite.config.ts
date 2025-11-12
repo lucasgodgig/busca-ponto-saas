@@ -67,12 +67,7 @@ export default defineConfig({
       strict: true,
       deny: ["**/.*"],
     },
-    hmr: {
-      protocol: 'ws',
-      host: 'localhost',
-      port: 5173,
-      timeout: 60000,
-    },
+    hmr: false,
     middlewareMode: true,
   },
 });

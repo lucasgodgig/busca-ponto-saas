@@ -2421,3 +2421,10 @@ Time interno precisa de um perfil intermediário entre admin (controle total) e 
 - [x] Admins BP tém limite de estudos - devem ter acesso ilimitado (CORRIGIDO - adicionado check de role)
 - [x] AdminPanel não está exibindo usuários - query retorna 0 usuários (CORRIGIDO - criada procedure list)
 
+
+
+
+## Bugs Encontrados (12/11/2025 - Sessão 17)
+- [x] HMR do Vite falhando novamente (CORRIGIDO - desabilitado hmr: false)
+- [x] Erro de keys faltando no Dashboard (CORRIGIDO - refatorado condicional para ter key única)
+

@@ -291,11 +291,15 @@ export default function Dashboard() {
               </Card>
             );
 
-            return isLimitReached ? (
-              <div key={card.title} title="Você atingiu o limite mensal de estudos. Solicite um upgrade para continuar.">
-                {cardContent}
-              </div>
-            ) : (
+            if (isLimitReached) {
+              return (
+                <div key={card.title} title="Você atingiu o limite mensal de estudos. Solicite um upgrade para continuar.">
+                  {cardContent}
+                </div>
+              );
+            }
+            
+            return (
               <Link key={card.title} href={card.href}>
                 {cardContent}
               </Link>
