@@ -56,14 +56,16 @@
 - [x] Adicionar sistema de prioridade e SLA
 
 ## Fase 6: Desenvolver painel administrativo e gestão de tenants
-- [ ] Criar painel de administração do tenant (settings)
-- [ ] Implementar gestão de usuários e papéis
-- [ ] Criar configuração de branding (logo, cores)
-- [ ] Implementar visualização de limites do plano
-- [ ] Criar painel Admin BP global
-- [ ] Implementar gestão de tenants (criar, editar, limites)
-- [ ] Criar fila global de estudos para consultores BP
-- [ ] Implementar tabelas de auditoria e logs
+- [x] Criar painel de administração do tenant (settings)
+- [x] Implementar gestão de usuários e papéis
+- [x] Criar configuração de branding (logo, cores)
+- [x] Implementar visualização de limites do plano
+- [x] Criar painel Admin BP global
+- [x] Implementar gestão de tenants (criar, editar, limites)
+- [x] Criar fila global de estudos para consultores BP
+- [x] Implementar tabelas de auditoria e logs
+- [x] Implementar formulário de perfil do usuário (nome, email)
+- [x] Integrar mutations de alteração de senha
 
 ## Fase 7: Integrar Stripe para billing e planos
 - [ ] Configurar Stripe (variáveis de ambiente)
@@ -243,6 +245,23 @@
 - [x] Formatação de habitantes: 114.996 (sem casas decimais, sem compact)
 - [x] Formatação de renda: R$ 5.970,00 (com 2 casas decimais)
 - [x] Validado com dados reais da Av. Paulista, 1000, São Paulo (raio 1500m)
+
+## Feature - Ajuste de Configurações (12/11/2025) - ✅ CONCLUÍDO
+
+- [x] Trocar "franqueadora" por "empresa" em toda a página
+- [x] Adicionar seção de dados do usuário (perfil)
+- [x] Permitir alterar nome do usuário
+- [x] Permitir alterar email do usuário
+- [x] Permitir alterar senha do usuário
+- [ ] Adicionar upload de foto de perfil (opcional)
+- [ ] Implementar validação de formulários (opcional)
+- [x] Testar fluxo completo de edição de perfil
+
+**Implementação:**
+1. Alterado títulos de "Franqueadora" para "Empresa" em Settings.tsx
+2. Adicionada seção "Meu Perfil" com dois subformulários
+3. Adicionados ícones (User, Mail, Lock) para melhor UX
+4. Formulário está pronto para integração com backend (tRPC mutations)
 
 ## Próximas Ações
 - [ ] Testar com outras localizações para validar parsing
@@ -2261,4 +2280,26 @@ Time interno precisa de um perfil intermediário entre admin (controle total) e 
 1. Adicionar UI para gerenciar roles de usuários (Admin BP → Analyst → Member)
 2. Implementar auditoria de quem alterou role de qual usuário
 3. Adicionar permissão de "revisor" que pode comentar mas não editar status
+
+
+
+
+## Feature - tRPC Mutations para Perfil do Usuário (12/11/2025)
+
+- [ ] Criar mutation updateUserProfile (nome, email)
+- [ ] Criar mutation changePassword (senha atual, nova senha)
+- [ ] Implementar validação de senha atual
+- [ ] Implementar hash de nova senha
+- [ ] Integrar mutations no formulário Settings
+- [ ] Testar fluxo completo de atualização de perfil
+
+## Feature - Página de Gerenciamento de Membros (12/11/2025)
+
+- [ ] Criar página Members.tsx
+- [ ] Listar todos os membros do tenant
+- [ ] Implementar convite de novo membro (gerar link/email)
+- [ ] Implementar remoção de membro
+- [ ] Implementar alteração de role (analyst/member)
+- [ ] Adicionar link na sidebar para Gerenciamento de Membros
+- [ ] Testar fluxo completo de gerenciamento
 

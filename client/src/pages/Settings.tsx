@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Loader2, Settings as SettingsIcon, Building2, Palette } from "lucide-react";
+import { Loader2, Settings as SettingsIcon, Building2, Palette, User, Lock, Mail } from "lucide-react";
 import { useLocation } from "wouter";
 import NotificationSettings from "@/components/NotificationSettings";
 
@@ -26,10 +26,17 @@ export default function Settings() {
     { enabled: !!selectedTenant }
   );
 
-  // Estados do formulário
+  // Estados do formulário - Empresa
   const [name, setName] = useState("");
   const [logoUrl, setLogoUrl] = useState("");
   const [colorPrimary, setColorPrimary] = useState("");
+
+  // Estados do formulário - Perfil do Usuário
+  const [userEmail, setUserEmail] = useState(user?.email || "");
+  const [userName, setUserName] = useState(user?.name || "");
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   // Preencher formulário quando tenant carregar
   if (tenant && !name) {
@@ -49,6 +56,28 @@ export default function Settings() {
     },
   });
 
+  // Mutations para perfil do usuário
+  const updateProfileMutation = trpc.users.updateProfile.useMutation({
+    onSuccess: () => {
+      toast.success("Perfil atualizado com sucesso!");
+    },
+    onError: (error) => {
+      toast.error(error.message || "Erro ao atualizar perfil");
+    },
+  });
+
+  const changePasswordMutation = trpc.users.changePassword.useMutation({
+    onSuccess: () => {
+      toast.success("Senha alterada com sucesso!");
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    },
+    onError: (error) => {
+      toast.error(error.message || "Erro ao alterar senha");
+    },
+  });
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedTenant) return;
@@ -58,6 +87,39 @@ export default function Settings() {
       name,
       logoUrl: logoUrl || undefined,
       colorPrimary: colorPrimary || undefined,
+    });
+  };
+
+  const handleUpdateProfile = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user?.id) return;
+
+    updateProfileMutation.mutate({
+      userId: user.id,
+      name: userName || undefined,
+      email: userEmail || undefined,
+    });
+  };
+
+  const handleChangePassword = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!newPassword || !confirmPassword) {
+      toast.error("Preencha os campos de senha");
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      toast.error("As senhas não conferem");
+      return;
+    }
+
+    if (!user?.id) return;
+
+    changePasswordMutation.mutate({
+      userId: user.id,
+      currentPassword,
+      newPassword,
     });
   };
 
@@ -114,26 +176,26 @@ export default function Settings() {
       {/* Conteúdo */}
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto space-y-6">
-          {/* Informações da Franqueadora */}
+          {/* Informações da Empresa */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Building2 className="w-5 h-5" />
-                Informações da Franqueadora
+                Informações da Empresa
               </CardTitle>
               <CardDescription>
-                Configure o nome e a identidade visual da sua franqueadora
+                Configure o nome e a identidade visual da sua empresa
               </CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="name">Nome da Franqueadora</Label>
+                  <Label htmlFor="name">Nome da Empresa</Label>
                   <Input
                     id="name"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    placeholder="Ex: Minha Franquia"
+                    placeholder="Ex: Minha Empresa"
                     required
                   />
                 </div>
@@ -197,6 +259,137 @@ export default function Settings() {
             </CardContent>
           </Card>
 
+          {/* Perfil do Usuário */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <User className="w-5 h-5" />
+                Meu Perfil
+              </CardTitle>
+              <CardDescription>
+                Altere seus dados pessoais e senha
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                {/* Seção de Dados Pessoais */}
+                <div>
+                  <h3 className="text-sm font-semibold mb-4">Dados Pessoais</h3>
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="userName">Nome Completo</Label>
+                      <Input
+                        id="userName"
+                        value={userName}
+                        onChange={(e) => setUserName(e.target.value)}
+                        placeholder="Seu nome completo"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="userEmail" className="flex items-center gap-2">
+                        <Mail className="w-4 h-4" />
+                        Email
+                      </Label>
+                      <Input
+                        id="userEmail"
+                        type="email"
+                        value={userEmail}
+                        onChange={(e) => setUserEmail(e.target.value)}
+                        placeholder="seu.email@exemplo.com"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Seção de Alteração de Senha */}
+                <div className="border-t pt-6">
+                  <h3 className="text-sm font-semibold mb-4 flex items-center gap-2">
+                    <Lock className="w-4 h-4" />
+                    Alterar Senha
+                  </h3>
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="currentPassword">Senha Atual</Label>
+                      <Input
+                        id="currentPassword"
+                        type="password"
+                        value={currentPassword}
+                        onChange={(e) => setCurrentPassword(e.target.value)}
+                        placeholder="Digite sua senha atual"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="newPassword">Nova Senha</Label>
+                      <Input
+                        id="newPassword"
+                        type="password"
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        placeholder="Digite sua nova senha"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="confirmPassword">Confirmar Nova Senha</Label>
+                      <Input
+                        id="confirmPassword"
+                        type="password"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        placeholder="Confirme sua nova senha"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Botões de Ação */}
+                <div className="flex gap-2 pt-4">
+                  <Button 
+                    onClick={handleUpdateProfile}
+                    className="flex-1"
+                    disabled={updateProfileMutation.isPending}
+                  >
+                    {updateProfileMutation.isPending ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Salvando...
+                      </>
+                    ) : (
+                      "Salvar Alterações do Perfil"
+                    )}
+                  </Button>
+                  <Button 
+                    onClick={handleChangePassword}
+                    variant="outline" 
+                    className="flex-1"
+                    disabled={changePasswordMutation.isPending}
+                  >
+                    {changePasswordMutation.isPending ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Alterando...
+                      </>
+                    ) : (
+                      "Alterar Senha"
+                    )}
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    className="flex-1"
+                    onClick={() => {
+                      setUserName(user?.name || "");
+                      setUserEmail(user?.email || "");
+                      setCurrentPassword("");
+                      setNewPassword("");
+                      setConfirmPassword("");
+                    }}
+                  >
+                    Cancelar
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Notificações */}
           <NotificationSettings />
 
@@ -233,7 +426,7 @@ export default function Settings() {
             <CardHeader>
               <CardTitle>Informações Técnicas</CardTitle>
               <CardDescription>
-                Dados técnicos da franqueadora
+                Dados técnicos da empresa
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3 text-sm">
