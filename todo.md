@@ -1970,3 +1970,46 @@ Em vez de usar `key={location}` (que força remontagem e causa erro), implementa
    - Removida linha com "Fumo" do array de categorias
    - PDF agora não exibe mais essa categoria
 
+
+
+## Alteração de Nome (12/11/2025) - ✅ INSTRUÇÕES FORNECIDAS
+
+- [x] Alterar nome de "Busca Ponto SaaS" para "Sistema Busca Ponto"
+- [x] Verificar sidebar, header, títulos de página
+- [x] Atualizar variável de ambiente VITE_APP_TITLE
+
+**Status:**
+O código já usa "Sistema Busca Ponto" na maioria dos lugares (PDF, páginas, rodapés).
+O nome "Busca Ponto SaaS" que aparece na sidebar vem da variável de ambiente `VITE_APP_TITLE`.
+
+**Como alterar:**
+1. Abrir Management UI (painel direito)
+2. Clicar em Settings (⚙️)
+3. Ir em General
+4. Campo "Website name (VITE_APP_TITLE)": alterar de "Busca Ponto SaaS" para "Sistema Busca Ponto"
+5. Salvar
+
+**Resultado:**
+Nome será atualizado automaticamente em toda a aplicação (sidebar, header, login, etc).
+
+
+
+## Criação de Logo (12/11/2025) - ✅ CONCLUÍDO
+
+- [x] Gerar logo com ícone de Pin (📍) remetendo a busca de ponto
+- [x] Salvar logo no projeto (client/public/)
+- [x] Configurar APP_LOGO para usar novo logo
+- [ ] Atualizar favicon no Management UI (ação manual do usuário)
+
+**Implementação:**
+1. Logo gerado com IA: Pin azul (#2563eb) em fundo branco
+2. Salvo em: `client/public/logo-busca-ponto.png` (512x512px)
+3. Atualizado `client/src/const.ts` linha 7: `APP_LOGO = "/logo-busca-ponto.png"`
+4. Logo agora aparece na sidebar e em toda a aplicação
+
+**Próximos passos (manual):**
+Para atualizar o favicon (aba do navegador):
+1. Abrir Management UI → Settings → General
+2. Upload do arquivo `logo-busca-ponto.png` no campo "Favicon"
+3. Salvar
+
