@@ -1758,3 +1758,14 @@ Substituir análise de centroide + raio fixo por análise real usando coordenada
 3. Altere de "Busca Ponto SaaS" para "Sistema Busca Ponto"
 4. Salve e republique
 
+
+
+
+## Melhorias Implementadas (11/11/2025 - Sessão 18)
+- [x] Polígono fecha automaticamente ao clicar próximo ao primeiro ponto (raio de detecção 200m)
+- [x] Estilo visual do polígono atualizado para azul translúcido (#3b82f6 com 25% opacidade)
+- [x] Bordas tracejadas azuis (dasharray [4, 4])
+- [x] Vértices com quadrados brancos e borda azul (como referência Google Maps)
+- [x] Tooltip "Clique aqui para fechar" no primeiro vértice durante desenho
+- [x] Toast com descrição ao fechar polígono ("Clique em 'Analisar Área' para ver os dados")
+

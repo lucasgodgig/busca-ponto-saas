@@ -340,26 +340,33 @@ export default function MapShell({ tenantId, loading = false, onNavigateHome }: 
       
       // MODO: Desenhar Área
       else if (activeMode === 'area') {
-        const newVertex = { lat: newMarker.lat, lng: newMarker.lng };
-        setPolygonVertices(prev => [...prev, newVertex]);
-        
-        if (polygonVertices.length === 0) {
-          toast.info('Clique para adicionar vértices. Clique no primeiro ponto para fechar.');
-        } else if (polygonVertices.length >= 2) {
-          // Verificar se clicou perto do primeiro ponto para fechar polígono
+        // Verificar se clicou perto do primeiro ponto para fechar polígono (mínimo 3 vértices)
+        if (polygonVertices.length >= 2) {
           const firstVertex = polygonVertices[0];
           const distance = Math.sqrt(
             Math.pow(newMarker.lat - firstVertex.lat, 2) + 
             Math.pow(newMarker.lng - firstVertex.lng, 2)
           );
           
-          // Se clicar a menos de 0.001 graus (~100m) do primeiro ponto, fechar polígono
-          if (distance < 0.001) {
+          // Se clicar a menos de 0.002 graus (~200m) do primeiro ponto, fechar polígono
+          if (distance < 0.002) {
             setIsDrawingPolygon(false);
-            toast.success(`Polígono fechado com ${polygonVertices.length} vértices!`);
-          } else {
-            toast.info(`Vértice ${polygonVertices.length + 1} adicionado`);
+            toast.success(`Polígono fechado com ${polygonVertices.length} vértices!`, {
+              description: 'Clique em "Analisar Área" para ver os dados',
+            });
+            return; // Não adicionar novo vértice, apenas fechar
           }
+        }
+        
+        // Adicionar novo vértice
+        const newVertex = { lat: newMarker.lat, lng: newMarker.lng };
+        setPolygonVertices(prev => [...prev, newVertex]);
+        setIsDrawingPolygon(true);
+        
+        if (polygonVertices.length === 0) {
+          toast.info('Clique para adicionar vértices. Clique próximo ao primeiro ponto para fechar.');
+        } else {
+          toast.info(`Vértice ${polygonVertices.length + 1} adicionado`);
         }
       }
     },
@@ -492,10 +499,11 @@ export default function MapShell({ tenantId, loading = false, onNavigateHome }: 
                 anchor="center"
               >
                 <div className="relative">
-                  <div className="w-3 h-3 bg-purple-600 rounded-full border-2 border-white shadow-lg" />
-                  {index === 0 && polygonVertices.length > 0 && (
-                    <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-purple-600 text-white text-xs px-2 py-1 rounded whitespace-nowrap">
-                      Início
+                  {/* Quadrado branco com borda azul, como na referência */}
+                  <div className="w-4 h-4 bg-white border-2 border-blue-500 shadow-lg" />
+                  {index === 0 && polygonVertices.length > 0 && isDrawingPolygon && (
+                    <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white text-xs px-2 py-1 rounded whitespace-nowrap shadow-lg">
+                      Clique aqui para fechar
                     </div>
                   )}
                 </div>
@@ -542,9 +550,9 @@ export default function MapShell({ tenantId, loading = false, onNavigateHome }: 
                     id="polygon-lines-layer"
                     type="line"
                     paint={{
-                      'line-color': '#9333ea',
+                      'line-color': '#3b82f6',
                       'line-width': 2,
-                      'line-dasharray': [2, 2],
+                      'line-dasharray': [4, 4],
                     }}
                   />
                 </Source>
@@ -570,8 +578,9 @@ export default function MapShell({ tenantId, loading = false, onNavigateHome }: 
                       id="polygon-closing-line-layer"
                       type="line"
                       paint={{
-                        'line-color': '#9333ea',
+                        'line-color': '#3b82f6',
                         'line-width': 2,
+                        'line-dasharray': [4, 4],
                       }}
                     />
                   </Source>
@@ -595,8 +604,8 @@ export default function MapShell({ tenantId, loading = false, onNavigateHome }: 
                       id="polygon-fill-layer"
                       type="fill"
                       paint={{
-                        'fill-color': '#9333ea',
-                        'fill-opacity': 0.2,
+                        'fill-color': '#3b82f6',
+                        'fill-opacity': 0.25,
                       }}
                     />
                   </Source>
