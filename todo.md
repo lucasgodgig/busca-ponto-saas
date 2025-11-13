@@ -2442,7 +2442,7 @@ Time interno precisa de um perfil intermediário entre admin (controle total) e 
 - [x] Adicionar botão de login na Landing Page para usuários já cadastrados (IMPLEMENTADO - Botões "Começar Agora" e "Entrar" adicionados)
 
 ## Bugs Encontrados (12/11/2025 - Sessão 19)
-- [ ] Erro "OAuth callback failed" ao tentar fazer login via botão "Entrar" (logs adicionados para debug)
+- [ ] Erro "OAuth callback failed" ao tentar fazer login via botão "Entrar" (CAUSA IDENTIFICADA: dominio de desenvolvimento nao registrado no OAuth. Testar com dominio publicado sistema-buscaponto.manus.space)
 - [x] Mapa parou de carregar na página de Mapa Interativo (RESOLVIDO - rota correta é /mapa)
 - [x] Erro "No procedure found on path 'admin.users.update'" ao tentar editar usuário como admin (RESOLVIDO - procedure implementada)
 
