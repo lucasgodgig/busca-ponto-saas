@@ -152,7 +152,7 @@ export default function Dashboard() {
               variant="ghost"
               size="sm"
               className="text-xs md:text-sm px-2 md:px-4 h-9 md:h-10"
-              onClick={() => setLocation("/settings")}
+              onClick={() => setLocation("/configuracoes")}
             >
               <span className="hidden sm:inline">{user.name}</span>
               <span className="sm:hidden">⚙️</span>

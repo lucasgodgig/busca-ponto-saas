@@ -2476,3 +2476,8 @@ Time interno precisa de um perfil intermediário entre admin (controle total) e 
 ## Bugs Críticos (13/11/2025 - Continuação 2)
 - [x] Histórico de consultas vazio mesmo após fazer pesquisas no mapa (CORRIGIDO - adicionada função createQuickQuery e simplificado salvamento)
 
+
+
+## Bugs de Navegação (13/11/2025 - Continuação 3)
+- [x] Clique no nome do usuário redireciona para /settings ao invés de /configuracoes (CORRIGIDO - alterado em MapPage.tsx)
+
