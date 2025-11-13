@@ -120,7 +120,7 @@ export default function Dashboard() {
       title: "Relatórios",
       description: "Acesse seu histórico de análises",
       icon: BarChart3,
-      href: "/historico",
+      href: "/history",
       color: "text-orange-600 dark:text-orange-400",
       bgColor: "bg-orange-50 dark:bg-orange-950/30",
     },

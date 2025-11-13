@@ -2469,4 +2469,5 @@ Time interno precisa de um perfil intermediário entre admin (controle total) e 
 ## Novos Bugs Reportados (13/11/2025 - Continuação)
 - [x] Botão "Exportar Relatório" está sobreposto a outro elemento (CORRIGIDO - movido para o header do painel)
 - [x] Relatório PDF está fazendo screenshot da tela ao invés de gerar PDF com dados estruturados (CORRIGIDO - implementado com jsPDF)
+- [x] Rota /histórico estava em português, alterado para /history (CORRIGIDO - atualizado em Sidebar, CommandPalette e Dashboard)
 

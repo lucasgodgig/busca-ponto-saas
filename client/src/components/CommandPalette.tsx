@@ -97,7 +97,7 @@ export default function CommandPalette({ open, onOpenChange }: CommandPalettePro
                 <span>Mapa Interativo</span>
               </Command.Item>
               <Command.Item
-                onSelect={() => handleSelect(() => setLocation("/historico"))}
+                onSelect={() => handleSelect(() => setLocation("/history"))}
                 className="flex items-center gap-2 rounded-md px-2 py-2 cursor-pointer hover:bg-accent"
               >
                 <Clock className="h-4 w-4" />

@@ -49,7 +49,7 @@ export default function Sidebar({ className }: SidebarProps) {
     {
       title: "Histórico",
       icon: Clock,
-      href: "/historico",
+      href: "/history",
     },
     {
       title: "Configurações",
