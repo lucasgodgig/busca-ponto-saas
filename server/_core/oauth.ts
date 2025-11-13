@@ -11,10 +11,20 @@ function getQueryParam(req: Request, key: string): string | undefined {
 }
 
 function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
+  const startTime = Date.now();
+  console.log(`[OAuth] [${label}] Starting at ${new Date().toISOString()}`);
   return Promise.race([
-    promise,
+    promise.then(result => {
+      const elapsed = Date.now() - startTime;
+      console.log(`[OAuth] [${label}] Completed in ${elapsed}ms`);
+      return result;
+    }),
     new Promise<T>((_, reject) =>
-      setTimeout(() => reject(new Error(`${label} timeout after ${ms}ms`)), ms)
+      setTimeout(() => {
+        const elapsed = Date.now() - startTime;
+        console.error(`[OAuth] [${label}] TIMEOUT after ${elapsed}ms (limit: ${ms}ms)`);
+        reject(new Error(`${label} timeout after ${ms}ms`));
+      }, ms)
     ),
   ]);
 }
@@ -36,7 +46,7 @@ export function registerOAuthRoutes(app: Express) {
       console.log("[OAuth] Exchanging code for token...");
       const tokenResponse = await withTimeout(
         sdk.exchangeCodeForToken(code, state),
-        15000,
+        30000,
         "Token exchange"
       );
       console.log("[OAuth] Token exchange successful");
@@ -44,7 +54,7 @@ export function registerOAuthRoutes(app: Express) {
       console.log("[OAuth] Getting user info...");
       const userInfo = await withTimeout(
         sdk.getUserInfo(tokenResponse.accessToken),
-        15000,
+        30000,
         "Get user info"
       );
       console.log("[OAuth] User info retrieved", { openId: userInfo.openId });
@@ -64,7 +74,7 @@ export function registerOAuthRoutes(app: Express) {
           loginMethod: userInfo.loginMethod ?? userInfo.platform ?? null,
           lastSignedIn: new Date(),
         }),
-        15000,
+        30000,
         "UpsertUser"
       );
       console.log("[OAuth] upsertUser completed for:", userInfo.openId);
@@ -104,7 +114,7 @@ export function registerOAuthRoutes(app: Express) {
           name: userInfo.name || "",
           expiresInMs: ONE_YEAR_MS,
         }),
-        15000,
+        30000,
         "Create session token"
       );
       console.log("[OAuth] Session token created");
