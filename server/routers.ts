@@ -831,6 +831,44 @@ export const appRouter = router({
 
   // Admin BP routes
   admin: router({
+    // Users management
+    users: router({
+      update: adminProcedure
+        .input(z.object({
+          id: z.number(),
+          name: z.string().optional(),
+          email: z.string().email().optional(),
+          role: z.enum(["user", "admin"]).optional(),
+          isActive: z.boolean().optional(),
+        }))
+        .mutation(async ({ ctx, input }) => {
+          const dbInstance = await db.getDb();
+          if (!dbInstance) {
+            throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database não disponível" });
+          }
+
+          const { users: usersTable } = await import("../drizzle/schema");
+          const { eq } = await import("drizzle-orm");
+
+          const updateData: any = {};
+          if (input.name !== undefined) updateData.name = input.name;
+          if (input.email !== undefined) updateData.email = input.email;
+          if (input.role !== undefined) updateData.role = input.role;
+          if (input.isActive !== undefined) updateData.isActive = input.isActive;
+
+          if (Object.keys(updateData).length === 0) {
+            throw new TRPCError({ code: "BAD_REQUEST", message: "Nenhum campo para atualizar" });
+          }
+
+          await dbInstance
+            .update(usersTable)
+            .set(updateData)
+            .where(eq(usersTable.id, input.id));
+
+          return { success: true };
+        }),
+    }),
+
     // Atualizar limites de um tenant
     updateTenantLimits: adminProcedure
       .input(z.object({
