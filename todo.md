@@ -2464,3 +2464,9 @@ Time interno precisa de um perfil intermediário entre admin (controle total) e 
 - [x] Erro 403 Forbidden ao acessar página /history (CORRIGIDO - melhorado tratamento de tenant access)
 - [x] Histórico de consultas não aparece mesmo após fazer consultas no mapa (CORRIGIDO - adicionado useEffect para selecionar tenant automaticamente)
 
+
+
+## Novos Bugs Reportados (13/11/2025 - Continuação)
+- [x] Botão "Exportar Relatório" está sobreposto a outro elemento (CORRIGIDO - movido para o header do painel)
+- [x] Relatório PDF está fazendo screenshot da tela ao invés de gerar PDF com dados estruturados (CORRIGIDO - implementado com jsPDF)
+

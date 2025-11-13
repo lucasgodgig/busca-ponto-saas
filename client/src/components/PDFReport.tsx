@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
+import jsPDF from "jspdf";
 
 interface PDFReportProps {
   address: string;
@@ -8,190 +9,219 @@ interface PDFReportProps {
 }
 
 export function PDFReport({ address, segment, data }: PDFReportProps) {
-  const generatePDF = () => {
+  const generatePDF = async () => {
     if (!data) {
       alert("Nenhum dado disponível para exportar");
       return;
     }
 
-    // Extrair dados da estrutura correta
-    const habitantes = data.head?.pessoas || data.people || 0;
-    const rendaMedia = data.head?.renda_media || data.income || 0;
-    const rendaPerCapita = rendaMedia / 2.5; // Aproximação
-    const domicilios = Math.round(habitantes / 2.8);
-    const potencialConsumo = data.head?.potencial_consumo || data.consumer || 0;
+    try {
+      // Extrair dados da estrutura correta
+      const habitantes = data.head?.people || data.people || 0;
+      const rendaMedia = data.head?.income || data.income || 0;
+      const rendaPerCapita = rendaMedia / 2.5;
+      const domicilios = Math.round(habitantes / 2.8);
+      const potencialConsumo = data.head?.consumer || data.consumer || 0;
 
-    // Dados de classe social
-    const classData = [
-      { label: "A1", value: data.head?.class_a1 || data.class_a1 || 0 },
-      { label: "A2", value: data.head?.class_a2 || data.class_a2 || 0 },
-      { label: "B1", value: data.head?.class_b1 || data.class_b1 || 0 },
-      { label: "B2", value: data.head?.class_b2 || data.class_b2 || 0 },
-      { label: "C", value: data.head?.class_c || data.class_c || 0 },
-      { label: "D", value: data.head?.class_d || data.class_d || 0 },
-      { label: "E", value: data.head?.class_e || data.class_e || 0 },
-    ];
+      // Dados de classe social
+      const classData = [
+        { label: "A1", value: data.classes?.find((c: any) => c.sigla === "A1")?.domicilios || 0 },
+        { label: "A2", value: data.classes?.find((c: any) => c.sigla === "A2")?.domicilios || 0 },
+        { label: "B1", value: data.classes?.find((c: any) => c.sigla === "B1")?.domicilios || 0 },
+        { label: "B2", value: data.classes?.find((c: any) => c.sigla === "B2")?.domicilios || 0 },
+        { label: "C", value: data.classes?.find((c: any) => c.sigla === "C")?.domicilios || 0 },
+        { label: "D", value: data.classes?.find((c: any) => c.sigla === "D")?.domicilios || 0 },
+        { label: "E", value: data.classes?.find((c: any) => c.sigla === "E")?.domicilios || 0 },
+      ];
 
-    const totalClass = classData.reduce((sum, c) => sum + c.value, 0);
+      const totalClass = classData.reduce((sum, c) => sum + c.value, 0);
 
-    // Dados de consumo por categoria
-    const consumoData = [
-      { label: "Alimentação", value: data.head?.cons_alimentacao || 0 },
-      { label: "Habitação", value: data.head?.cons_habitacao || 0 },
-      { label: "Vestuário", value: data.head?.cons_vestuario || 0 },
-      { label: "Transporte", value: data.head?.cons_transporte || 0 },
-      { label: "Higiene & Cuidados", value: data.head?.cons_higiene || 0 },
-      { label: "Saúde", value: data.head?.cons_saude || 0 },
-      { label: "Educação", value: data.head?.cons_educacao || 0 },
-      { label: "Lazer", value: data.head?.cons_lazer || 0 },
-      { label: "Serviços Pessoais", value: data.head?.cons_servicos || 0 },
-      { label: "Outros", value: data.head?.cons_outros || 0 },
-    ].filter(c => c.value > 0);
+      // Dados de consumo por categoria
+      const consumoData = data.categorias?.filter((c: any) => c.valor > 0) || [];
 
-    // Criar elemento com o relatório
-    const element = document.createElement("div");
-    element.id = "pdf-report";
-    element.innerHTML = `
-      <div style="font-family: 'Segoe UI', Arial, sans-serif; padding: 40px; color: #333; max-width: 1000px; margin: 0 auto; line-height: 1.6;">
-        <!-- Cabeçalho -->
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 3px solid #2563eb; padding-bottom: 20px;">
-          <div>
-            <h1 style="color: #2563eb; margin: 0; font-size: 28px;">Sistema Busca Ponto</h1>
-            <p style="color: #666; margin: 5px 0 0 0; font-size: 14px;">Análise de Localização</p>
-          </div>
-          <div style="text-align: right; font-size: 12px; color: #666;">
-            <p style="margin: 0;">Relatório Gerado em</p>
-            <p style="margin: 5px 0 0 0; font-weight: bold;">${new Date().toLocaleDateString("pt-BR")} às ${new Date().toLocaleTimeString("pt-BR")}</p>
-          </div>
-        </div>
+      // Criar PDF
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4",
+      });
 
-        <!-- Informações Principais -->
-        <div style="background: #f0f9ff; padding: 20px; border-radius: 8px; margin-bottom: 30px; border-left: 4px solid #2563eb;">
-          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px;">
-            <div>
-              <div style="font-size: 11px; color: #666; font-weight: bold; text-transform: uppercase; margin-bottom: 5px;">Endereço</div>
-              <div style="font-size: 14px; font-weight: 500;">${address || "Não informado"}</div>
-            </div>
-            <div>
-              <div style="font-size: 11px; color: #666; font-weight: bold; text-transform: uppercase; margin-bottom: 5px;">Segmento</div>
-              <div style="font-size: 14px; font-weight: 500; text-transform: capitalize;">${segment || "Não informado"}</div>
-            </div>
-            <div>
-              <div style="font-size: 11px; color: #666; font-weight: bold; text-transform: uppercase; margin-bottom: 5px;">Raio de Análise</div>
-              <div style="font-size: 14px; font-weight: 500;">1.5 km</div>
-            </div>
-          </div>
-        </div>
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      let yPosition = 15;
 
-        <!-- Dados Demográficos -->
-        <h2 style="color: #2563eb; font-size: 18px; margin: 30px 0 20px 0; border-left: 4px solid #2563eb; padding-left: 12px; font-weight: 600;">
-          Dados Demográficos
-        </h2>
-        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 30px;">
-          <div style="background: linear-gradient(135deg, #fff5e6 0%, #ffe6cc 100%); padding: 20px; border-radius: 8px; border-left: 4px solid #f97316;">
-            <div style="font-size: 11px; color: #92400e; font-weight: bold; text-transform: uppercase; margin-bottom: 8px;">Habitantes</div>
-            <div style="font-size: 28px; font-weight: bold; color: #f97316;">${habitantes.toLocaleString("pt-BR")}</div>
-            <div style="font-size: 12px; color: #b45309; margin-top: 8px;">${(habitantes / 100).toFixed(1)} hab/hectare</div>
-          </div>
-          <div style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); padding: 20px; border-radius: 8px; border-left: 4px solid #22c55e;">
-            <div style="font-size: 11px; color: #166534; font-weight: bold; text-transform: uppercase; margin-bottom: 8px;">Renda Média</div>
-            <div style="font-size: 28px; font-weight: bold; color: #22c55e;">R$ ${(rendaMedia).toLocaleString("pt-BR", { maximumFractionDigits: 0 })}</div>
-            <div style="font-size: 12px; color: #4ade80; margin-top: 8px;">Per capita: R$ ${(rendaPerCapita).toLocaleString("pt-BR", { maximumFractionDigits: 0 })}</div>
-          </div>
-          <div style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); padding: 20px; border-radius: 8px; border-left: 4px solid #3b82f6;">
-            <div style="font-size: 11px; color: #1e40af; font-weight: bold; text-transform: uppercase; margin-bottom: 8px;">Domicílios</div>
-            <div style="font-size: 28px; font-weight: bold; color: #3b82f6;">${domicilios.toLocaleString("pt-BR")}</div>
-            <div style="font-size: 12px; color: #60a5fa; margin-top: 8px;">Estimados na área</div>
-          </div>
-        </div>
+      // Cabeçalho
+      pdf.setFillColor(37, 99, 235);
+      pdf.rect(10, 10, pageWidth - 20, 20, "F");
+      pdf.setTextColor(255, 255, 255);
+      pdf.setFont("helvetica", "bold");
+      pdf.setFontSize(18);
+      pdf.text("Sistema Busca Ponto", 15, 22);
+      pdf.setFont("helvetica", "normal");
+      pdf.setFontSize(10);
+      pdf.text("Análise de Localização", 15, 28);
 
-        <!-- Potencial de Consumo -->
-        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 30px; border-left: 4px solid #2563eb;">
-          <h3 style="color: #2563eb; font-size: 16px; margin: 0 0 15px 0; font-weight: 600;">Potencial de Consumo Total</h3>
-          <div style="font-size: 32px; font-weight: bold; color: #2563eb;">R$ ${(potencialConsumo / 1000000).toFixed(1)}M</div>
-          <div style="font-size: 12px; color: #666; margin-top: 8px;">Potencial total na área de análise</div>
-        </div>
+      yPosition = 40;
 
-        <!-- Distribuição por Classe Social -->
-        <h2 style="color: #2563eb; font-size: 18px; margin: 30px 0 20px 0; border-left: 4px solid #2563eb; padding-left: 12px; font-weight: 600;">
-          Distribuição por Classe Social
-        </h2>
-        <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
-          <thead style="background: #2563eb; color: white;">
-            <tr>
-              <th style="padding: 12px; text-align: left; font-size: 12px; font-weight: bold;">Classe</th>
-              <th style="padding: 12px; text-align: right; font-size: 12px; font-weight: bold;">Quantidade</th>
-              <th style="padding: 12px; text-align: right; font-size: 12px; font-weight: bold;">Percentual</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${classData
-              .map(
-                (cls, idx) => `
-            <tr style="background: ${idx % 2 === 0 ? "#f8fafc" : "white"}; border-bottom: 1px solid #e2e8f0;">
-              <td style="padding: 12px; font-weight: 500;">Classe ${cls.label}</td>
-              <td style="padding: 12px; text-align: right;">${cls.value.toLocaleString("pt-BR")}</td>
-              <td style="padding: 12px; text-align: right;">${totalClass > 0 ? ((cls.value / totalClass) * 100).toFixed(1) : 0}%</td>
-            </tr>
-            `
-              )
-              .join("")}
-          </tbody>
-        </table>
+      // Data do relatório
+      pdf.setTextColor(100, 100, 100);
+      pdf.setFontSize(9);
+      pdf.text(`Relatório gerado em ${new Date().toLocaleDateString("pt-BR")} às ${new Date().toLocaleTimeString("pt-BR")}`, 15, yPosition);
+      yPosition += 8;
 
-        <!-- Potencial de Consumo por Categoria -->
-        <h2 style="color: #2563eb; font-size: 18px; margin: 30px 0 20px 0; border-left: 4px solid #2563eb; padding-left: 12px; font-weight: 600;">
-          Potencial de Consumo por Categoria
-        </h2>
-        <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
-          <thead style="background: #2563eb; color: white;">
-            <tr>
-              <th style="padding: 12px; text-align: left; font-size: 12px; font-weight: bold;">Categoria</th>
-              <th style="padding: 12px; text-align: right; font-size: 12px; font-weight: bold;">Valor</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${consumoData
-              .map(
-                (cat, idx) => `
-            <tr style="background: ${idx % 2 === 0 ? "#f8fafc" : "white"}; border-bottom: 1px solid #e2e8f0;">
-              <td style="padding: 12px;">${cat.label}</td>
-              <td style="padding: 12px; text-align: right; font-weight: 500;">R$ ${(cat.value / 1000000).toFixed(2)}M</td>
-            </tr>
-            `
-              )
-              .join("")}
-          </tbody>
-        </table>
+      // Informações principais
+      pdf.setFillColor(240, 249, 255);
+      pdf.rect(10, yPosition, pageWidth - 20, 25, "F");
+      pdf.setTextColor(0, 0, 0);
+      pdf.setFont("helvetica", "bold");
+      pdf.setFontSize(10);
+      pdf.text("INFORMAÇÕES PRINCIPAIS", 15, yPosition + 5);
 
-        <!-- Aviso -->
-        <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; border-radius: 4px; font-size: 12px; color: #92400e; margin-top: 30px;">
-          <strong>Aviso Importante:</strong> Dados conectados de ferramentas oficiais com base no Censo. Para informações específicas, consulte o time da Sistema Busca Ponto.
-        </div>
+      pdf.setFont("helvetica", "normal");
+      pdf.setFontSize(9);
+      pdf.text(`Endereço: ${address || "Não informado"}`, 15, yPosition + 12);
+      pdf.text(`Segmento: ${segment || "Não informado"}`, 15, yPosition + 18);
+      pdf.text(`Raio de Análise: 1.5 km`, 15, yPosition + 24);
+      yPosition += 30;
 
-        <!-- Rodapé -->
-        <div style="margin-top: 40px; padding-top: 20px; border-top: 2px solid #e2e8f0; text-align: center; color: #999; font-size: 11px;">
-          <p style="margin: 0;">Relatório gerado automaticamente pelo Sistema Busca Ponto</p>
-          <p style="margin: 5px 0 0 0;">© 2025 Sistema Busca Ponto. Todos os direitos reservados.</p>
-        </div>
-      </div>
-    `;
+      // Dados Demográficos
+      pdf.setFont("helvetica", "bold");
+      pdf.setFontSize(12);
+      pdf.setTextColor(37, 99, 235);
+      pdf.text("DADOS DEMOGRÁFICOS", 15, yPosition);
+      yPosition += 8;
 
-    // Adicionar ao DOM temporariamente
-    document.body.appendChild(element);
+      // Cards de dados
+      const cardWidth = (pageWidth - 30) / 3;
+      const cardHeight = 20;
 
-    // Esperar um pouco para o elemento ser renderizado
-    setTimeout(() => {
-      // Abrir diálogo de impressão
-      window.print();
+      // Card 1: Habitantes
+      pdf.setFillColor(255, 245, 230);
+      pdf.rect(10, yPosition, cardWidth, cardHeight, "F");
+      pdf.setTextColor(0, 0, 0);
+      pdf.setFont("helvetica", "bold");
+      pdf.setFontSize(9);
+      pdf.text("Habitantes", 12, yPosition + 5);
+      pdf.setFontSize(14);
+      pdf.text(habitantes.toLocaleString("pt-BR"), 12, yPosition + 13);
 
-      // Remover elemento após impressão
-      setTimeout(() => {
-        if (element.parentNode === document.body) {
-          document.body.removeChild(element);
+      // Card 2: Renda Média
+      pdf.setFillColor(240, 253, 244);
+      pdf.rect(10 + cardWidth + 5, yPosition, cardWidth, cardHeight, "F");
+      pdf.setTextColor(0, 0, 0);
+      pdf.setFont("helvetica", "bold");
+      pdf.setFontSize(9);
+      pdf.text("Renda Média", 12 + cardWidth + 5, yPosition + 5);
+      pdf.setFontSize(14);
+      pdf.text(`R$ ${(rendaMedia).toLocaleString("pt-BR", { maximumFractionDigits: 0 })}`, 12 + cardWidth + 5, yPosition + 13);
+
+      // Card 3: Domicílios
+      pdf.setFillColor(239, 246, 255);
+      pdf.rect(10 + (cardWidth + 5) * 2, yPosition, cardWidth, cardHeight, "F");
+      pdf.setTextColor(0, 0, 0);
+      pdf.setFont("helvetica", "bold");
+      pdf.setFontSize(9);
+      pdf.text("Domicílios", 12 + (cardWidth + 5) * 2, yPosition + 5);
+      pdf.setFontSize(14);
+      pdf.text(domicilios.toLocaleString("pt-BR"), 12 + (cardWidth + 5) * 2, yPosition + 13);
+
+      yPosition += 25;
+
+      // Potencial de Consumo
+      pdf.setFillColor(248, 249, 250);
+      pdf.rect(10, yPosition, pageWidth - 20, 15, "F");
+      pdf.setTextColor(37, 99, 235);
+      pdf.setFont("helvetica", "bold");
+      pdf.setFontSize(11);
+      pdf.text("Potencial de Consumo Total", 15, yPosition + 5);
+      pdf.setFontSize(16);
+      pdf.text(`R$ ${(potencialConsumo / 1000000).toFixed(1)}M`, 15, yPosition + 12);
+      yPosition += 20;
+
+      // Distribuição por Classe Social
+      pdf.setFont("helvetica", "bold");
+      pdf.setFontSize(12);
+      pdf.setTextColor(37, 99, 235);
+      pdf.text("DISTRIBUIÇÃO POR CLASSE SOCIAL", 15, yPosition);
+      yPosition += 8;
+
+      // Tabela de classes
+      pdf.setFillColor(37, 99, 235);
+      pdf.setTextColor(255, 255, 255);
+      pdf.setFont("helvetica", "bold");
+      pdf.setFontSize(9);
+      pdf.text("Classe", 15, yPosition);
+      pdf.text("Quantidade", 80, yPosition);
+      pdf.text("Percentual", 130, yPosition);
+      yPosition += 6;
+
+      pdf.setTextColor(0, 0, 0);
+      pdf.setFont("helvetica", "normal");
+      pdf.setFontSize(8);
+
+      classData.forEach((cls, idx) => {
+        if (idx % 2 === 0) {
+          pdf.setFillColor(248, 250, 252);
+          pdf.rect(10, yPosition - 3, pageWidth - 20, 5, "F");
         }
-      }, 100);
-    }, 100);
+        pdf.text(`Classe ${cls.label}`, 15, yPosition);
+        pdf.text(cls.value.toLocaleString("pt-BR"), 80, yPosition);
+        pdf.text(`${totalClass > 0 ? ((cls.value / totalClass) * 100).toFixed(1) : 0}%`, 130, yPosition);
+        yPosition += 5;
+      });
+
+      yPosition += 5;
+
+      // Potencial de Consumo por Categoria
+      if (consumoData.length > 0) {
+        pdf.setFont("helvetica", "bold");
+        pdf.setFontSize(12);
+        pdf.setTextColor(37, 99, 235);
+        pdf.text("POTENCIAL DE CONSUMO POR CATEGORIA", 15, yPosition);
+        yPosition += 8;
+
+        // Tabela de consumo
+        pdf.setFillColor(37, 99, 235);
+        pdf.setTextColor(255, 255, 255);
+        pdf.setFont("helvetica", "bold");
+        pdf.setFontSize(9);
+        pdf.text("Categoria", 15, yPosition);
+        pdf.text("Valor", 130, yPosition);
+        yPosition += 6;
+
+        pdf.setTextColor(0, 0, 0);
+        pdf.setFont("helvetica", "normal");
+        pdf.setFontSize(8);
+
+        consumoData.forEach((cat: any, idx: number) => {
+          if (yPosition > pageHeight - 20) {
+            pdf.addPage();
+            yPosition = 15;
+          }
+
+          if (idx % 2 === 0) {
+            pdf.setFillColor(248, 250, 252);
+            pdf.rect(10, yPosition - 3, pageWidth - 20, 5, "F");
+          }
+          pdf.text(cat.rotulo, 15, yPosition);
+          pdf.text(`R$ ${(cat.valor / 1000000).toFixed(2)}M`, 130, yPosition);
+          yPosition += 5;
+        });
+      }
+
+      // Rodapé
+      yPosition = pageHeight - 15;
+      pdf.setTextColor(150, 150, 150);
+      pdf.setFontSize(8);
+      pdf.text("Relatório gerado automaticamente pelo Sistema Busca Ponto", 15, yPosition);
+      pdf.text("© 2025 Sistema Busca Ponto. Todos os direitos reservados.", 15, yPosition + 5);
+
+      // Salvar PDF
+      pdf.save(`relatorio-busca-ponto-${new Date().toISOString().split("T")[0]}.pdf`);
+    } catch (error) {
+      console.error("Erro ao gerar PDF:", error);
+      alert("Erro ao gerar PDF. Tente novamente.");
+    }
   };
 
   return (
