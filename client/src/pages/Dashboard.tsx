@@ -254,8 +254,8 @@ export default function Dashboard() {
 
         {/* Action Cards */}
         <h2 className="text-xl md:text-2xl font-bold mb-4">Acesso Rápido</h2>
-        <div className="grid gap-4 md:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 mb-6 md:mb-8">
-          {actionCards.map((card) => {
+        <div className="grid gap-6 md:gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 mb-8 md:mb-12 animate-stagger">
+          {actionCards.map((card, index) => {
             const isAdmin = user?.role === 'admin_bp';
             const isLimitReached = !isAdmin && usageData && usageData.remaining <= 0 && card.title === 'Solicitar Estudo';
             const cardContent = (
@@ -290,14 +290,14 @@ export default function Dashboard() {
 
             if (isLimitReached) {
               return (
-                <div key={card.title} title="Você atingiu o limite mensal de estudos. Solicite um upgrade para continuar.">
+                <div key={`${card.title}-${index}`} title="Você atingiu o limite mensal de estudos. Solicite um upgrade para continuar.">
                   {cardContent}
                 </div>
               );
             }
             
             return (
-              <Link key={card.title} href={card.href}>
+              <Link key={`${card.title}-${index}`} href={card.href}>
                 {cardContent}
               </Link>
             );

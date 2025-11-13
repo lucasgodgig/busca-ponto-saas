@@ -10,7 +10,13 @@ import {
   planUsage,
   auditLogs,
   Tenant,
-  Membership
+  Membership,
+  commercialPointRequests,
+  commercialPoints,
+  commercialPointPhotos,
+  InsertCommercialPointRequest,
+  InsertCommercialPoint,
+  InsertCommercialPointPhoto
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -352,4 +358,179 @@ export async function createQuickQuery(data: {
   }
 }
 
+
+
+
+// Commercial Points
+
+export async function createCommercialPointRequest(data: InsertCommercialPointRequest) {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot create commercial point request: database not available");
+    return null;
+  }
+
+  try {
+    const result = await db.insert(commercialPointRequests).values(data);
+    console.log("[Database] Commercial point request created successfully");
+    return result;
+  } catch (error) {
+    console.error("[Database] Failed to create commercial point request:", error);
+    throw error;
+  }
+}
+
+export async function getTenantCommercialPointRequests(tenantId: number) {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot get commercial point requests: database not available");
+    return [];
+  }
+
+  try {
+    const result = await db
+      .select()
+      .from(commercialPointRequests)
+      .where(eq(commercialPointRequests.tenantId, tenantId))
+      .orderBy(desc(commercialPointRequests.createdAt));
+    
+    return result;
+  } catch (error) {
+    console.error("[Database] Failed to get commercial point requests:", error);
+    throw error;
+  }
+}
+
+export async function getCommercialPointRequestById(requestId: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  try {
+    const result = await db
+      .select()
+      .from(commercialPointRequests)
+      .where(eq(commercialPointRequests.id, requestId))
+      .limit(1);
+    
+    return result.length > 0 ? result[0] : undefined;
+  } catch (error) {
+    console.error("[Database] Failed to get commercial point request:", error);
+    throw error;
+  }
+}
+
+export async function createCommercialPoint(data: InsertCommercialPoint) {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot create commercial point: database not available");
+    return null;
+  }
+
+  try {
+    const result = await db.insert(commercialPoints).values(data);
+    console.log("[Database] Commercial point created successfully");
+    return result;
+  } catch (error) {
+    console.error("[Database] Failed to create commercial point:", error);
+    throw error;
+  }
+}
+
+export async function getCommercialPointsByRequestId(requestId: number) {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot get commercial points: database not available");
+    return [];
+  }
+
+  try {
+    const result = await db
+      .select()
+      .from(commercialPoints)
+      .where(eq(commercialPoints.requestId, requestId))
+      .orderBy(desc(commercialPoints.createdAt));
+    
+    return result;
+  } catch (error) {
+    console.error("[Database] Failed to get commercial points:", error);
+    throw error;
+  }
+}
+
+export async function getCommercialPointById(pointId: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  try {
+    const result = await db
+      .select()
+      .from(commercialPoints)
+      .where(eq(commercialPoints.id, pointId))
+      .limit(1);
+    
+    return result.length > 0 ? result[0] : undefined;
+  } catch (error) {
+    console.error("[Database] Failed to get commercial point:", error);
+    throw error;
+  }
+}
+
+export async function addCommercialPointPhoto(data: InsertCommercialPointPhoto) {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot add photo: database not available");
+    return null;
+  }
+
+  try {
+    const result = await db.insert(commercialPointPhotos).values(data);
+    console.log("[Database] Photo added successfully");
+    return result;
+  } catch (error) {
+    console.error("[Database] Failed to add photo:", error);
+    throw error;
+  }
+}
+
+export async function getCommercialPointPhotos(pointId: number) {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot get photos: database not available");
+    return [];
+  }
+
+  try {
+    const result = await db
+      .select()
+      .from(commercialPointPhotos)
+      .where(eq(commercialPointPhotos.pointId, pointId))
+      .orderBy(commercialPointPhotos.order);
+    
+    return result;
+  } catch (error) {
+    console.error("[Database] Failed to get photos:", error);
+    throw error;
+  }
+}
+
+export async function updateCommercialPointRequestStatus(requestId: number, status: string) {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot update request status: database not available");
+    return null;
+  }
+
+  try {
+    const result = await db
+      .update(commercialPointRequests)
+      .set({ status: status as any })
+      .where(eq(commercialPointRequests.id, requestId));
+    
+    console.log("[Database] Request status updated successfully");
+    return result;
+  } catch (error) {
+    console.error("[Database] Failed to update request status:", error);
+    throw error;
+  }
+}
 

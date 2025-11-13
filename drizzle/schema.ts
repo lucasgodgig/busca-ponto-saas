@@ -518,3 +518,125 @@ export type InsertStudyRequest = typeof studyRequests.$inferInsert;
 export type Notification = typeof notifications.$inferSelect;
 export type InsertNotification = typeof notifications.$inferInsert;
 
+
+
+
+/**
+ * CommercialPointRequest - Solicitações de indicação de pontos comerciais
+ */
+export const commercialPointRequests = mysqlTable("commercialPointRequests", {
+  id: int("id").autoincrement().primaryKey(),
+  tenantId: int("tenantId").notNull(),
+  userId: int("userId").notNull(),
+  studyId: int("studyId"), // Opcional: vinculado a um estudo
+  segment: varchar("segment", { length: 255 }).notNull(),
+  address: text("address").notNull(),
+  lat: varchar("lat", { length: 50 }).notNull(),
+  lng: varchar("lng", { length: 50 }).notNull(),
+  radiusM: int("radiusM").notNull(),
+  requirements: text("requirements"), // Requisitos específicos do ponto
+  status: mysqlEnum("status", ["aberto", "em_busca", "encontrado", "cancelado"]).default("aberto").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => ({
+  tenantIdIdx: index("tenantId_idx").on(table.tenantId),
+  userIdIdx: index("userId_idx").on(table.userId),
+  statusIdx: index("status_idx").on(table.status),
+}));
+
+/**
+ * CommercialPoint - Pontos comerciais indicados em resposta às solicitações
+ */
+export const commercialPoints = mysqlTable("commercialPoints", {
+  id: int("id").autoincrement().primaryKey(),
+  requestId: int("requestId").notNull(),
+  tenantId: int("tenantId").notNull(),
+  address: text("address").notNull(),
+  lat: varchar("lat", { length: 50 }).notNull(),
+  lng: varchar("lng", { length: 50 }).notNull(),
+  propertyType: varchar("propertyType", { length: 100 }), // Loja, Sala, Galpão, etc
+  totalAreaM2: int("totalAreaM2"),
+  usableAreaM2: int("usableAreaM2"),
+  rentalPrice: int("rentalPrice"), // Em centavos
+  salePrice: int("salePrice"), // Em centavos
+  ownerName: varchar("ownerName", { length: 255 }),
+  ownerPhone: varchar("ownerPhone", { length: 20 }),
+  brokerName: varchar("brokerName", { length: 255 }),
+  brokerPhone: varchar("brokerPhone", { length: 20 }),
+  brokerEmail: varchar("brokerEmail", { length: 320 }),
+  description: text("description"),
+  amenitiesJson: json("amenitiesJson").$type<string[]>(), // ["estacionamento", "elevador", etc]
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => ({
+  requestIdIdx: index("requestId_idx").on(table.requestId),
+  tenantIdIdx: index("tenantId_idx").on(table.tenantId),
+}));
+
+/**
+ * CommercialPointPhoto - Fotos dos pontos comerciais
+ */
+export const commercialPointPhotos = mysqlTable("commercialPointPhotos", {
+  id: int("id").autoincrement().primaryKey(),
+  pointId: int("pointId").notNull(),
+  url: text("url").notNull(),
+  fileKey: text("fileKey").notNull(),
+  caption: varchar("caption", { length: 255 }),
+  order: int("order").default(0).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (table) => ({
+  pointIdIdx: index("pointId_idx").on(table.pointId),
+}));
+
+export type CommercialPointRequest = typeof commercialPointRequests.$inferSelect;
+export type InsertCommercialPointRequest = typeof commercialPointRequests.$inferInsert;
+export type CommercialPoint = typeof commercialPoints.$inferSelect;
+export type InsertCommercialPoint = typeof commercialPoints.$inferInsert;
+export type CommercialPointPhoto = typeof commercialPointPhotos.$inferSelect;
+export type InsertCommercialPointPhoto = typeof commercialPointPhotos.$inferInsert;
+
+
+
+
+// Duplicated tables removed - already defined above
+
+// Relations
+export const commercialPointRequestsRelations = relations(commercialPointRequests, ({ one, many }) => ({
+  tenant: one(tenants, {
+    fields: [commercialPointRequests.tenantId],
+    references: [tenants.id],
+  }),
+  user: one(users, {
+    fields: [commercialPointRequests.userId],
+    references: [users.id],
+  }),
+  points: many(commercialPoints),
+}));
+
+export const commercialPointsRelations = relations(commercialPoints, ({ one, many }) => ({
+  request: one(commercialPointRequests, {
+    fields: [commercialPoints.requestId],
+    references: [commercialPointRequests.id],
+  }),
+  tenant: one(tenants, {
+    fields: [commercialPoints.tenantId],
+    references: [tenants.id],
+  }),
+  photos: many(commercialPointPhotos),
+}));
+
+export const commercialPointPhotosRelations = relations(commercialPointPhotos, ({ one }) => ({
+  point: one(commercialPoints, {
+    fields: [commercialPointPhotos.pointId],
+    references: [commercialPoints.id],
+  }),
+}));
+
+// Type exports
+export type CommercialPointRequest = typeof commercialPointRequests.$inferSelect;
+export type InsertCommercialPointRequest = typeof commercialPointRequests.$inferInsert;
+export type CommercialPoint = typeof commercialPoints.$inferSelect;
+export type InsertCommercialPoint = typeof commercialPoints.$inferInsert;
+export type CommercialPointPhoto = typeof commercialPointPhotos.$inferSelect;
+export type InsertCommercialPointPhoto = typeof commercialPointPhotos.$inferInsert;
+
