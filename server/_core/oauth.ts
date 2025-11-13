@@ -10,25 +10,6 @@ function getQueryParam(req: Request, key: string): string | undefined {
   return typeof value === "string" ? value : undefined;
 }
 
-function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
-  const startTime = Date.now();
-  console.log(`[OAuth] [${label}] Starting at ${new Date().toISOString()}`);
-  return Promise.race([
-    promise.then(result => {
-      const elapsed = Date.now() - startTime;
-      console.log(`[OAuth] [${label}] Completed in ${elapsed}ms`);
-      return result;
-    }),
-    new Promise<T>((_, reject) =>
-      setTimeout(() => {
-        const elapsed = Date.now() - startTime;
-        console.error(`[OAuth] [${label}] TIMEOUT after ${elapsed}ms (limit: ${ms}ms)`);
-        reject(new Error(`${label} timeout after ${ms}ms`));
-      }, ms)
-    ),
-  ]);
-}
-
 export function registerOAuthRoutes(app: Express) {
   app.get("/api/oauth/callback", async (req: Request, res: Response) => {
     const code = getQueryParam(req, "code");
@@ -43,21 +24,17 @@ export function registerOAuthRoutes(app: Express) {
     }
 
     try {
-      console.log("[OAuth] Exchanging code for token...");
-      const tokenResponse = await withTimeout(
-        sdk.exchangeCodeForToken(code, state),
-        30000,
-        "Token exchange"
-      );
-      console.log("[OAuth] Token exchange successful");
+      console.log("[OAuth] [Token exchange] Starting at", new Date().toISOString());
+      const startTokenExchange = Date.now();
+      const tokenResponse = await sdk.exchangeCodeForToken(code, state);
+      const tokenExchangeTime = Date.now() - startTokenExchange;
+      console.log(`[OAuth] [Token exchange] Completed in ${tokenExchangeTime}ms`);
 
-      console.log("[OAuth] Getting user info...");
-      const userInfo = await withTimeout(
-        sdk.getUserInfo(tokenResponse.accessToken),
-        30000,
-        "Get user info"
-      );
-      console.log("[OAuth] User info retrieved", { openId: userInfo.openId });
+      console.log("[OAuth] [Get user info] Starting at", new Date().toISOString());
+      const startGetUserInfo = Date.now();
+      const userInfo = await sdk.getUserInfo(tokenResponse.accessToken);
+      const getUserInfoTime = Date.now() - startGetUserInfo;
+      console.log(`[OAuth] [Get user info] Completed in ${getUserInfoTime}ms`, { openId: userInfo.openId });
 
       if (!userInfo.openId) {
         console.error("[OAuth] Missing openId in user info");
@@ -65,24 +42,22 @@ export function registerOAuthRoutes(app: Express) {
         return;
       }
 
-      console.log("[OAuth] Starting upsertUser for:", userInfo.openId);
-      await withTimeout(
-        db.upsertUser({
-          openId: userInfo.openId,
-          name: userInfo.name || null,
-          email: userInfo.email ?? null,
-          loginMethod: userInfo.loginMethod ?? userInfo.platform ?? null,
-          lastSignedIn: new Date(),
-        }),
-        30000,
-        "UpsertUser"
-      );
-      console.log("[OAuth] upsertUser completed for:", userInfo.openId);
+      console.log("[OAuth] [UpsertUser] Starting at", new Date().toISOString());
+      const startUpsert = Date.now();
+      await db.upsertUser({
+        openId: userInfo.openId,
+        name: userInfo.name || null,
+        email: userInfo.email ?? null,
+        loginMethod: userInfo.loginMethod ?? userInfo.platform ?? null,
+        lastSignedIn: new Date(),
+      });
+      const upsertTime = Date.now() - startUpsert;
+      console.log(`[OAuth] [UpsertUser] Completed in ${upsertTime}ms for openId: ${userInfo.openId}`);
 
       // Vincular lead se houver email no sessionStorage (vindo do formulário de cadastro)
       // Nota: sessionStorage é client-side, então vamos usar cookie temporário
-      const leadEmail = req.cookies.leadEmail;
-      if (leadEmail) {
+      const leadEmail = req.cookies?.leadEmail;
+      if (leadEmail && leadEmail.trim()) {
         try {
           const dbInstance = await db.getDb();
           if (dbInstance) {
@@ -108,21 +83,27 @@ export function registerOAuthRoutes(app: Express) {
         res.clearCookie("leadEmail");
       }
 
-      console.log("[OAuth] Creating session token...");
-      const sessionToken = await withTimeout(
-        sdk.createSessionToken(userInfo.openId, {
-          name: userInfo.name || "",
-          expiresInMs: ONE_YEAR_MS,
-        }),
-        30000,
-        "Create session token"
-      );
-      console.log("[OAuth] Session token created");
+      console.log("[OAuth] [Create session token] Starting at", new Date().toISOString());
+      const startSessionToken = Date.now();
+      const sessionToken = await sdk.createSessionToken(userInfo.openId, {
+        name: userInfo.name || "",
+        expiresInMs: ONE_YEAR_MS,
+      });
+      const sessionTokenTime = Date.now() - startSessionToken;
+      console.log(`[OAuth] [Create session token] Completed in ${sessionTokenTime}ms`);
 
       const cookieOptions = getSessionCookieOptions(req);
       res.cookie(COOKIE_NAME, sessionToken, { ...cookieOptions, maxAge: ONE_YEAR_MS });
 
-      console.log("[OAuth] Redirecting to home...");
+      console.log("[OAuth] All operations completed successfully. Redirecting to home...");
+      console.log("[OAuth] Timing summary:", {
+        tokenExchange: `${tokenExchangeTime}ms`,
+        getUserInfo: `${getUserInfoTime}ms`,
+        upsertUser: `${upsertTime}ms`,
+        createSessionToken: `${sessionTokenTime}ms`,
+        total: `${Date.now() - startTokenExchange}ms`
+      });
+      
       res.redirect(302, "/");
     } catch (error) {
       console.error("[OAuth] Callback failed", error);
