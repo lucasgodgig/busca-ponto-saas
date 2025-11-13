@@ -34,11 +34,8 @@ const Analytics = lazy(() => import("./pages/Analytics"));
 
 // Loading component
 const PageLoader = () => (
-  <div className="flex items-center justify-center min-h-screen bg-background animate-fade-in">
-    <div className="flex flex-col items-center gap-4">
-      <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent"></div>
-      <p className="text-sm text-muted-foreground font-medium">Carregando...</p>
-    </div>
+  <div className="flex items-center justify-center min-h-screen">
+    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
   </div>
 );
 
@@ -47,7 +44,6 @@ function Router() {
   return (
     <Suspense fallback={<PageLoader />}>
       <Switch>
-        {/* Wrapper para adicionar transição de página */}
       <Route path={"/"} component={Home} />
       <Route path={"/cadastro"} component={Cadastro} />
       <Route path={"/invite"} component={InviteCodeValidation} />
@@ -160,7 +156,7 @@ function Router() {
           </AppLayout>
         </ProtectedRoute>
       </Route>
-      <Route path={"404"} component={NotFound} />
+      <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
       </Switch>
@@ -182,9 +178,7 @@ function App() {
       >
         <TooltipProvider>
           <Toaster />
-          <div className="animate-fade-in">
-            <Router />
-          </div>
+          <Router />
         </TooltipProvider>
       </ThemeProvider>
     </ErrorBoundary>

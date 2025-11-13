@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { useLocation } from "wouter";
 import { useState } from "react";
 import { Loader2, FileText, Download, Clock, CheckCircle2, AlertCircle, Plus } from "lucide-react";
+import { useAuth } from "@/_core/hooks/useAuth";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 

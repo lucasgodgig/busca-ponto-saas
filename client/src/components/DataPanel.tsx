@@ -115,60 +115,60 @@ function DataPanel({ data, loading, segment }: DataPanelProps) {
   }));
 
   return (
-    <div className="space-y-8 p-6 md:p-8">
+    <div className="space-y-6 p-4 md:p-6">
       {/* Cards de Informações Principais */}
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6 animate-fade-in">Visão Geral</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 animate-stagger">
-        <Card className="bg-gradient-to-br from-orange-50 to-orange-100 shadow-lg hover:shadow-xl transition-shadow duration-300 border-l-4 border-orange-500">
-          <CardContent className="pt-8 pb-6">
+      <div className="mb-6">
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">Visão Geral</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <Card className="bg-gradient-to-br from-orange-50 to-orange-100">
+          <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-orange-600 font-semibold uppercase tracking-wide">Habitantes</p>
-                <p className="text-3xl font-bold text-orange-900 mt-2">
+                <p className="text-sm text-orange-600 font-medium">Habitantes</p>
+                <p className="text-2xl font-bold text-orange-900">
                   {Math.round(inhabitants).toLocaleString("pt-BR")}
                 </p>
-                <p className="text-xs text-orange-600 mt-2 font-medium">
+                <p className="text-xs text-orange-600">
                   {parseFloat(density).toLocaleString("pt-BR", { maximumFractionDigits: 2 })} hab/hectare
                 </p>
               </div>
-              <Users className="w-12 h-12 text-orange-500 opacity-70" />
+              <Users className="w-10 h-10 text-orange-500 opacity-50" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-green-50 to-green-100 shadow-lg hover:shadow-xl transition-shadow duration-300 border-l-4 border-green-500">
-          <CardContent className="pt-8 pb-6">
+        <Card className="bg-gradient-to-br from-green-50 to-green-100">
+          <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-green-600 font-semibold uppercase tracking-wide">Renda Média</p>
-                <p className="text-3xl font-bold text-green-900 mt-2">
+                <p className="text-sm text-green-600 font-medium">Renda Média</p>
+                <p className="text-2xl font-bold text-green-900">
                   R$ {(head.income * 1000).toLocaleString("pt-BR", {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2,
                   })}
                 </p>
-                <p className="text-xs text-green-600 mt-2 font-medium">Renda per capita</p>
+                <p className="text-xs text-green-600">Renda per capita</p>
               </div>
-              <DollarSign className="w-12 h-12 text-green-500 opacity-70" />
+              <DollarSign className="w-10 h-10 text-green-500 opacity-50" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-blue-50 to-blue-100 shadow-lg hover:shadow-xl transition-shadow duration-300 border-l-4 border-blue-500">
-          <CardContent className="pt-8 pb-6">
+        <Card className="bg-gradient-to-br from-blue-50 to-blue-100">
+          <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-blue-600 font-semibold uppercase tracking-wide">
+                <p className="text-sm text-blue-600 font-medium">
                   Potencial de Consumo
                 </p>
-                <p className="text-3xl font-bold text-blue-900 mt-2">
+                <p className="text-2xl font-bold text-blue-900">
                   R$ {(totals.consumo_total / 1000000).toFixed(1).replace('.', ',')}
                   M
                 </p>
-                <p className="text-xs text-blue-600 mt-2 font-medium">Total na área</p>
+                <p className="text-xs text-blue-600">Total na área</p>
               </div>
-              <TrendingUp className="w-12 h-12 text-blue-500 opacity-70" />
+              <TrendingUp className="w-10 h-10 text-blue-500 opacity-50" />
             </div>
           </CardContent>
         </Card>
@@ -176,9 +176,9 @@ function DataPanel({ data, loading, segment }: DataPanelProps) {
       </div>
 
       {/* Gráficos de Classe Social e Faixa Etária */}
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6 animate-fade-in">Distribuição Demográfica</h2>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-stagger">
+      <div className="mb-6">
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">Distribuição Demográfica</h2>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Gráfico de Classe Social */}
         <Card>
           <CardHeader>
@@ -252,8 +252,8 @@ function DataPanel({ data, loading, segment }: DataPanelProps) {
 
       {/* Gráfico de Categorias de Consumo */}
       {data && (
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6 animate-fade-in">Análise de Consumo</h2>
+        <div className="mb-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Análise de Consumo</h2>
           <div className="overflow-x-auto">
             <ConsumptionCategoriesChart
               data={data as SpaceData}
