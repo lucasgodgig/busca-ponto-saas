@@ -77,7 +77,7 @@ function Router() {
           </AppLayout>
         </ProtectedRoute>
       </Route>
-      <Route path={"/historico"}>
+      <Route path={"/history"}>
         <ProtectedRoute>
           <AppLayout>
             <History />

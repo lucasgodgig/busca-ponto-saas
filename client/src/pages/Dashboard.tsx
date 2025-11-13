@@ -162,10 +162,7 @@ export default function Dashboard() {
               Gerencie seus estudos de mercado e análises de localização
             </p>
           </div>
-          <Button onClick={handleExport} variant="outline" className="gap-2">
-            <Download className="h-4 w-4" />
-            Exportar PDF
-          </Button>
+
         </div>
 
         {/* Stats */}

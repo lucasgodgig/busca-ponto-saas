@@ -1,3 +1,6 @@
+import { Button } from "@/components/ui/button";
+import { Download } from "lucide-react";
+
 interface PDFReportProps {
   address: string;
   segment: string;
@@ -192,24 +195,10 @@ export function PDFReport({ address, segment, data }: PDFReportProps) {
   };
 
   return (
-    <button
-      onClick={generatePDF}
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: "8px",
-        padding: "8px 16px",
-        backgroundColor: "#ff6b35",
-        color: "white",
-        border: "none",
-        borderRadius: "6px",
-        cursor: "pointer",
-        fontSize: "14px",
-        fontWeight: "bold",
-      }}
-    >
-      📄 Exportar PDF
-    </button>
+    <Button onClick={generatePDF} className="gap-2">
+      <Download className="h-4 w-4" />
+      Exportar Relatório
+    </Button>
   );
 }
 

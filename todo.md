@@ -346,6 +346,17 @@
 
 
 
+## Novas Features (12/11/2025 - Sessão 19)
+- [x] Adicionar botão de logout no header/sidebar (IMPLEMENTADO - Botão "Sair" abaixo do "Tema Escuro" na sidebar)
+- [x] Adicionar botão de login na Landing Page para usuários já cadastrados (IMPLEMENTADO - Botões "Começar Agora" e "Entrar" adicionados)
+- [x] Remover botão "Exportar PDF" da página inicial (IMPLEMENTADO)
+- [x] Adicionar botão "Exportar Relatório" na análise do mapa (IMPLEMENTADO - Botão aparece quando há dados de análise)
+
+## Bugs Encontrados (12/11/2025 - Sessão 19)
+- [ ] Erro "OAuth callback failed" ao tentar fazer login via botão "Entrar" (Em investigação - logs adicionados, timeout removido para capturar tempo real de execução)
+- [x] Mapa parou de carregar na página de Mapa Interativo (RESOLVIDO - rota correta é /mapa)
+- [x] Erro "No procedure found on path 'admin.users.update'" ao tentar editar usuário como admin (RESOLVIDO - procedure implementada)
+
 ## Implementação do Fluxo de Geração Automática de Estudos (28/10/2025 - Sessão 9)
 
 ### Fases Concluídas ✅
