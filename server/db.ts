@@ -42,9 +42,11 @@ export async function upsertUser(user: InsertUser): Promise<void> {
 
   try {
     console.log("[Database] Starting upsertUser for openId:", user.openId);
-    const values: InsertUser = {
-      openId: user.openId,
-    };
+    
+    // First, check if user exists
+    const existingUser = await db.select().from(users).where(eq(users.openId, user.openId)).limit(1);
+    console.log("[Database] User exists:", existingUser.length > 0);
+    
     const updateSet: Record<string, unknown> = {};
 
     const textFields = ["name", "email", "loginMethod"] as const;
@@ -54,36 +56,37 @@ export async function upsertUser(user: InsertUser): Promise<void> {
       const value = user[field];
       if (value === undefined) return;
       const normalized = value ?? null;
-      values[field] = normalized;
       updateSet[field] = normalized;
     };
 
     textFields.forEach(assignNullable);
 
     if (user.lastSignedIn !== undefined) {
-      values.lastSignedIn = user.lastSignedIn;
       updateSet.lastSignedIn = user.lastSignedIn;
+    } else {
+      updateSet.lastSignedIn = new Date();
     }
+    
     if (user.role !== undefined) {
-      values.role = user.role;
       updateSet.role = user.role;
     } else if (user.openId === ENV.ownerOpenId) {
-      values.role = 'admin_bp';
       updateSet.role = 'admin_bp';
     }
 
-    if (!values.lastSignedIn) {
-      values.lastSignedIn = new Date();
+    if (existingUser.length > 0) {
+      // User exists, update only
+      console.log("[Database] Updating existing user:", user.openId);
+      await db.update(users).set(updateSet).where(eq(users.openId, user.openId));
+    } else {
+      // User doesn't exist, insert
+      console.log("[Database] Inserting new user:", user.openId);
+      const values: InsertUser = {
+        openId: user.openId,
+        ...updateSet,
+      };
+      await db.insert(users).values(values);
     }
-
-    if (Object.keys(updateSet).length === 0) {
-      updateSet.lastSignedIn = new Date();
-    }
-
-    console.log("[Database] Executing insert/update for user:", user.openId);
-    await db.insert(users).values(values).onDuplicateKeyUpdate({
-      set: updateSet,
-    });
+    
     console.log("[Database] upsertUser completed for openId:", user.openId);
   } catch (error) {
     console.error("[Database] Failed to upsert user:", error);
