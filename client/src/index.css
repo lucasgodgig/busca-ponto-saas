@@ -43,15 +43,16 @@
 }
 
 :root {
-  --primary: var(--color-blue-700);
-  --primary-foreground: var(--color-blue-50);
-  --sidebar-primary: var(--color-blue-600);
-  --sidebar-primary-foreground: var(--color-blue-50);
-  --chart-1: var(--color-blue-300);
-  --chart-2: var(--color-blue-500);
-  --chart-3: var(--color-blue-600);
-  --chart-4: var(--color-blue-700);
-  --chart-5: var(--color-blue-800);
+  /* Cores Primárias - Inspirado em Conta Azul */
+  --primary: oklch(0.55 0.25 262); /* Azul Ciano Principal */
+  --primary-foreground: oklch(1 0 0); /* Branco */
+  --sidebar-primary: oklch(0.45 0.28 262); /* Azul Ciano Escuro para Sidebar */
+  --sidebar-primary-foreground: oklch(1 0 0); /* Branco */
+  --chart-1: oklch(0.65 0.22 142); /* Verde Limão */
+  --chart-2: oklch(0.55 0.25 262); /* Azul Ciano */
+  --chart-3: oklch(0.60 0.28 302); /* Roxo/Magenta */
+  --chart-4: oklch(0.65 0.25 42); /* Laranja */
+  --chart-5: oklch(0.55 0.25 12); /* Vermelho */
   --radius: 0.65rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.235 0.015 65);
@@ -70,19 +71,19 @@
   --border: oklch(0.92 0.004 286.32);
   --input: oklch(0.92 0.004 286.32);
   --ring: oklch(0.623 0.214 259.815);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.235 0.015 65);
-  --sidebar-accent: oklch(0.967 0.001 286.375);
-  --sidebar-accent-foreground: oklch(0.141 0.005 285.823);
-  --sidebar-border: oklch(0.92 0.004 286.32);
-  --sidebar-ring: oklch(0.623 0.214 259.815);
+  --sidebar: oklch(0.45 0.28 262); /* Azul Ciano do Sidebar */
+  --sidebar-foreground: oklch(1 0 0); /* Branco */
+  --sidebar-accent: oklch(0.65 0.22 142); /* Verde para Badges */
+  --sidebar-accent-foreground: oklch(1 0 0); /* Branco */
+  --sidebar-border: oklch(0.35 0.25 262); /* Azul mais escuro */
+  --sidebar-ring: oklch(0.55 0.25 262); /* Azul Ciano */
 }
 
 .dark {
-  --primary: var(--color-blue-700);
-  --primary-foreground: var(--color-blue-50);
-  --sidebar-primary: var(--color-blue-500);
-  --sidebar-primary-foreground: var(--color-blue-50);
+  --primary: oklch(0.55 0.25 262); /* Azul Ciano */
+  --primary-foreground: oklch(1 0 0); /* Branco */
+  --sidebar-primary: oklch(0.45 0.28 262); /* Azul Ciano Escuro */
+  --sidebar-primary-foreground: oklch(1 0 0); /* Branco */
   --background: oklch(0.141 0.005 285.823);
   --foreground: oklch(0.85 0.005 65);
   --card: oklch(0.21 0.006 285.885);
@@ -105,11 +106,11 @@
   --chart-3: var(--color-blue-600);
   --chart-4: var(--color-blue-700);
   --chart-5: var(--color-blue-800);
-  --sidebar: oklch(0.21 0.006 285.885);
-  --sidebar-foreground: oklch(0.85 0.005 65);
-  --sidebar-accent: oklch(0.274 0.006 286.033);
-  --sidebar-accent-foreground:  oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar: oklch(0.45 0.28 262); /* Azul Ciano mesmo no dark mode */
+  --sidebar-foreground: oklch(1 0 0); /* Branco */
+  --sidebar-accent: oklch(0.65 0.22 142); /* Verde para Badges */
+  --sidebar-accent-foreground: oklch(1 0 0); /* Branco */
+  --sidebar-border: oklch(0.35 0.25 262); /* Azul mais escuro */
   --sidebar-ring: oklch(0.488 0.243 264.376);
 }
 
@@ -168,5 +169,117 @@
       padding-right: 2rem;
       max-width: 1280px; /* Standard content width */
     }
+  }
+
+  /* Animações de Entrada */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slideInLeft {
+    from {
+      opacity: 0;
+      transform: translateX(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-out;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.6s ease-out;
+  }
+
+  .animate-slide-in-left {
+    animation: slideInLeft 0.5s ease-out;
+  }
+
+  /* Stagger Animation para múltiplos elementos */
+  .animate-stagger > * {
+    animation: slideUp 0.6s ease-out;
+  }
+
+  .animate-stagger > *:nth-child(1) { animation-delay: 0.1s; }
+  .animate-stagger > *:nth-child(2) { animation-delay: 0.2s; }
+  .animate-stagger > *:nth-child(3) { animation-delay: 0.3s; }
+  .animate-stagger > *:nth-child(4) { animation-delay: 0.4s; }
+  .animate-stagger > *:nth-child(5) { animation-delay: 0.5s; }
+
+  /* Skeleton Loaders com Gradiente Pulsante */
+  @keyframes shimmer {
+    0% { background-position: -1000px 0; }
+    100% { background-position: 1000px 0; }
+  }
+
+  .skeleton {
+    background: linear-gradient(90deg, oklch(0.92 0.004 286.32) 0%, oklch(0.97 0.001 286.375) 50%, oklch(0.92 0.004 286.32) 100%);
+    background-size: 1000px 100%;
+    animation: shimmer 2s infinite;
+  }
+
+  .dark .skeleton {
+    background: linear-gradient(90deg, oklch(0.25 0.01 262) 0%, oklch(0.3 0.01 262) 50%, oklch(0.25 0.01 262) 100%);
+    background-size: 1000px 100%;
+    animation: shimmer 2s infinite;
+  }
+
+  /* Micro-interacoes em Botoes */
+  button:not(:disabled), [role="button"]:not([aria-disabled="true"]) {
+    transition: all 0.2s ease-out;
+  }
+
+  button:hover:not(:disabled), [role="button"]:hover:not([aria-disabled="true"]) {
+    transform: scale(1.05);
+  }
+
+  button:active:not(:disabled), [role="button"]:active:not([aria-disabled="true"]) {
+    transform: scale(0.95);
+  }
+
+  /* Transicoes de Estado */
+  @keyframes successPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+  }
+
+  .state-loading { opacity: 0.6; pointer-events: none; }
+  .state-success { animation: successPulse 0.6s ease-out; }
+  .state-error { border-color: rgb(239, 68, 68); background-color: rgb(254, 242, 242); }
+  .dark .state-error { border-color: rgb(239, 68, 68); background-color: rgba(127, 29, 29, 0.2); }
+
+  /* Tema Escuro Otimizado para Azul Ciano */
+  .dark {
+    --background: oklch(0.12 0.008 262); /* Azul muito escuro */
+    --foreground: oklch(0.95 0.002 0); /* Branco quase puro */
+    --card: oklch(0.18 0.01 262); /* Azul escuro para cards */
+    --card-foreground: oklch(0.95 0.002 0);
+    --primary: oklch(0.55 0.25 262); /* Azul Ciano */
+    --primary-foreground: oklch(1 0 0); /* Branco */
+    --accent: oklch(0.65 0.22 142); /* Verde Limão */
+    --accent-foreground: oklch(1 0 0);
+    --muted: oklch(0.3 0.01 262); /* Cinza azulado */
+    --muted-foreground: oklch(0.7 0.01 0);
+    --border: oklch(0.25 0.01 262); /* Borda azul escura */
   }
 }
