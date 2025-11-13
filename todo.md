@@ -2471,3 +2471,8 @@ Time interno precisa de um perfil intermediário entre admin (controle total) e 
 - [x] Relatório PDF está fazendo screenshot da tela ao invés de gerar PDF com dados estruturados (CORRIGIDO - implementado com jsPDF)
 - [x] Rota /histórico estava em português, alterado para /history (CORRIGIDO - atualizado em Sidebar, CommandPalette e Dashboard)
 
+
+
+## Bugs Críticos (13/11/2025 - Continuação 2)
+- [x] Histórico de consultas vazio mesmo após fazer pesquisas no mapa (CORRIGIDO - adicionada função createQuickQuery e simplificado salvamento)
+

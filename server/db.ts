@@ -306,3 +306,50 @@ export async function getStudyById(studyId: number) {
   return result.length > 0 ? result[0] : undefined;
 }
 
+
+
+
+// Quick Queries
+
+export async function createQuickQuery(data: {
+  tenantId: number;
+  userId: number;
+  lat: string;
+  lng: string;
+  radiusM: number;
+  layersEnabledJson: {
+    demografia: boolean;
+    renda: boolean;
+    fluxo: boolean;
+    concorrencia: boolean;
+  };
+  resultSummaryJson?: Record<string, any>;
+  costUnits?: number;
+}) {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot create quick query: database not available");
+    return null;
+  }
+
+  try {
+    const result = await db.insert(quickQueries).values({
+      tenantId: data.tenantId,
+      userId: data.userId,
+      lat: data.lat,
+      lng: data.lng,
+      radiusM: data.radiusM,
+      layersEnabledJson: data.layersEnabledJson,
+      resultSummaryJson: data.resultSummaryJson || {},
+      costUnits: data.costUnits || 1,
+    });
+    
+    console.log("[Database] Quick query created successfully");
+    return result;
+  } catch (error) {
+    console.error("[Database] Failed to create quick query:", error);
+    throw error;
+  }
+}
+
+

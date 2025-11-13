@@ -393,11 +393,8 @@ export const appRouter = router({
         });
 
         // Registrar consulta no banco
-        const dbInstance = await db.getDb();
-        if (dbInstance) {
-          const { quickQueries } = await import("../drizzle/schema");
-          
-          await dbInstance.insert(quickQueries).values({
+        try {
+          await db.createQuickQuery({
             tenantId: tenantCtx.tenantId,
             userId: ctx.user.id,
             lat: String(input.lat),
@@ -428,6 +425,8 @@ export const appRouter = router({
               radius: input.radius,
             },
           });
+        } catch (error) {
+          console.error("[Router] Error saving quick query:", error);
         }
 
         return result;
