@@ -9,6 +9,7 @@ import { TRPCError } from "@trpc/server";
 import { querySpaceApiWithCache } from "./services/spaceApiService";
 import { searchAddress, searchCompetitors } from "./services/googlePlacesService";
 import { ENV } from "./_core/env";
+
 import { leadsRouter } from "./routes/leads";
 import { studyRequestsRouter, notificationsRouter } from "./routes/studyRequests";
 import { usersRouter } from "./routes/users";
@@ -440,8 +441,12 @@ export const appRouter = router({
         offset: z.number().min(0).default(0),
       }))
       .query(async ({ ctx, input }) => {
+        if (!ctx.user) {
+          throw new TRPCError({ code: "UNAUTHORIZED", message: "Usuario nao autenticado" });
+        }
         await validateTenantAccess(ctx, input.tenantId);
-        return await db.getTenantQuickQueries(input.tenantId, input.limit, input.offset);
+        const history = await db.getTenantQuickQueries(input.tenantId, input.limit, input.offset);
+        return history || [];
       }),
   }),
 

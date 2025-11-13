@@ -1,4 +1,5 @@
 import { useState } from "react";
+import React from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,15 +13,61 @@ export default function History() {
   const [, setLocation] = useLocation();
   const [selectedTenant, setSelectedTenant] = useState<number | null>(null);
 
+  // Selecionar tenant automaticamente (antes de fazer a query)
+  React.useEffect(() => {
+    if (!authLoading && user && user.memberships && user.memberships.length > 0 && !selectedTenant) {
+      const tenantId = user.memberships[0].tenant?.id;
+      if (tenantId) {
+        setSelectedTenant(tenantId);
+      }
+    }
+  }, [authLoading, user, selectedTenant]);
+
   // Buscar histórico de consultas
   const { data: history, isLoading } = trpc.space.history.useQuery(
     { tenantId: selectedTenant!, limit: 50, offset: 0 },
     { enabled: !!selectedTenant }
   );
 
-  // Selecionar tenant automaticamente
-  if (!authLoading && user && user.memberships && user.memberships.length > 0 && !selectedTenant) {
-    setSelectedTenant(user.memberships[0].tenant?.id || null);
+  // Se o usuário não tem tenants, mostrar mensagem
+  if (!authLoading && (!user || !user.memberships || user.memberships.length === 0)) {
+    return (
+      <div className="min-h-screen bg-muted/30">
+        <header className="border-b bg-background">
+          <div className="container py-4">
+            <div className="flex items-center gap-4">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setLocation("/app")}
+              >
+                <ArrowLeft className="w-4 h-4" />
+              </Button>
+              <div>
+                <h1 className="text-2xl font-bold">Histórico de Consultas</h1>
+                <p className="text-sm text-muted-foreground">
+                  Visualize todas as consultas rápidas realizadas
+                </p>
+              </div>
+            </div>
+          </div>
+        </header>
+        <div className="container py-8">
+          <Card>
+            <CardContent className="flex flex-col items-center justify-center py-12">
+              <MapPin className="w-12 h-12 text-muted-foreground mb-4" />
+              <p className="text-lg font-medium">Nenhum tenant disponível</p>
+              <p className="text-sm text-muted-foreground mb-4">
+                Você precisa ser membro de um tenant para visualizar o histórico
+              </p>
+              <Button onClick={() => setLocation("/app")}>
+                Voltar
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
   }
 
   if (authLoading || isLoading) {

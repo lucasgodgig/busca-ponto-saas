@@ -2457,3 +2457,10 @@ Time interno precisa de um perfil intermediário entre admin (controle total) e 
 - [x] Mapa parou de carregar na página de Mapa Interativo (RESOLVIDO - rota correta é /mapa)
 - [x] Erro "No procedure found on path 'admin.users.update'" ao tentar editar usuário como admin (RESOLVIDO - procedure implementada)
 
+
+
+
+## Bugs Reportados (13/11/2025 - Sessão Atual)
+- [x] Erro 403 Forbidden ao acessar página /history (CORRIGIDO - melhorado tratamento de tenant access)
+- [x] Histórico de consultas não aparece mesmo após fazer consultas no mapa (CORRIGIDO - adicionado useEffect para selecionar tenant automaticamente)
+

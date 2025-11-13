@@ -1223,11 +1223,15 @@ const MapShell = forwardRef<MapShellRef, MapShellProps>(({ tenantId, loading = f
           <div className="bg-white border-t shadow-lg p-6 overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold">Analise de Dados</h3>
-              {spaceData && (
-                <PDFReport address={address} segment={segment} data={spaceData} />
-              )}
             </div>
             <DataPanel data={spaceData} loading={spaceLoading} segment={segment} />
+          </div>
+        )}
+
+        {/* Export Button - Floating */}
+        {spaceData && (
+          <div className="absolute top-20 right-4 z-10">
+            <PDFReport address={address} segment={segment} data={spaceData} />
           </div>
         )}
 
