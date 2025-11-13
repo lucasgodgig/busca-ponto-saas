@@ -41,6 +41,7 @@ export async function upsertUser(user: InsertUser): Promise<void> {
   }
 
   try {
+    console.log("[Database] Starting upsertUser for openId:", user.openId);
     const values: InsertUser = {
       openId: user.openId,
     };
@@ -79,9 +80,11 @@ export async function upsertUser(user: InsertUser): Promise<void> {
       updateSet.lastSignedIn = new Date();
     }
 
+    console.log("[Database] Executing insert/update for user:", user.openId);
     await db.insert(users).values(values).onDuplicateKeyUpdate({
       set: updateSet,
     });
+    console.log("[Database] upsertUser completed for openId:", user.openId);
   } catch (error) {
     console.error("[Database] Failed to upsert user:", error);
     throw error;
