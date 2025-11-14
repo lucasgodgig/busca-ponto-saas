@@ -186,3 +186,21 @@
 - Servidor dev está rodando corretamente na porta 3000
 - Recomenda-se criar um checkpoint após validar funcionamento
 
+
+
+## 🆕 Nova Feature - Pontos Comerciais (Sessão 6)
+- [x] Adicionar menu "Pontos Comerciais" no sidebar
+- [x] Criar página CommercialPoints.tsx
+- [x] Integrar com tRPC para listar pontos
+- [x] Adicionar formulário para criar novo ponto
+- [ ] Adicionar mapa interativo para visualizar pontos
+
+
+
+
+## 🔄 Ajuste de Formulário - Solicitação de Pontos Comerciais (Sessão 7)
+- [x] Atualizar schema: remover endereço, adicionar cidade, bairros, classe social, m², aluguel máximo
+- [x] Reformular formulário com novos campos
+- [x] Atualizar tRPC procedures
+- [ ] Testar formulário e salvar checkpoint
+

@@ -9,11 +9,12 @@ export const commercialPointsRouter = router({
     .input(z.object({
       tenantId: z.number(),
       segment: z.string().min(1),
-      address: z.string().min(1),
-      lat: z.string(),
-      lng: z.string(),
-      radiusM: z.number().int().positive(),
-      requirements: z.string().optional(),
+      city: z.string().min(1),
+      neighborhoods: z.string().optional(),
+      socialClass: z.string().optional(),
+      propertySize: z.number().int().optional(),
+      maxRent: z.number().int().optional(),
+      requirements: z.string().min(1),
       studyId: z.number().optional(),
     }))
     .mutation(async ({ ctx, input }) => {
@@ -27,10 +28,11 @@ export const commercialPointsRouter = router({
         tenantId: input.tenantId,
         userId: ctx.user.id,
         segment: input.segment,
-        address: input.address,
-        lat: input.lat,
-        lng: input.lng,
-        radiusM: input.radiusM,
+        city: input.city,
+        neighborhoods: input.neighborhoods,
+        socialClass: input.socialClass,
+        propertySize: input.propertySize,
+        maxRent: input.maxRent,
         requirements: input.requirements,
         studyId: input.studyId,
         status: "aberto",
@@ -49,7 +51,10 @@ export const commercialPointsRouter = router({
       await validateTenantAccess(ctx, input.tenantId);
 
       const requests = await db.getTenantCommercialPointRequests(input.tenantId);
-      return requests;
+      return requests.map(req => ({
+        ...req,
+        neighborhoods: req.neighborhoods ? (typeof req.neighborhoods === 'string' ? req.neighborhoods.split(',').map(n => n.trim()) : req.neighborhoods) : [],
+      }));
     }),
 
   getRequest: protectedProcedure
@@ -66,7 +71,10 @@ export const commercialPointsRouter = router({
 
       await validateTenantAccess(ctx, request.tenantId);
 
-      return request;
+      return {
+        ...request,
+        neighborhoods: request.neighborhoods ? (typeof request.neighborhoods === 'string' ? request.neighborhoods.split(',').map(n => n.trim()) : request.neighborhoods) : [],
+      };
     }),
 
   createPoint: protectedProcedure

@@ -517,6 +517,12 @@ export type StudyRequest = typeof studyRequests.$inferSelect;
 export type InsertStudyRequest = typeof studyRequests.$inferInsert;
 export type Notification = typeof notifications.$inferSelect;
 export type InsertNotification = typeof notifications.$inferInsert;
+export type CommercialPointRequest = typeof commercialPointRequests.$inferSelect;
+export type InsertCommercialPointRequest = typeof commercialPointRequests.$inferInsert;
+export type CommercialPoint = typeof commercialPoints.$inferSelect;
+export type InsertCommercialPoint = typeof commercialPoints.$inferInsert;
+export type CommercialPointPhoto = typeof commercialPointPhotos.$inferSelect;
+export type InsertCommercialPointPhoto = typeof commercialPointPhotos.$inferInsert;
 
 
 
@@ -529,12 +535,13 @@ export const commercialPointRequests = mysqlTable("commercialPointRequests", {
   tenantId: int("tenantId").notNull(),
   userId: int("userId").notNull(),
   studyId: int("studyId"), // Opcional: vinculado a um estudo
-  segment: varchar("segment", { length: 255 }).notNull(),
-  address: text("address").notNull(),
-  lat: varchar("lat", { length: 50 }).notNull(),
-  lng: varchar("lng", { length: 50 }).notNull(),
-  radiusM: int("radiusM").notNull(),
-  requirements: text("requirements"), // Requisitos específicos do ponto
+  segment: varchar("segment", { length: 255 }).notNull(), // Segmento do negócio (Farmácia, Restaurante, etc)
+  city: varchar("city", { length: 255 }).notNull(), // Cidade de interesse
+  neighborhoods: text("neighborhoods"), // Bairros de interesse (JSON array ou string separada por vírgula)
+  socialClass: varchar("socialClass", { length: 50 }), // Classe social atendida (A, B, C, D, E)
+  propertySize: int("propertySize"), // Tamanho do imóvel em m²
+  maxRent: int("maxRent"), // Valor máximo de aluguel em reais
+  requirements: text("requirements").notNull(), // Requisitos adicionais (OBRIGATÓRIO)
   status: mysqlEnum("status", ["aberto", "em_busca", "encontrado", "cancelado"]).default("aberto").notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
@@ -542,6 +549,7 @@ export const commercialPointRequests = mysqlTable("commercialPointRequests", {
   tenantIdIdx: index("tenantId_idx").on(table.tenantId),
   userIdIdx: index("userId_idx").on(table.userId),
   statusIdx: index("status_idx").on(table.status),
+  cityIdx: index("city_idx").on(table.city),
 }));
 
 /**

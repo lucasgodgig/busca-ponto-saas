@@ -15,10 +15,11 @@ export default function CommercialPoints() {
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
     segment: "",
-    address: "",
-    lat: "",
-    lng: "",
-    radiusM: 1500,
+    city: "",
+    neighborhoods: "",
+    socialClass: "",
+    propertySize: "",
+    maxRent: "",
     requirements: "",
   });
 
@@ -32,10 +33,11 @@ export default function CommercialPoints() {
       toast.success("Solicitação criada com sucesso!");
       setFormData({
         segment: "",
-        address: "",
-        lat: "",
-        lng: "",
-        radiusM: 1500,
+        city: "",
+        neighborhoods: "",
+        socialClass: "",
+        propertySize: "",
+        maxRent: "",
         requirements: "",
       });
       setShowForm(false);
@@ -52,13 +54,19 @@ export default function CommercialPoints() {
       return;
     }
 
+    if (!formData.requirements.trim()) {
+      toast.error("Requisitos adicionais são obrigatórios");
+      return;
+    }
+
     createRequestMutation.mutate({
       tenantId: user.memberships[0].tenant.id,
       segment: formData.segment,
-      address: formData.address,
-      lat: formData.lat,
-      lng: formData.lng,
-      radiusM: formData.radiusM,
+      city: formData.city,
+      neighborhoods: formData.neighborhoods || undefined,
+      socialClass: formData.socialClass || undefined,
+      propertySize: formData.propertySize ? parseInt(formData.propertySize) : undefined,
+      maxRent: formData.maxRent ? parseInt(formData.maxRent) : undefined,
       requirements: formData.requirements,
     });
   };
@@ -78,8 +86,8 @@ export default function CommercialPoints() {
               <ArrowLeft size={24} />
             </button>
             <div>
-              <h1 className="text-3xl font-bold">Pontos Comerciais</h1>
-              <p className="text-white/80">Solicite indicações de pontos comerciais</p>
+              <h1 className="text-3xl font-bold">Solicitar Ponto Comercial</h1>
+              <p className="text-white/80">Encontre o ponto comercial ideal para seu negócio</p>
             </div>
           </div>
           <Button
@@ -111,55 +119,75 @@ export default function CommercialPoints() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-2">Endereço *</label>
+                  <label className="block text-sm font-medium mb-2">Cidade de Interesse *</label>
                   <Input
                     type="text"
-                    placeholder="Ex: Av. Paulista, 1000, São Paulo"
-                    value={formData.address}
-                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                    placeholder="Ex: São Paulo, Rio de Janeiro"
+                    value={formData.city}
+                    onChange={(e) => setFormData({ ...formData, city: e.target.value })}
                     required
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium mb-2">Latitude</label>
+                  <label className="block text-sm font-medium mb-2">Bairros de Interesse</label>
                   <Input
                     type="text"
-                    placeholder="-23.5505"
-                    value={formData.lat}
-                    onChange={(e) => setFormData({ ...formData, lat: e.target.value })}
+                    placeholder="Ex: Pinheiros, Vila Mariana, Consolação"
+                    value={formData.neighborhoods}
+                    onChange={(e) => setFormData({ ...formData, neighborhoods: e.target.value })}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-2">Longitude</label>
-                  <Input
-                    type="text"
-                    placeholder="-46.6333"
-                    value={formData.lng}
-                    onChange={(e) => setFormData({ ...formData, lng: e.target.value })}
-                  />
+                  <label className="block text-sm font-medium mb-2">Classe Social Atendida</label>
+                  <select
+                    className="w-full px-3 py-2 border border-input rounded-md bg-background text-foreground"
+                    value={formData.socialClass}
+                    onChange={(e) => setFormData({ ...formData, socialClass: e.target.value })}
+                  >
+                    <option value="">Selecione uma opção</option>
+                    <option value="A">Classe A</option>
+                    <option value="B">Classe B</option>
+                    <option value="C">Classe C</option>
+                    <option value="D">Classe D</option>
+                    <option value="E">Classe E</option>
+                  </select>
                 </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium mb-2">Raio (metros)</label>
+                  <label className="block text-sm font-medium mb-2">Tamanho do Imóvel (m²)</label>
                   <Input
                     type="number"
-                    min="100"
-                    max="5000"
-                    value={formData.radiusM}
-                    onChange={(e) => setFormData({ ...formData, radiusM: parseInt(e.target.value) })}
+                    min="0"
+                    placeholder="Ex: 100, 250, 500"
+                    value={formData.propertySize}
+                    onChange={(e) => setFormData({ ...formData, propertySize: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Valor Máximo de Aluguel (R$)</label>
+                  <Input
+                    type="number"
+                    min="0"
+                    placeholder="Ex: 5000, 10000"
+                    value={formData.maxRent}
+                    onChange={(e) => setFormData({ ...formData, maxRent: e.target.value })}
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">Requisitos Adicionais</label>
+                <label className="block text-sm font-medium mb-2">Requisitos Adicionais *</label>
                 <Textarea
-                  placeholder="Descreva características específicas que você procura no ponto comercial..."
+                  placeholder="Descreva características específicas que você procura no ponto comercial (estacionamento, visibilidade, proximidade a transportes, etc)..."
                   value={formData.requirements}
                   onChange={(e) => setFormData({ ...formData, requirements: e.target.value })}
                   rows={4}
+                  required
                 />
               </div>
 

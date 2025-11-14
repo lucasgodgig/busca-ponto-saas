@@ -11,7 +11,8 @@ import {
   Moon,
   Sun,
   Shield,
-  LogOut
+  LogOut,
+  MapPin
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { APP_LOGO, APP_TITLE } from "@/const";
@@ -56,39 +57,54 @@ export default function Sidebar({ className }: SidebarProps) {
       icon: Settings,
       href: "/configuracoes",
     },
+    {
+      title: "Pontos Comerciais",
+      icon: MapPin,
+      href: "/pontos-comerciais",
+    },
   ];
 
-  // Adicionar Admin BP se for admin_bp ou analyst_bp
-  if (user?.role === "admin_bp" || user?.role === "analyst_bp") {
-    menuItems.push({
-      title: "Admin BP",
-      icon: Shield,
-      href: "/admin-bp",
-    });
-    menuItems.push({
-      title: "Solicitações",
-      icon: FileText,
-      href: "/admin-bp/solicitacoes",
-    });
+  // Adicionar Admin BP se for admin_bp ou analyst_bp ou admin
+  if (user?.role === "admin_bp" || user?.role === "analyst_bp" || user?.role === "admin") {
+    if (user?.role === "admin_bp" || user?.role === "analyst_bp") {
+      menuItems.push({
+        title: "Admin BP",
+        icon: Shield,
+        href: "/admin-bp",
+      });
+      menuItems.push({
+        title: "Solicitações",
+        icon: FileText,
+        href: "/admin-bp/solicitacoes",
+      });
+    }
   }
 
   const isActive = (href: string) => {
+    const currentPath = location.split("?")[0];
     if (href === "/app") {
-      return location === "/app" || location === "/";
+      return currentPath === "/app" || currentPath === "/";
     }
-    return location.startsWith(href);
+    return currentPath.startsWith(href);
   };
 
   return (
     <>
       {/* Mobile Header */}
       <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-background border-b z-50 flex items-center justify-between px-4">
-        <div className="flex items-center gap-2">
+        <Link href="/app" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
           {APP_LOGO && <img src={APP_LOGO} alt={APP_TITLE} className="h-8 w-8" />}
           <span className="font-bold text-lg">{APP_TITLE}</span>
-        </div>
+        </Link>
         <div className="flex items-center gap-2">
           <NotificationBadge />
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => toggleTheme()}
+          >
+            {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+          </Button>
           <Button
             variant="ghost"
             size="icon"
