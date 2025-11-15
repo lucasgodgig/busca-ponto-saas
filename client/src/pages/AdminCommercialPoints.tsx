@@ -50,8 +50,8 @@ export default function AdminCommercialPoints() {
   const { user, loading } = useAuth();
   const [, setLocation] = useLocation();
   const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [cityFilter, setCityFilter] = useState<string>("");
-  const [segmentFilter, setSegmentFilter] = useState<string>("");
+  const [cityFilter, setCityFilter] = useState<string>("all");
+  const [segmentFilter, setSegmentFilter] = useState<string>("all");
   const [searchText, setSearchText] = useState<string>("");
   const [dateFilter, setDateFilter] = useState<string>("all");
 
@@ -62,8 +62,8 @@ export default function AdminCommercialPoints() {
       try {
         const filters = JSON.parse(savedFilters);
         setStatusFilter(filters.status || "all");
-        setCityFilter(filters.city || "");
-        setSegmentFilter(filters.segment || "");
+        setCityFilter(filters.city || "all");
+        setSegmentFilter(filters.segment || "all");
         setSearchText(filters.search || "");
         setDateFilter(filters.date || "all");
       } catch (e) {
@@ -98,10 +98,10 @@ export default function AdminCommercialPoints() {
       if (statusFilter !== "all" && request.status !== statusFilter) return false;
 
       // Filtro de cidade
-      if (cityFilter && !request.city.toLowerCase().includes(cityFilter.toLowerCase())) return false;
+      if (cityFilter !== "all" && !request.city.toLowerCase().includes(cityFilter.toLowerCase())) return false;
 
       // Filtro de segmento
-      if (segmentFilter && !request.segment.toLowerCase().includes(segmentFilter.toLowerCase())) return false;
+      if (segmentFilter !== "all" && !request.segment.toLowerCase().includes(segmentFilter.toLowerCase())) return false;
 
       // Filtro de texto (busca em requisitos e título)
       if (searchText) {
@@ -154,14 +154,14 @@ export default function AdminCommercialPoints() {
   // Limpar filtros
   const clearFilters = () => {
     setStatusFilter("all");
-    setCityFilter("");
-    setSegmentFilter("");
+    setCityFilter("all");
+    setSegmentFilter("all");
     setSearchText("");
     setDateFilter("all");
     localStorage.removeItem("commercialPointsFilters");
   };
 
-  const hasActiveFilters = statusFilter !== "all" || cityFilter || segmentFilter || searchText || dateFilter !== "all";
+  const hasActiveFilters = statusFilter !== "all" || cityFilter !== "all" || segmentFilter !== "all" || searchText || dateFilter !== "all";
 
   // WebSocket notifications
   const { isConnected } = useWebSocketNotifications({
@@ -264,7 +264,7 @@ export default function AdminCommercialPoints() {
                     <SelectValue placeholder="Todas" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Todas as cidades</SelectItem>
+                    <SelectItem value="all">Todas as cidades</SelectItem>
                     {uniqueCities.map((city: string) => (
                       <SelectItem key={city} value={city}>
                         {city}
@@ -282,7 +282,7 @@ export default function AdminCommercialPoints() {
                     <SelectValue placeholder="Todos" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Todos os segmentos</SelectItem>
+                    <SelectItem value="all">Todos os segmentos</SelectItem>
                     {uniqueSegments.map((segment: string) => (
                       <SelectItem key={segment} value={segment}>
                         {segment}
