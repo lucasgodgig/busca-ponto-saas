@@ -153,3 +153,22 @@
 ✅ **Endpoint Funcional**: Sistema de solicitação de pontos comerciais 100% operacional
 ✅ **Comunicação Usuário-Admin**: Fluxo completo de envio e recebimento de solicitações
 ✅ **Validação**: Campos obrigatórios validados corretamente
+
+
+## 🐛 Bug Report - Sessão 12 (Continuação)
+
+### Problema
+- [x] Erro 404 ao clicar em "Ver Detalhes" de um ponto comercial solicitado
+- [x] Rota `/commercial-points/1` não existe ou não está registrada
+- [x] Página de detalhes do ponto comercial não foi criada
+
+### Solução Implementada
+- [x] Criar página CommercialPointDetails.tsx com layout profissional
+- [x] Registrar rota /commercial-points/:id no App.tsx
+- [x] Implementar query tRPC para buscar detalhes da solicitação
+- [x] Testar fluxo completo: listar → clicar em detalhes → visualizar
+
+### Resultado
+✅ Página Funcional: Detalhes do ponto comercial exibidos corretamente
+✅ Navegação: Botão Voltar para Lista funciona perfeitamente
+✅ Design: Interface profissional com status badge e informações organizadas
