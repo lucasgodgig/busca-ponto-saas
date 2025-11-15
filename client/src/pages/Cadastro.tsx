@@ -40,15 +40,15 @@ export default function Cadastro() {
     try {
       await createLeadMutation.mutateAsync(formData);
 
-      // Salvar email em cookie para vincular depois do login
-      document.cookie = `leadEmail=${encodeURIComponent(formData.email)}; path=/; max-age=3600`;
+      // Salvar email em localStorage para página de confirmação
+      localStorage.setItem("cadastroEmail", formData.email);
 
-      toast.success("Cadastro realizado! Redirecionando para login...");
+      toast.success("Cadastro realizado! Redirecionando...");
 
-      // Redirecionar para OAuth
+      // Redirecionar para página de confirmação
       setTimeout(() => {
-        window.location.href = getLoginUrl();
-      }, 1000);
+        setLocation("/cadastro-confirmacao");
+      }, 500);
     } catch (error) {
       toast.error("Erro ao realizar cadastro");
       console.error(error);

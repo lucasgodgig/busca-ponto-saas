@@ -10,6 +10,7 @@ import Dashboard from "./pages/Dashboard";
 import MapPage from "./pages/MapPage";
 import InviteCodeValidation from "./pages/InviteCodeValidation";
 import Cadastro from "./pages/Cadastro";
+import CadastroConfirmacao from "./pages/CadastroConfirmacao";
 import AnalysisDashboard from "./pages/AnalysisDashboard";
 import AppLayout from "./components/AppLayout";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -47,6 +48,7 @@ function Router() {
       <Switch>
       <Route path={"/"} component={Home} />
       <Route path={"/cadastro"} component={Cadastro} />
+      <Route path={"/cadastro-confirmacao"} component={CadastroConfirmacao} />
       <Route path={"/invite"} component={InviteCodeValidation} />
       
       {/* Rotas com Sidebar */}
