@@ -3,10 +3,10 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { toast } from "sonner";
 
 interface StudyNotification {
-  type: "study_created" | "study_status_changed" | "study_updated";
+  type: "study_created" | "study_status_changed" | "study_updated" | "commercial_point_request_new" | "commercial_point_request_status_updated" | "commercial_point_new";
   data: {
-    studyId: number;
-    title: string;
+    studyId?: number;
+    title?: string;
     segment?: string;
     address?: string;
     oldStatus?: string;
@@ -14,6 +14,11 @@ interface StudyNotification {
     tenantId?: number;
     createdBy?: string;
     changedBy?: string;
+    requestId?: number;
+    city?: string;
+    requirements?: string;
+    pointId?: number;
+    propertyType?: string;
   };
   timestamp: Date;
 }
@@ -111,6 +116,39 @@ export function useWebSocketNotifications(
             }
 
             // Chamar callback se fornecido
+            if (onNotification) {
+              onNotification(notification);
+            }
+          }
+
+          // Processar notificacoes de pontos comerciais
+          if (message.type === "commercial_point_request_new") {
+            const notification: StudyNotification = message;
+            toast.success(
+              `Nova solicitacao: ${message.data.segment} em ${message.data.city}`,
+              {
+                description: message.data.requirements?.substring(0, 50) + "...",
+                duration: 5000,
+              }
+            );
+            if (onNotification) {
+              onNotification(notification);
+            }
+          } else if (message.type === "commercial_point_request_status_updated") {
+            const notification: StudyNotification = message;
+            toast.info(
+              `Solicitacao #${message.data.requestId} agora esta: ${message.data.newStatus}`,
+              { duration: 4000 }
+            );
+            if (onNotification) {
+              onNotification(notification);
+            }
+          } else if (message.type === "commercial_point_new") {
+            const notification: StudyNotification = message;
+            toast.success(`Novo ponto indicado: ${message.data.address}`, {
+              description: `Tipo: ${message.data.propertyType || "Nao especificado"}`,
+              duration: 5000,
+            });
             if (onNotification) {
               onNotification(notification);
             }
