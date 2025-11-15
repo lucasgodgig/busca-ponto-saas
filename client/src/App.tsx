@@ -10,7 +10,6 @@ import Dashboard from "./pages/Dashboard";
 import MapPage from "./pages/MapPage";
 import InviteCodeValidation from "./pages/InviteCodeValidation";
 import Cadastro from "./pages/Cadastro";
-import CadastroConfirmacao from "./pages/CadastroConfirmacao";
 import AnalysisDashboard from "./pages/AnalysisDashboard";
 import AppLayout from "./components/AppLayout";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -30,12 +29,10 @@ const AdminPanel = lazy(() => import("./pages/AdminPanel"));
 const MeusEstudos = lazy(() => import("./pages/MeusEstudos"));
 const SolicitarEstudo = lazy(() => import("./pages/SolicitarEstudo"));
 const AdminStudyRequests = lazy(() => import("./pages/AdminStudyRequests"));
+const AdminCommercialPoints = lazy(() => import("./pages/AdminCommercialPoints"));
 const UsageHistory = lazy(() => import("./pages/UsageHistory"));
 const Analytics = lazy(() => import("./pages/Analytics"));
 const CommercialPoints = lazy(() => import("./pages/CommercialPoints"));
-const CommercialPointDetails = lazy(() => import("./pages/CommercialPointDetails"));
-const AdminCommercialPoints = lazy(() => import("./pages/AdminCommercialPoints"));
-const CommercialPointsList = lazy(() => import("./pages/CommercialPointsList"));
 
 // Loading component
 const PageLoader = () => (
@@ -51,7 +48,6 @@ function Router() {
       <Switch>
       <Route path={"/"} component={Home} />
       <Route path={"/cadastro"} component={Cadastro} />
-      <Route path={"/cadastro-confirmacao"} component={CadastroConfirmacao} />
       <Route path={"/invite"} component={InviteCodeValidation} />
       
       {/* Rotas com Sidebar */}
@@ -148,6 +144,13 @@ function Router() {
           </AppLayout>
         </ProtectedRoute>
       </Route>
+      <Route path={"/admin-bp/pontos-comerciais"}>
+        <ProtectedRoute>
+          <AppLayout>
+            <AdminCommercialPoints />
+          </AppLayout>
+        </ProtectedRoute>
+      </Route>
       <Route path={"/historico-uso"}>
         <ProtectedRoute>
           <AppLayout>
@@ -166,27 +169,6 @@ function Router() {
         <ProtectedRoute>
           <AppLayout>
             <CommercialPoints />
-          </AppLayout>
-        </ProtectedRoute>
-      </Route>
-      <Route path={"/commercial-points/:id"}>
-        <ProtectedRoute>
-          <AppLayout>
-            <CommercialPointDetails />
-          </AppLayout>
-        </ProtectedRoute>
-      </Route>
-      <Route path={"/admin-bp/pontos-comerciais"}>
-        <ProtectedRoute>
-          <AppLayout>
-            <AdminCommercialPoints />
-          </AppLayout>
-        </ProtectedRoute>
-      </Route>
-      <Route path={"/pontos-comerciais/criados"}>
-        <ProtectedRoute>
-          <AppLayout>
-            <CommercialPointsList />
           </AppLayout>
         </ProtectedRoute>
       </Route>

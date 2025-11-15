@@ -167,8 +167,8 @@ export default function Dashboard() {
 
         {/* Stats */}
         <div className="grid gap-4 grid-cols-1 sm:grid-cols-3 mb-6 md:mb-8">
-          {stats.map((stat, idx) => (
-            <Card key={`stat-${idx}-${stat.title}`}>
+          {stats.map((stat) => (
+            <Card key={stat.title}>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
                   {stat.title}
@@ -316,8 +316,8 @@ export default function Dashboard() {
           <div className="mt-6 md:mt-8">
             <h2 className="text-xl md:text-2xl font-bold mb-4">Estudos Recentes</h2>
             <div className="grid gap-4">
-              {studies.slice(0, 3).map((study, idx) => (
-                <Link key={`study-${study.id}-${idx}`} href={`/estudos/${study.id}`}>
+              {studies.slice(0, 3).map((study) => (
+                <Link key={study.id} href={`/estudos/${study.id}`}>
                   <Card className="cursor-pointer hover:shadow-md transition-shadow">
                     <CardHeader>
                       <div className="flex items-center justify-between">

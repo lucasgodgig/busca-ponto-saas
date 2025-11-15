@@ -8,68 +8,38 @@ interface OnboardingStep {
   description: string;
   icon: React.ElementType;
   color: string;
-  details?: string[];
 }
 
-interface OnboardingStepExtended extends OnboardingStep {
-  details?: string[];
-}
-
-const steps: OnboardingStepExtended[] = [
+const steps: OnboardingStep[] = [
   {
     title: "Bem-vindo ao Sistema Busca Ponto!",
     description: "Vamos fazer um tour rápido pelas principais funcionalidades da plataforma.",
     icon: CheckCircle2,
     color: "text-green-600",
-    details: [
-      "Análise de dados demográficos em tempo real",
-      "Mapa interativo com múltiplas camadas",
-      "Relatórios profissionais exportáveis",
-    ],
   },
   {
     title: "Análise Rápida",
     description: "Use o Mapa Interativo para fazer análises de localização em tempo real. Selecione um endereço, defina o raio e escolha o segmento.",
     icon: Map,
     color: "text-blue-600",
-    details: [
-      "Busque por endereço ou coordenadas",
-      "Ajuste o raio de busca (até 5km)",
-      "Veja dados demográficos instantaneamente",
-    ],
   },
   {
     title: "Solicitar Estudo",
     description: "Precisa de uma análise mais detalhada? Solicite um estudo de mercado completo e nossa equipe preparará um relatório personalizado.",
     icon: FileText,
     color: "text-green-600",
-    details: [
-      "Estudos detalhados com análise de mercado",
-      "Relatórios personalizados por segmento",
-      "Entrega em até 48 horas",
-    ],
   },
   {
     title: "Acompanhar Estudos",
     description: "Acompanhe o status dos seus estudos em tempo real. Receba notificações quando estiverem prontos.",
     icon: FolderOpen,
     color: "text-purple-600",
-    details: [
-      "Status em tempo real de cada estudo",
-      "Notificações automáticas de conclusão",
-      "Histórico completo de solicitações",
-    ],
   },
   {
     title: "Histórico e Relatórios",
     description: "Acesse todo o histórico de análises e estudos realizados. Baixe relatórios em PDF a qualquer momento.",
     icon: BarChart3,
     color: "text-orange-600",
-    details: [
-      "Acesso a todos os relatórios anteriores",
-      "Exportar em PDF ou Excel",
-      "Comparar análises ao longo do tempo",
-    ],
   },
 ];
 
@@ -117,32 +87,18 @@ export default function Onboarding() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <div className="flex items-center justify-center mb-4">
-            <div className={`w-20 h-20 rounded-full ${colorBgMap[step.color]} flex items-center justify-center animate-pulse`}>
-              <Icon className={`h-10 w-10 ${step.color}`} />
+            <div className={`w-16 h-16 rounded-full ${colorBgMap[step.color]} flex items-center justify-center`}>
+              <Icon className={`h-8 w-8 ${step.color}`} />
             </div>
           </div>
-          <DialogTitle className="text-center text-2xl font-bold">{step.title}</DialogTitle>
-          <DialogDescription className="text-center text-base pt-3">
+          <DialogTitle className="text-center text-xl">{step.title}</DialogTitle>
+          <DialogDescription className="text-center text-base pt-2">
             {step.description}
           </DialogDescription>
         </DialogHeader>
-
-        {/* Detalhes do passo */}
-        {step.details && (
-          <div className="space-y-2 py-4 px-2">
-            {step.details.map((detail, idx) => (
-              <div key={idx} className="flex items-start gap-3">
-                <div className={`w-6 h-6 rounded-full ${colorBgMap[step.color]} flex items-center justify-center flex-shrink-0 mt-0.5`}>
-                  <span className="text-xs font-bold text-gray-700">✓</span>
-                </div>
-                <span className="text-sm text-gray-700 pt-0.5">{detail}</span>
-              </div>
-            ))}
-          </div>
-        )}
 
         {/* Progress Indicator */}
         <div className="flex items-center justify-center gap-2 py-4">
@@ -159,11 +115,8 @@ export default function Onboarding() {
             />
           ))}
         </div>
-        <div className="text-center text-xs text-gray-500">
-          Passo {currentStep + 1} de {steps.length}
-        </div>
 
-        <DialogFooter className="flex justify-between sm:justify-between pt-2">
+        <DialogFooter className="flex justify-between sm:justify-between">
           <div className="flex gap-2">
             {currentStep > 0 && (
               <Button variant="outline" onClick={handlePrevious}>
@@ -175,7 +128,7 @@ export default function Onboarding() {
             <Button variant="ghost" onClick={handleClose}>
               Pular
             </Button>
-            <Button onClick={handleNext} className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800">
+            <Button onClick={handleNext}>
               {currentStep === steps.length - 1 ? "Começar" : "Próximo"}
             </Button>
           </div>

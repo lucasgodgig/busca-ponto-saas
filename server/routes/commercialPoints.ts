@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { protectedProcedure, router } from "../_core/trpc";
+import { protectedProcedure, router, adminProcedure } from "../_core/trpc";
 import { TRPCError } from "@trpc/server";
 import * as db from "../db";
 import { validateTenantAccess } from "../_core/tenantContext";
@@ -127,20 +127,6 @@ export const commercialPointsRouter = router({
       // Atualizar status da solicitação para "encontrado"
       await db.updateCommercialPointRequestStatus(input.requestId, "encontrado");
 
-      // Buscar a solicitação para obter informações do usuário
-      const request = await db.getCommercialPointRequestById(input.requestId);
-      
-      // Criar notificação para o usuário que fez a solicitação
-      if (request) {
-        await db.createNotification({
-          userId: request.userId,
-          title: "Ponto Comercial Encontrado!",
-          content: `Um novo ponto comercial foi encontrado para sua solicitação de ${request.segment} em ${request.city}. Endereco: ${input.address}`,
-          type: "other",
-          relatedStudyRequestId: request.id,
-        });
-      }
-
       return { success: true, pointId: (result as any).insertId };
     }),
 
@@ -221,6 +207,21 @@ export const commercialPointsRouter = router({
       });
 
       return { success: true, photoId: (result as any).insertId };
+    }),
+
+  // Admin endpoint para listar todas as solicitações de pontos comerciais
+  listAllRequests: adminProcedure
+    .input(z.object({ status: z.string().optional() }))
+    .query(async ({ ctx, input }) => {
+      if (!ctx.user) {
+        throw new TRPCError({ code: "UNAUTHORIZED" });
+      }
+
+      const requests = await db.getAllCommercialPointRequests(input.status);
+      return requests.map(req => ({
+        ...req,
+        neighborhoods: req.neighborhoods ? (typeof req.neighborhoods === 'string' ? req.neighborhoods.split(',').map(n => n.trim()) : req.neighborhoods) : [],
+      }));
     }),
 });
 

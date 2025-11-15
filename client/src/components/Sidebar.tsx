@@ -79,7 +79,7 @@ export default function Sidebar({ className }: SidebarProps) {
       });
       menuItems.push({
         title: "Pontos Comerciais",
-        icon: FileText,
+        icon: MapPin,
         href: "/admin-bp/pontos-comerciais",
       });
     }
