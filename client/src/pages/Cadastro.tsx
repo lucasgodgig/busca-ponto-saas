@@ -23,8 +23,8 @@ export default function Cadastro() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.nome || !formData.email) {
-      toast.error("Nome e e-mail são obrigatórios");
+    if (!formData.nome || !formData.email || !formData.telefone || !formData.empresa || !formData.cargo) {
+      toast.error("Todos os campos são obrigatórios");
       return;
     }
 
@@ -128,7 +128,7 @@ export default function Cadastro() {
               {/* Telefone */}
               <div className="space-y-1.5">
                 <label className="text-sm font-semibold text-gray-900">
-                  Telefone
+                  Telefone *
                 </label>
                 <Input
                   type="tel"
@@ -136,6 +136,7 @@ export default function Cadastro() {
                   value={formData.telefone}
                   onChange={(e) => setFormData({ ...formData, telefone: e.target.value })}
                   disabled={isSubmitting}
+                  required
                   className="h-11 border-gray-300 focus:border-[#001F5C] focus:ring-[#001F5C]"
                 />
               </div>
@@ -143,7 +144,7 @@ export default function Cadastro() {
               {/* Empresa */}
               <div className="space-y-1.5">
                 <label className="text-sm font-semibold text-gray-900">
-                  Empresa
+                  Empresa *
                 </label>
                 <Input
                   type="text"
@@ -151,6 +152,7 @@ export default function Cadastro() {
                   value={formData.empresa}
                   onChange={(e) => setFormData({ ...formData, empresa: e.target.value })}
                   disabled={isSubmitting}
+                  required
                   className="h-11 border-gray-300 focus:border-[#001F5C] focus:ring-[#001F5C]"
                 />
               </div>
@@ -158,7 +160,7 @@ export default function Cadastro() {
               {/* Cargo */}
               <div className="space-y-1.5">
                 <label className="text-sm font-semibold text-gray-900">
-                  Cargo
+                  Cargo *
                 </label>
                 <Input
                   type="text"
@@ -166,6 +168,7 @@ export default function Cadastro() {
                   value={formData.cargo}
                   onChange={(e) => setFormData({ ...formData, cargo: e.target.value })}
                   disabled={isSubmitting}
+                  required
                   className="h-11 border-gray-300 focus:border-[#001F5C] focus:ring-[#001F5C]"
                 />
               </div>
@@ -173,7 +176,7 @@ export default function Cadastro() {
               {/* Submit Button */}
               <Button
                 type="submit"
-                disabled={isSubmitting || !formData.nome || !formData.email}
+                disabled={isSubmitting || !formData.nome || !formData.email || !formData.telefone || !formData.empresa || !formData.cargo}
                 className="w-full h-11 bg-yellow-400 hover:bg-yellow-500 text-[#001F5C] font-bold text-base rounded-lg transition-all shadow-md hover:shadow-lg disabled:opacity-50 mt-6"
               >
                 {isSubmitting ? (

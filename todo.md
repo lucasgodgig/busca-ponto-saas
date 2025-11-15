@@ -118,3 +118,21 @@
 - [ ] Testar fluxo completo cadastro → confirmação → login
 ### Status
 ✅ **Simplificação Completa**: Formulário de cadastro simples e elegante com design visual da LP (sem seções extras)
+
+
+## 🔄 Sessão 11 - Melhorias no Fluxo de Cadastro
+
+### Mudanças Implementadas
+- [x] Deixar TODOS os campos do formulário /cadastro como obrigatórios (nome, email, telefone, empresa, cargo)
+- [x] Documentar fluxo de primeiro acesso: OAuth → Dashboard → Onboarding
+- [ ] Testar fluxo completo de novo usuário
+
+### Fluxo de Primeiro Acesso
+1. Usuário clica "Entrar" (login OAuth Manus)
+2. Se tem conta no Manus → autentica
+3. Se NÃO tem conta no Manus → cria nova conta
+4. Após OAuth → vai para Dashboard do SaaS
+5. Se é primeiro acesso → mostra onboarding tour
+
+### Status
+✅ **Campos Obrigatórios**: Todos os 5 campos agora são obrigatórios no cadastro
