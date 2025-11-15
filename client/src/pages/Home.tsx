@@ -5,14 +5,20 @@ import { getLoginUrl } from "@/const";
 import { APP_LOGO, APP_TITLE } from "@/const";
 import { useLocation } from "wouter";
 import { ArrowRight, MapPin, BarChart3, Zap } from "lucide-react";
+import { useEffect } from "react";
 
 export default function Home() {
   const { user, loading } = useAuth();
   const [, navigate] = useLocation();
 
   // Se usuário está autenticado, redirecionar para dashboard
+  useEffect(() => {
+    if (!loading && user) {
+      navigate("/app");
+    }
+  }, [loading, user, navigate]);
+
   if (!loading && user) {
-    navigate("/app");
     return null;
   }
 

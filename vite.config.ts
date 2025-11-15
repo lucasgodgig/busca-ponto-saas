@@ -69,7 +69,7 @@ export default defineConfig({
     },
     hmr: {
       protocol: "wss",
-      host: "3000-id585axpxaqf480hd0ixe-c2524acc.manusvm.computer",
+      host: typeof window !== "undefined" ? window.location.hostname : "localhost",
       port: 443,
     },
     middlewareMode: true,
