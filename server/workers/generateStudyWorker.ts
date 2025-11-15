@@ -1,11 +1,11 @@
-import { db } from '../db';
+import { getDb } from '../db';
 import { generatedStudies } from '../../drizzle/schema';
 import { eq } from 'drizzle-orm';
 import { fetchSpace, normalizeSpace } from '../services/spaceApiService';
 import { fetchNearby, mapSegmentToTypes, mapSynergyTypes } from '../services/googlePlacesService';
 import { computeSegmentPotential } from '../services/segmentPotentialService';
 import { generatePdf } from '../services/pdfService';
-import { storagePut } from '../utils/storage';
+import { storagePut } from '../storage';
 
 export interface GenerateStudyPayload {
   id: number;
@@ -20,56 +20,60 @@ export async function generateStudyWorker(payload: GenerateStudyPayload) {
   try {
     console.log(`[Worker] Iniciando geração do estudo ${studyId}`);
 
-    // Buscar estudo no banco
-    const study = await db.query.generatedStudies.findFirst({
-      where: eq(generatedStudies.id, studyId),
-    });
+    const db = await getDb();
+    if (!db) throw new Error('Database not available');
 
-    if (!study) {
+    // Buscar estudo no banco
+    const study = await db.select().from(generatedStudies).where(eq(generatedStudies.id, studyId)).limit(1);
+    const studyData = study[0];
+
+    if (!studyData) {
       throw new Error(`Estudo ${studyId} não encontrado`);
     }
 
     // Atualizar status para processing
-    await db
+    const db2 = await getDb();
+    if (!db2) throw new Error('Database not available');
+    await db2
       .update(generatedStudies)
       .set({ status: 'processing', updatedAt: new Date() })
       .where(eq(generatedStudies.id, studyId));
 
     // Converter lat/lng de string para number
-    const lat = parseFloat(study.lat);
-    const lng = parseFloat(study.lng);
+    const lat = parseFloat(studyData.lat);
+    const lng = parseFloat(studyData.lng);
 
     // 1. Buscar dados da Space API
-    console.log(`[Worker] Buscando dados Space API para ${lat}, ${lng}, raio ${study.radiusM}m`);
-    const rawSpace = await fetchSpace(lat, lng, study.radiusM);
+    console.log(`[Worker] Buscando dados Space API para ${lat}, ${lng}, raio ${studyData.radiusM}m`);
+    const rawSpace = await fetchSpace(lat, lng, studyData.radiusM);
     const space = normalizeSpace(rawSpace);
 
     // 2. Buscar concorrentes
-    console.log(`[Worker] Buscando concorrentes para segmento: ${study.segment}`);
-    const competitors = await fetchNearby(lat, lng, study.radiusM, mapSegmentToTypes(study.segment));
+    console.log(`[Worker] Buscando concorrentes para segmento: ${studyData.segment}`);
+    const competitors = await fetchNearby(lat, lng, studyData.radiusM, mapSegmentToTypes(studyData.segment));
 
     // 3. Buscar sinergias
     console.log(`[Worker] Buscando sinergias`);
-    const synergies = await fetchNearby(lat, lng, study.radiusM, mapSynergyTypes());
+    const synergies = await fetchNearby(lat, lng, studyData.radiusM, mapSynergyTypes());
 
     // 4. Calcular potencial por segmento
-    console.log(`[Worker] Calculando potencial para segmento: ${study.segment}`);
+    console.log(`[Worker] Calculando potencial para segmento: ${studyData.segment}`);
     const { value: segmentPotential, breakdown } = computeSegmentPotential(
       space.categorias,
-      study.segment
+      studyData.segment
     );
 
     // 5. Montar payload completo
     const payload_data = {
       meta: {
-        id: study.id,
-        title: study.title,
-        segment: study.segment,
+        id: studyData.id,
+        title: studyData.title,
+        segment: studyData.segment,
         lat,
         lng,
-        radiusM: study.radiusM,
-        notes: study.notes,
-        createdAt: study.createdAt,
+        radiusM: studyData.radiusM,
+        notes: studyData.notes,
+        createdAt: studyData.createdAt,
       },
       space,
       competitors,
@@ -81,11 +85,11 @@ export async function generateStudyWorker(payload: GenerateStudyPayload) {
     // 6. Gerar PDF
     console.log(`[Worker] Gerando PDF`);
     const pdfBuffer = await generatePdf(payload_data);
-    const pdfUrl = await storagePut(`studies/${studyId}.pdf`, pdfBuffer, 'application/pdf');
+    const { url: pdfUrl } = await storagePut(`studies/${studyId}.pdf`, pdfBuffer, 'application/pdf');
 
     // 7. Salvar JSON
     console.log(`[Worker] Salvando JSON`);
-    const jsonUrl = await storagePut(
+    const { url: jsonUrl } = await storagePut(
       `studies/${studyId}.json`,
       JSON.stringify(payload_data),
       'application/json'
@@ -93,7 +97,9 @@ export async function generateStudyWorker(payload: GenerateStudyPayload) {
 
     // 8. Atualizar status para done
     console.log(`[Worker] Atualizando status para done`);
-    await db
+    const db3 = await getDb();
+    if (!db3) throw new Error('Database not available');
+    await db3
       .update(generatedStudies)
       .set({
         status: 'done',
@@ -108,14 +114,21 @@ export async function generateStudyWorker(payload: GenerateStudyPayload) {
     console.error(`[Worker] Erro ao gerar estudo ${studyId}:`, error);
 
     // Atualizar status para error
-    await db
-      .update(generatedStudies)
-      .set({
-        status: 'error',
-        errorMessage: error instanceof Error ? error.message : 'Erro desconhecido',
-        updatedAt: new Date(),
-      })
-      .where(eq(generatedStudies.id, studyId));
+    try {
+      const db4 = await getDb();
+      if (db4) {
+        await db4
+          .update(generatedStudies)
+          .set({
+            status: 'error',
+            errorMessage: error instanceof Error ? error.message : 'Erro desconhecido',
+            updatedAt: new Date(),
+          })
+          .where(eq(generatedStudies.id, studyId));
+      }
+    } catch (dbError) {
+      console.error(`[Worker] Erro ao atualizar status de erro:`, dbError);
+    }
   }
 }
 

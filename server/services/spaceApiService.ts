@@ -118,9 +118,12 @@ export function normalizeSpace(raw: SpaceRawData): NormalizedSpace {
   });
 
   const total = classes.reduce((s, c) => s + c.domicilios, 0);
-  classes.forEach((c) => ((c as any).pct = total > 0 ? (c.domicilios / total) * 100 : 0));
+  const classesWithPct = classes.map((c) => ({
+    ...c,
+    pct: total > 0 ? (c.domicilios / total) * 100 : 0,
+  }));
 
-  return { head, categorias, classes };
+  return { head, categorias, classes: classesWithPct };
 }
 
 /**

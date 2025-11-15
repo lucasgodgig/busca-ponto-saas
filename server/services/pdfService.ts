@@ -1,3 +1,4 @@
+import React from 'react';
 import { renderToString } from 'react-dom/server';
 import { chromium } from 'playwright';
 import { ReportTemplate } from '../templates/ReportTemplate';
@@ -10,7 +11,7 @@ export interface PdfPayload {
     lat: number;
     lng: number;
     radiusM: number;
-    notes?: string;
+    notes?: string | null;
     createdAt: Date;
   };
   space: any;
@@ -26,7 +27,7 @@ export interface PdfPayload {
 export async function generatePdf(payload: PdfPayload): Promise<Buffer> {
   try {
     // Renderizar template React para HTML
-    const html = renderToString(<ReportTemplate payload={payload} />);
+    const html = renderToString(React.createElement(ReportTemplate, { payload }));
 
     // Usar Playwright para gerar PDF
     const browser = await chromium.launch();
@@ -48,4 +49,3 @@ export async function generatePdf(payload: PdfPayload): Promise<Buffer> {
     throw new Error('Falha ao gerar PDF');
   }
 }
-
