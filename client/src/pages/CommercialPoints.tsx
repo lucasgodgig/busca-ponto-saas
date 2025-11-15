@@ -28,6 +28,8 @@ export default function CommercialPoints() {
     { enabled: !!user?.memberships?.[0]?.tenant?.id }
   );
 
+  const utils = trpc.useUtils();
+
   const createRequestMutation = trpc.commercialPoints.createRequest.useMutation({
     onSuccess: () => {
       toast.success("Solicitação criada com sucesso!");
@@ -41,6 +43,8 @@ export default function CommercialPoints() {
         requirements: "",
       });
       setShowForm(false);
+      // Invalidar a query para atualizar a lista
+      utils.commercialPoints.listRequests.invalidate();
     },
     onError: (error) => {
       toast.error(error.message || "Erro ao criar solicitação");

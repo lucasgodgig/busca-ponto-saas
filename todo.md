@@ -136,3 +136,20 @@
 
 ### Status
 ✅ **Campos Obrigatórios**: Todos os 5 campos agora são obrigatórios no cadastro
+
+## 🔄 Sessão 12 - Corrigir Endpoint de Solicitação de Ponto Comercial
+
+### Problema
+- ❌ Erro: "No procedure found on path 'commercialPoints.createRequest'"
+- ❌ Solicitações não apareciam na lista após criação
+
+### Correções Realizadas
+- [x] Registrar `commercialPointsRouter` no `appRouter` principal
+- [x] Adicionar invalidação de cache após criar solicitação
+- [x] Validar fluxo completo de criação e listagem
+- [x] Testar com dados reais (Academia em Belo Horizonte)
+
+### Resultado
+✅ **Endpoint Funcional**: Sistema de solicitação de pontos comerciais 100% operacional
+✅ **Comunicação Usuário-Admin**: Fluxo completo de envio e recebimento de solicitações
+✅ **Validação**: Campos obrigatórios validados corretamente

@@ -1,0 +1,28 @@
+{
+  "query": "SELECT id, segment, city, createdAt FROM commercialPointRequests ORDER BY createdAt DESC LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user KpBuSok2NkZmZXX.root --database 7GaR8dGShizifRGBM35LMu --execute SELECT id, segment, city, createdAt FROM commercialPointRequests ORDER BY createdAt DESC LIMIT 10;",
+  "rows": [
+    {
+      "id": "30002",
+      "segment": "Restaurante",
+      "city": "Rio de Janeiro",
+      "createdAt": "2025-11-15 17:52:48"
+    },
+    {
+      "id": "30001",
+      "segment": "Farmácia",
+      "city": "São Paulo",
+      "createdAt": "2025-11-15 17:49:53"
+    },
+    {
+      "id": "1",
+      "segment": "Farmacia ",
+      "city": "JOinville",
+      "createdAt": "2025-11-14 14:44:29"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tsegment\tcity\tcreatedAt\n30002\tRestaurante\tRio de Janeiro\t2025-11-15 17:52:48\n30001\tFarmácia\tSão Paulo\t2025-11-15 17:49:53\n1\tFarmacia \tJOinville\t2025-11-14 14:44:29\n",
+  "stderr": "",
+  "execution_time_ms": 58
+}
