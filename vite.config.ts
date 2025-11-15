@@ -9,33 +9,6 @@ import { vitePluginManusRuntime } from "vite-plugin-manus-runtime";
 
 const plugins = [react(), tailwindcss(), jsxLocPlugin(), vitePluginManusRuntime()];
 
-// Detectar ambiente e configurar HMR apropriadamente
-const getHmrConfig = () => {
-  // Em produção ou quando NODE_ENV nao eh development, desabilitar HMR
-  if (process.env.NODE_ENV !== "development") {
-    return undefined;
-  }
-  
-  // Detectar se estamos em ambiente de sandbox/producao baseado no hostname
-  const isProduction = typeof window !== "undefined" && 
-    (window.location.hostname.includes(".manusvm.computer") ||
-     window.location.hostname.includes(".manus.computer") ||
-     window.location.hostname.includes(".manus-asia.computer") ||
-     window.location.hostname.includes(".manuscomputer.ai"));
-  
-  if (isProduction) {
-    // Em produção, desabilitar HMR completamente
-    return undefined;
-  }
-  
-  // Em desenvolvimento local
-  return {
-    protocol: "ws",
-    host: "localhost",
-    port: 5173,
-  };
-};
-
 export default defineConfig({
   plugins,
   resolve: {
