@@ -1,3 +1,4 @@
+import React from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -11,8 +12,14 @@ export default function Home() {
   const [, navigate] = useLocation();
 
   // Se usuário está autenticado, redirecionar para dashboard
+  // Usar useEffect para evitar setState durante render
+  React.useEffect(() => {
+    if (!loading && user) {
+      navigate("/app");
+    }
+  }, [user, loading, navigate]);
+
   if (!loading && user) {
-    navigate("/app");
     return null;
   }
 
