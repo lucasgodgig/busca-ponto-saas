@@ -16,7 +16,9 @@ import {
   commercialPointPhotos,
   InsertCommercialPointRequest,
   InsertCommercialPoint,
-  InsertCommercialPointPhoto
+  InsertCommercialPointPhoto,
+  notifications,
+  InsertNotification
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -534,3 +536,62 @@ export async function updateCommercialPointRequestStatus(requestId: number, stat
   }
 }
 
+
+export async function createNotification(data: InsertNotification) {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot create notification: database not available");
+    return null;
+  }
+
+  try {
+    const result = await db.insert(notifications).values(data);
+    console.log("[Database] Notification created successfully");
+    return result;
+  } catch (error) {
+    console.error("[Database] Failed to create notification:", error);
+    throw error;
+  }
+}
+
+export async function getUserNotifications(userId: number) {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot get notifications: database not available");
+    return [];
+  }
+
+  try {
+    const result = await db
+      .select()
+      .from(notifications)
+      .where(eq(notifications.userId, userId))
+      .orderBy(desc(notifications.createdAt));
+    
+    return result;
+  } catch (error) {
+    console.error("[Database] Failed to get notifications:", error);
+    throw error;
+  }
+}
+
+export async function markNotificationAsRead(notificationId: number) {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot update notification: database not available");
+    return null;
+  }
+
+  try {
+    const result = await db
+      .update(notifications)
+      .set({ isRead: true })
+      .where(eq(notifications.id, notificationId));
+    
+    console.log("[Database] Notification marked as read");
+    return result;
+  } catch (error) {
+    console.error("[Database] Failed to mark notification as read:", error);
+    throw error;
+  }
+}

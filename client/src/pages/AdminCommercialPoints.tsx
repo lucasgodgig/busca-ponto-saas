@@ -32,6 +32,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Plus, Search, Edit2, CheckCircle, Clock, MapPin } from "lucide-react";
 import { toast } from "sonner";
+import { useState } from "react";
 
 export default function AdminCommercialPoints() {
   const { user } = useAuth();
@@ -64,6 +65,18 @@ export default function AdminCommercialPoints() {
     },
   });
 
+  const createPointMutation = trpc.commercialPoints.createPoint.useMutation({
+    onSuccess: () => {
+      toast.success("Ponto comercial adicionado com sucesso!");
+      setShowDialog(false);
+      setSelectedRequest(null);
+      refetch();
+    },
+    onError: (error) => {
+      toast.error(error.message || "Erro ao adicionar ponto comercial");
+    },
+  });
+
   const handleOpenDialog = (request: any) => {
     setSelectedRequest(request);
     setFormData({
@@ -84,10 +97,25 @@ export default function AdminCommercialPoints() {
       return;
     }
 
-    // Aqui você implementaria a lógica para salvar o ponto comercial
-    toast.success("Ponto comercial adicionado com sucesso!");
-    setShowDialog(false);
-    setSelectedRequest(null);
+    if (!formData.latitude.trim() || !formData.longitude.trim()) {
+      toast.error("Latitude e longitude são obrigatórias");
+      return;
+    }
+
+    if (!selectedRequest || !user?.memberships?.[0]?.tenant?.id) {
+      toast.error("Erro: dados incompletos");
+      return;
+    }
+
+    createPointMutation.mutate({
+      requestId: selectedRequest.id,
+      tenantId: user.memberships[0].tenant.id,
+      address: formData.address,
+      lat: formData.latitude,
+      lng: formData.longitude,
+      description: formData.description || undefined,
+      amenitiesJson: formData.amenities.length > 0 ? formData.amenities : undefined,
+    });
   };
 
   const handleStatusChange = (requestId: number, newStatus: string) => {

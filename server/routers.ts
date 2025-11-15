@@ -11,7 +11,8 @@ import { searchAddress, searchCompetitors } from "./services/googlePlacesService
 import { ENV } from "./_core/env";
 
 import { leadsRouter } from "./routes/leads";
-import { studyRequestsRouter, notificationsRouter } from "./routes/studyRequests";
+import { studyRequestsRouter, notificationsRouter as studyNotificationsRouter } from "./routes/studyRequests";
+import { notificationsRouter } from "./routes/notifications";
 import { usersRouter } from "./routes/users";
 import { usageRouter } from "./routes/usage";
 import { analyticsRouter } from "./routes/analytics";

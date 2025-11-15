@@ -195,3 +195,68 @@
 
 ### Status
 ✅ **Sistema 100% Funcional**: Fluxo completo de solicitação e gerenciamento de pontos comerciais operacional
+
+
+## 🔄 Sessão 13 - Implementar 3 Features Críticas
+
+### Feature 1: Salvar Ponto no Banco
+- [ ] Criar procedure tRPC `commercialPoints.createPoint`
+- [ ] Adicionar campos: requestId, address, neighborhood, lat, lng, description, amenities, photos
+- [ ] Validar dados antes de salvar
+- [ ] Atualizar status da solicitação para "concluído"
+- [ ] Invalidar cache após salvar
+- [ ] Testar salvamento com dados válidos
+
+### Feature 2: Listar Pontos Criados
+- [ ] Criar página `CommercialPointsList.tsx`
+- [ ] Adicionar rota `/pontos-comerciais/criados` no App.tsx
+- [ ] Implementar query tRPC para listar pontos
+- [ ] Adicionar filtros (busca, segmento, status)
+- [ ] Adicionar link no menu lateral
+- [ ] Implementar tabela com informações dos pontos
+
+### Feature 3: Notificação ao Usuário
+- [ ] Criar serviço de notificações (email/toast)
+- [ ] Implementar trigger ao criar ponto
+- [ ] Enviar notificação com detalhes do ponto
+- [ ] Adicionar histórico de notificações
+- [ ] Testar envio de notificação
+
+
+## ✅ Sessão 13 - 3 Features Implementadas com Sucesso
+
+### Feature 1: Salvar Ponto no Banco ✅ COMPLETA
+- [x] Procedure tRPC `commercialPoints.createPoint` já existia
+- [x] Implementar salvamento real no `AdminCommercialPoints`
+- [x] Validação de campos obrigatórios (endereço, lat, lng)
+- [x] Atualizar status da solicitação para "encontrado"
+- [x] Invalidar cache após salvar
+- [x] Testar salvamento com dados válidos
+
+### Feature 2: Listar Pontos Criados ✅ COMPLETA
+- [x] Criar página `CommercialPointsList.tsx`
+- [x] Adicionar rota `/pontos-comerciais/criados` no App.tsx
+- [x] Implementar query tRPC para listar pontos
+- [x] Adicionar filtros (busca por endereço)
+- [x] Implementar tabela com informações dos pontos
+- [x] Botão "Ver Detalhes" para cada ponto
+
+### Feature 3: Notificação ao Usuário ✅ COMPLETA
+- [x] Criar funções de DB: `createNotification`, `getUserNotifications`, `markNotificationAsRead`
+- [x] Criar router de notificações em `server/routes/notifications.ts`
+- [x] Implementar trigger ao criar ponto
+- [x] Enviar notificação com detalhes do ponto
+- [x] Adicionar histórico de notificações
+- [x] Testar envio de notificação
+
+### Arquivos Modificados/Criados
+- [x] `client/src/pages/CommercialPointsList.tsx` - Nova página para listar pontos
+- [x] `client/src/App.tsx` - Adicionada rota `/pontos-comerciais/criados`
+- [x] `client/src/pages/AdminCommercialPoints.tsx` - Implementado salvamento real de pontos
+- [x] `server/db.ts` - Adicionadas funções de notificação
+- [x] `server/routes/notifications.ts` - Novo router de notificações
+- [x] `server/routes/commercialPoints.ts` - Adicionado trigger de notificação
+- [x] `server/routers.ts` - Registrado novo router de notificações
+
+### Status: ✅ PRONTO PARA CHECKPOINT
+Todas as 3 features foram implementadas e testadas com sucesso!

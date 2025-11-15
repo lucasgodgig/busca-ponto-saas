@@ -127,6 +127,20 @@ export const commercialPointsRouter = router({
       // Atualizar status da solicitação para "encontrado"
       await db.updateCommercialPointRequestStatus(input.requestId, "encontrado");
 
+      // Buscar a solicitação para obter informações do usuário
+      const request = await db.getCommercialPointRequestById(input.requestId);
+      
+      // Criar notificação para o usuário que fez a solicitação
+      if (request) {
+        await db.createNotification({
+          userId: request.userId,
+          title: "Ponto Comercial Encontrado!",
+          content: `Um novo ponto comercial foi encontrado para sua solicitação de ${request.segment} em ${request.city}. Endereco: ${input.address}`,
+          type: "other",
+          relatedStudyRequestId: request.id,
+        });
+      }
+
       return { success: true, pointId: (result as any).insertId };
     }),
 
