@@ -77,6 +77,11 @@ export default function Sidebar({ className }: SidebarProps) {
         icon: FileText,
         href: "/admin-bp/solicitacoes",
       });
+      menuItems.push({
+        title: "Pontos Comerciais",
+        icon: FileText,
+        href: "/admin-bp/pontos-comerciais",
+      });
     }
   }
 

@@ -34,6 +34,7 @@ const UsageHistory = lazy(() => import("./pages/UsageHistory"));
 const Analytics = lazy(() => import("./pages/Analytics"));
 const CommercialPoints = lazy(() => import("./pages/CommercialPoints"));
 const CommercialPointDetails = lazy(() => import("./pages/CommercialPointDetails"));
+const AdminCommercialPoints = lazy(() => import("./pages/AdminCommercialPoints"));
 
 // Loading component
 const PageLoader = () => (
@@ -171,6 +172,13 @@ function Router() {
         <ProtectedRoute>
           <AppLayout>
             <CommercialPointDetails />
+          </AppLayout>
+        </ProtectedRoute>
+      </Route>
+      <Route path={"/admin-bp/pontos-comerciais"}>
+        <ProtectedRoute>
+          <AppLayout>
+            <AdminCommercialPoints />
           </AppLayout>
         </ProtectedRoute>
       </Route>
