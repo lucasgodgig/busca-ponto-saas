@@ -1,3 +1,4 @@
+import React from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -5,18 +6,18 @@ import { getLoginUrl } from "@/const";
 import { APP_LOGO, APP_TITLE } from "@/const";
 import { useLocation } from "wouter";
 import { ArrowRight, MapPin, BarChart3, Zap } from "lucide-react";
-import { useEffect } from "react";
 
 export default function Home() {
   const { user, loading } = useAuth();
   const [, navigate] = useLocation();
 
   // Se usuário está autenticado, redirecionar para dashboard
-  useEffect(() => {
+  // Usar useEffect para evitar setState durante render
+  React.useEffect(() => {
     if (!loading && user) {
       navigate("/app");
     }
-  }, [loading, user, navigate]);
+  }, [user, loading, navigate]);
 
   if (!loading && user) {
     return null;

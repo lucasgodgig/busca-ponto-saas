@@ -15,7 +15,6 @@ import { studyRequestsRouter, notificationsRouter } from "./routes/studyRequests
 import { usersRouter } from "./routes/users";
 import { usageRouter } from "./routes/usage";
 import { analyticsRouter } from "./routes/analytics";
-import { commercialPointsRouter } from "./routes/commercialPoints";
 import { sendEmail, generateLimitAlertEmail, generateLimitReachedEmail } from "./services/emailService";
 
 export const appRouter = router({
@@ -26,7 +25,6 @@ export const appRouter = router({
   users: usersRouter,
   usage: usageRouter,
   analytics: analyticsRouter,
-  commercialPoints: commercialPointsRouter,
 
   auth: router({
     me: publicProcedure.query(async ({ ctx }) => {

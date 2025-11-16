@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { protectedProcedure, router, adminProcedure } from "../_core/trpc";
+import { protectedProcedure, router } from "../_core/trpc";
 import { TRPCError } from "@trpc/server";
 import * as db from "../db";
 import { validateTenantAccess } from "../_core/tenantContext";
@@ -207,21 +207,6 @@ export const commercialPointsRouter = router({
       });
 
       return { success: true, photoId: (result as any).insertId };
-    }),
-
-  // Admin endpoint para listar todas as solicitações de pontos comerciais
-  listAllRequests: adminProcedure
-    .input(z.object({ status: z.string().optional() }))
-    .query(async ({ ctx, input }) => {
-      if (!ctx.user) {
-        throw new TRPCError({ code: "UNAUTHORIZED" });
-      }
-
-      const requests = await db.getAllCommercialPointRequests(input.status);
-      return requests.map(req => ({
-        ...req,
-        neighborhoods: req.neighborhoods ? (typeof req.neighborhoods === 'string' ? req.neighborhoods.split(',').map(n => n.trim()) : req.neighborhoods) : [],
-      }));
     }),
 });
 

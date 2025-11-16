@@ -534,29 +534,3 @@ export async function updateCommercialPointRequestStatus(requestId: number, stat
   }
 }
 
-
-
-export async function getAllCommercialPointRequests(status?: string) {
-  const db = await getDb();
-  if (!db) {
-    console.warn("[Database] Cannot get commercial point requests: database not available");
-    return [];
-  }
-
-  try {
-    let query = db
-      .select()
-      .from(commercialPointRequests);
-    
-    if (status) {
-      query = query.where(eq(commercialPointRequests.status, status as any));
-    }
-    
-    const result = await query.orderBy(desc(commercialPointRequests.createdAt));
-    
-    return result;
-  } catch (error) {
-    console.error("[Database] Failed to get all commercial point requests:", error);
-    throw error;
-  }
-}
