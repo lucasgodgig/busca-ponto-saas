@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useWebSocketNotifications } from "@/hooks/useWebSocketNotifications";
 import { trpc } from "@/lib/trpc";
+import { validateStatusFilter, validateDateFilter, validateSearchText, validateCityFilter, validateSegmentFilter, loadFiltersFromStorage, saveFiltersToStorage } from "@/lib/filterValidation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -55,24 +56,27 @@ export default function AdminCommercialPoints() {
   const [searchText, setSearchText] = useState<string>("");
   const [dateFilter, setDateFilter] = useState<string>("all");
 
-  // Carregar filtros do localStorage
+  // Carregar filtros do localStorage com validação
   useEffect(() => {
-    const savedFilters = localStorage.getItem("commercialPointsFilters");
-    if (savedFilters) {
-      try {
-        const filters = JSON.parse(savedFilters);
-        setStatusFilter(filters.status || "all");
-        setCityFilter(filters.city || "all");
-        setSegmentFilter(filters.segment || "all");
-        setSearchText(filters.search || "");
-        setDateFilter(filters.date || "all");
-      } catch (e) {
-        console.error("Erro ao carregar filtros", e);
-      }
+    // Aguardar cidades e segmentos estarem disponíveis
+    if (!allRequests) return;
+    
+    const cities = Array.from(new Set(allRequests.map((r: any) => r.city))).sort();
+    const segments = Array.from(new Set(allRequests.map((r: any) => r.segment))).sort();
+    
+    const validated = loadFiltersFromStorage(cities, segments);
+    setStatusFilter(validated.status);
+    setCityFilter(validated.city);
+    setSegmentFilter(validated.segment);
+    setSearchText(validated.search);
+    setDateFilter(validated.date);
+    
+    if (!validated.isValid) {
+      toast.warning("Alguns filtros salvos eram inválidos e foram resetados");
     }
-  }, []);
+  }, [allRequests]);
 
-  // Salvar filtros no localStorage
+  // Salvar filtros no localStorage com validação
   useEffect(() => {
     const filters = {
       status: statusFilter,
@@ -81,7 +85,10 @@ export default function AdminCommercialPoints() {
       search: searchText,
       date: dateFilter,
     };
-    localStorage.setItem("commercialPointsFilters", JSON.stringify(filters));
+    const saved = saveFiltersToStorage(filters);
+    if (!saved) {
+      console.warn("Falha ao salvar filtros");
+    }
   }, [statusFilter, cityFilter, segmentFilter, searchText, dateFilter]);
 
   // Queries
