@@ -12,4 +12,6 @@ export const ENV = {
   spaceDefaultRadius: parseInt(process.env.SPACE_DEFAULT_RADIUS ?? "1500"),
   spaceMaxRadius: parseInt(process.env.SPACE_MAX_RADIUS ?? "5000"),
   googlePlacesApiKey: process.env.GOOGLE_PLACES_API_KEY ?? "",
+  stripeSecretKey: process.env.STRIPE_SECRET_KEY ?? "",
+  stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET ?? "",
 };

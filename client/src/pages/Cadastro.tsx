@@ -199,7 +199,7 @@ export default function Cadastro() {
           {/* Info Box */}
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center">
             <p className="text-sm text-gray-700">
-              <span className="font-semibold text-[#001F5C]">Teste gratuito:</span> 14 dias de acesso completo. Sem cartão de crédito.
+              <span className="font-semibold text-[#001F5C]">Teste gratuito:</span> 3 dias de acesso completo. Sem cartão de crédito.
             </p>
           </div>
         </div>
