@@ -1,2 +1,0 @@
-ALTER TABLE `commercialPointRequests` MODIFY COLUMN `status` enum('aberto','em_busca','em_analise','validacao','encontrado','cancelado') NOT NULL DEFAULT 'aberto';--> statement-breakpoint
-ALTER TABLE `commercialPoints` ADD `adminNotes` text;

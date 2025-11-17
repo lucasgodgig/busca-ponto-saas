@@ -52,6 +52,7 @@ export default function Onboarding() {
     await createTenantMutation.mutateAsync({
       name: formData.name,
       slug: formData.slug,
+      logoUrl: formData.logoUrl || undefined,
       colorPrimary: formData.colorPrimary,
     });
   };

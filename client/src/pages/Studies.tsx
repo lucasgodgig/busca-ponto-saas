@@ -51,7 +51,7 @@ export default function Studies() {
   }
 
   // Filtrar estudos
-  const filteredStudies = studies?.filter((study: any) => {
+  const filteredStudies = studies?.filter((study) => {
     // Filtro de texto
     if (searchText) {
       const searchLower = searchText.toLowerCase();

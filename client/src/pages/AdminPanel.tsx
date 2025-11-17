@@ -67,18 +67,42 @@ export default function AdminPanel() {
   });
 
   // Queries
-  const { data: users, isLoading, refetch } = trpc.users.list.useQuery();
+  const { data: users, isLoading, refetch } = trpc.admin.users.list.useQuery();
 
   // Mutations
-  const updateProfileMutation = trpc.users.updateProfile.useMutation({
+  const createUserMutation = trpc.admin.users.create.useMutation({
+    onSuccess: () => {
+      toast.success("Usuário criado com sucesso");
+      setCreateModalOpen(false);
+      resetForm();
+      refetch();
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
+  const updateUserMutation = trpc.admin.users.update.useMutation({
     onSuccess: () => {
       toast.success("Usuário atualizado com sucesso");
       setEditModalOpen(false);
       setSelectedUser(null);
       refetch();
     },
-    onError: (error: any) => {
-      toast.error(error?.message || "Erro ao atualizar usuário");
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
+  const deleteUserMutation = trpc.admin.users.delete.useMutation({
+    onSuccess: () => {
+      toast.success("Usuário deletado com sucesso");
+      setDeleteDialogOpen(false);
+      setSelectedUser(null);
+      refetch();
+    },
+    onError: (error) => {
+      toast.error(error.message);
     },
   });
 
@@ -98,7 +122,7 @@ export default function AdminPanel() {
   }
 
   // Filtrar usuários
-  const filteredUsers = users?.filter((u: any) => {
+  const filteredUsers = users?.filter((u) => {
     const matchesSearch =
       u.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       u.email?.toLowerCase().includes(searchTerm.toLowerCase());
@@ -122,8 +146,11 @@ export default function AdminPanel() {
   };
 
   const handleCreate = () => {
-    toast.info("Criação de usuários não está disponível nesta versão");
-    setCreateModalOpen(false);
+    if (!formData.openId.trim()) {
+      toast.error("OpenId é obrigatório");
+      return;
+    }
+    createUserMutation.mutate(formData);
   };
 
   const handleEdit = (u: any) => {
@@ -141,10 +168,13 @@ export default function AdminPanel() {
 
   const handleUpdate = () => {
     if (!selectedUser) return;
-    updateProfileMutation.mutate({
+    updateUserMutation.mutate({
       userId: selectedUser.id,
       name: formData.name || undefined,
       email: formData.email || undefined,
+      role: formData.role,
+      monthlyStudyLimit: formData.monthlyStudyLimit,
+      isActive: formData.isActive,
     });
   };
 
@@ -154,8 +184,9 @@ export default function AdminPanel() {
   };
 
   const confirmDelete = () => {
-    toast.info("Exclusão de usuários não está disponível nesta versão");
-    setDeleteDialogOpen(false);
+    if (selectedUser) {
+      deleteUserMutation.mutate({ userId: selectedUser.id });
+    }
   };
 
   return (
@@ -257,7 +288,7 @@ export default function AdminPanel() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredUsers.map((u: any) => (
+                  {filteredUsers.map((u) => (
                     <TableRow key={u.id}>
                       <TableCell className="font-medium">{u.name || "—"}</TableCell>
                       <TableCell>{u.email || "—"}</TableCell>
@@ -379,8 +410,8 @@ export default function AdminPanel() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setCreateModalOpen(false)}>Cancelar</Button>
-            <Button onClick={handleCreate} disabled={false}>
-              Criar Usuário
+            <Button onClick={handleCreate} disabled={createUserMutation.isPending}>
+              {createUserMutation.isPending ? "Criando..." : "Criar Usuário"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -455,8 +486,8 @@ export default function AdminPanel() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setEditModalOpen(false)}>Cancelar</Button>
-            <Button onClick={handleUpdate} disabled={updateProfileMutation.isPending}>
-              {updateProfileMutation.isPending ? "Atualizando..." : "Atualizar"}
+            <Button onClick={handleUpdate} disabled={updateUserMutation.isPending}>
+              {updateUserMutation.isPending ? "Salvando..." : "Salvar Alterações"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -474,9 +505,9 @@ export default function AdminPanel() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={() => confirmDelete()} disabled={false}>
-          Deletar
-        </AlertDialogAction>
+            <AlertDialogAction onClick={confirmDelete} className="bg-red-600 hover:bg-red-700">
+              {deleteUserMutation.isPending ? "Deletando..." : "Deletar"}
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

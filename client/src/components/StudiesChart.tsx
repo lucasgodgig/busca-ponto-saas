@@ -24,7 +24,7 @@ export default function StudiesChart() {
 
       // Contar estudos criados até essa data
       const count = studies?.filter(study => {
-        const studyDate = startOfDay(new Date(study.study?.createdAt || new Date()));
+        const studyDate = startOfDay(new Date(study.createdAt));
         return studyDate <= date;
       }).length || 0;
 

@@ -86,7 +86,7 @@ export const studyRequestsRouter = router({
 
       return {
         success: true,
-        id: Number((result as any).insertId),
+        id: Number(result.insertId),
       };
     }),
 

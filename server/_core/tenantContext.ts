@@ -4,7 +4,7 @@ import { getUserMembershipInTenant, getTenantById } from "../db";
 
 export type TenantContext = TrpcContext & {
   tenantId: number;
-  membershipRole: "tenant_admin" | "member" | "analyst";
+  membershipRole: "tenant_admin" | "member";
 };
 
 /**

@@ -86,7 +86,7 @@ export async function validateTenantAdmin(userId: number, tenantId: number): Pro
   try {
     const membership = await db.getUserMembershipInTenant(userId, tenantId);
     
-    if (!membership || membership.role !== 'tenant_admin') {
+    if (!membership || (membership.role !== 'admin' && membership.role !== 'tenant_admin')) {
       throw new TRPCError({
         code: 'FORBIDDEN',
         message: 'Você precisa ser administrador do tenant para realizar esta ação',

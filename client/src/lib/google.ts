@@ -13,7 +13,7 @@ async function fetchApiKey(): Promise<string> {
       throw new Error("Failed to fetch API config");
     }
     const data = await response.json();
-    cachedApiKey = (data.googleMapsApiKey as string) || "";
+    cachedApiKey = data.googleMapsApiKey || "";
     return cachedApiKey;
   } catch (error) {
     console.error("[Google Maps] Erro ao buscar API key:", error);

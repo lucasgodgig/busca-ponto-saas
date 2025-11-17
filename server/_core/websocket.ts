@@ -28,7 +28,7 @@ class NotificationManager {
 
       let userId: number | null = null;
       let isAdmin = false;
-      let clientId: string = "";
+      let clientId: string | null = null;
 
       // Enviar mensagem pedindo autenticação
       ws.send(
@@ -48,12 +48,11 @@ class NotificationManager {
           if (message.type === "auth" && !userId) {
             userId = message.userId;
             isAdmin = message.isAdmin || false;
-            const newClientId = `${userId}-${Date.now()}`;
-            clientId = newClientId;
+            clientId = `${userId}-${Date.now()}`;
             
             const clientConnection: ClientConnection = {
               ws,
-              userId: userId as number,
+              userId,
               isAdmin,
             };
             

@@ -57,7 +57,7 @@ export async function validateTenantAdmin(
 ): Promise<boolean> {
   try {
     const membership = await db.getUserMembershipInTenant(userId, tenantId);
-    return membership?.role === "tenant_admin";
+    return membership?.role === "admin" || membership?.role === "tenant_admin";
   } catch (error) {
     console.error("[TenantValidation] Error validating tenant admin:", error);
     return false;

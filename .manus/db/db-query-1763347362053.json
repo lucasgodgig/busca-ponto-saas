@@ -1,9 +1,0 @@
-{
-  "query": "SELECT m.id, m.userId, m.tenantId, m.role, t.id as tenant_id, t.name FROM memberships m LEFT JOIN tenants t ON m.tenantId = t.id;",
-  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user KpBuSok2NkZmZXX.root --database 7GaR8dGShizifRGBM35LMu --execute SELECT m.id, m.userId, m.tenantId, m.role, t.id as tenant_id, t.name FROM memberships m LEFT JOIN tenants t ON m.tenantId = t.id;",
-  "rows": [],
-  "messages": [],
-  "stdout": "",
-  "stderr": "",
-  "execution_time_ms": 49
-}

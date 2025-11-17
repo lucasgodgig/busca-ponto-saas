@@ -10,8 +10,7 @@ import {
   BarChart3,
   TrendingUp,
   Clock,
-  CheckCircle2,
-  MapPin
+  CheckCircle2
 } from "lucide-react";
 import { Link } from "wouter";
 import { trpc } from "@/lib/trpc";
@@ -70,32 +69,27 @@ export default function Dashboard() {
   
   useWebSocketNotifications(handleStudyNotification);
   
-  const { data: usageData } = trpc.tenants.usage.useQuery(
-    { tenantId: tenantId! },
-    { enabled: !!tenantId }
+  const { data: usageData } = trpc.admin.users.getCurrentUsage.useQuery(
+    undefined,
+    { enabled: !!user }
   );
   
   // Notificar quando limite eh atingido
   const hasNotifiedRef = useRef(false);
   useEffect(() => {
-    if (usageData && !hasNotifiedRef.current) {
-      const limit = usageData.tenant?.limitsJson?.quickQueriesPerMonth || 10;
-      const used = usageData.usage?.quickQueriesUsed || 0;
-      const remaining = Math.max(0, limit - used);
-      if (remaining <= 0) {
-        toast.error("Voce atingiu o limite mensal de estudos!", {
-          description: "Entre em contato com o administrador para aumentar seu limite.",
-          duration: 5000,
-        });
-        hasNotifiedRef.current = true;
-      }
-    } else if (!usageData) {
+    if (usageData && usageData.remaining <= 0 && !hasNotifiedRef.current) {
+      toast.error("Voce atingiu o limite mensal de estudos!", {
+        description: "Entre em contato com o administrador para aumentar seu limite.",
+        duration: 5000,
+      });
+      hasNotifiedRef.current = true;
+    } else if (usageData && usageData.remaining > 0) {
       hasNotifiedRef.current = false;
     }
-  }, [usageData?.tenant?.id, usageData?.usage?.id]);
+  }, [usageData?.remaining]);
 
-  const pendingStudies = studies?.filter((s) => s.study?.status === 'aberto' || s.study?.status === 'em_analise').length || 0;
-  const completedStudies = studies?.filter(s => s.study?.status === 'concluido').length || 0;
+  const pendingStudies = studies?.filter((s) => s.status === 'aberto' || s.status === 'em_analise').length || 0;
+  const completedStudies = studies?.filter(s => s.status === 'concluido').length || 0;
 
   const actionCards = [
     {
@@ -121,14 +115,6 @@ export default function Dashboard() {
       href: "/estudos",
       color: "text-purple-600 dark:text-purple-400",
       bgColor: "bg-purple-50 dark:bg-purple-950/30",
-    },
-    {
-      title: "Pontos Comerciais",
-      description: "Solicite e acompanhe pontos comerciais",
-      icon: MapPin,
-      href: "/solicitacoes-pontos",
-      color: "text-red-600 dark:text-red-400",
-      bgColor: "bg-red-50 dark:bg-red-950/30",
     },
     {
       title: "Relatórios",
@@ -181,8 +167,8 @@ export default function Dashboard() {
 
         {/* Stats */}
         <div className="grid gap-4 grid-cols-1 sm:grid-cols-3 mb-6 md:mb-8">
-          {stats.map((stat, idx) => (
-            <Card key={`stat-${idx}-${stat.title}`}>
+          {stats.map((stat) => (
+            <Card key={stat.title}>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
                   {stat.title}
@@ -197,16 +183,12 @@ export default function Dashboard() {
         </div>
 
         {/* Indicador de Estudos Restantes */}
-        {usageData && user?.role !== 'admin_bp' && (() => {
-          const limit = usageData.tenant?.limitsJson?.quickQueriesPerMonth || 10;
-          const used = usageData.usage?.quickQueriesUsed || 0;
-          const remaining = Math.max(0, limit - used);
-          return (
+        {usageData && user?.role !== 'admin_bp' && (
           <Card className="mb-6 md:mb-8 border-2 border-primary/20">
             <CardHeader>
               <CardTitle className="text-lg">Estudos Disponíveis Este Mês</CardTitle>
               <CardDescription>
-                Você pode criar até {limit} estudos por mês
+                Você pode criar até {usageData.limit} estudos por mês
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -214,48 +196,48 @@ export default function Dashboard() {
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">Utilizados</span>
                   <span className="text-2xl font-bold">
-                    {used} / {limit}
+                    {usageData.used} / {usageData.limit}
                   </span>
                 </div>
                 <div className="w-full bg-secondary rounded-full h-3 overflow-hidden">
                   <div
                     className={`h-full transition-all duration-300 ${
-                      (used / limit) >= 0.9
+                      usageData.used / usageData.limit >= 0.9
                         ? "bg-red-500"
-                        : (used / limit) >= 0.7
+                        : usageData.used / usageData.limit >= 0.7
                         ? "bg-yellow-500"
                         : "bg-green-500"
                     }`}
-                    style={{ width: `${Math.min((used / limit) * 100, 100)}%` }}
+                    style={{ width: `${Math.min((usageData.used / usageData.limit) * 100, 100)}%` }}
                   />
                 </div>
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Restantes</span>
-                  <span className={`${
-                    remaining <= 0
+                  <span className={
+                    usageData.remaining <= 0
                       ? "text-red-600 font-semibold"
-                      : remaining <= 3
+                      : usageData.remaining <= 3
                       ? "text-yellow-600 font-semibold"
                       : "text-green-600 font-semibold"
-                  }`}>
-                    {remaining} estudos
+                  }>
+                    {usageData.remaining} estudos
                   </span>
                 </div>
-                {remaining <= 0 && (
+                {usageData.remaining <= 0 && (
                   <div className="mt-3 p-3 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-md">
                     <p className="text-sm text-red-800 dark:text-red-200">
                       ⚠️ Você atingiu o limite mensal de estudos. Entre em contato com o administrador para aumentar seu limite.
                     </p>
                   </div>
                 )}
-                {remaining > 0 && remaining <= 3 && (
+                {usageData.remaining > 0 && usageData.remaining <= 3 && (
                   <div className="mt-3 p-3 bg-yellow-50 dark:bg-yellow-950/30 border border-yellow-200 dark:border-yellow-800 rounded-md">
                     <p className="text-sm text-yellow-800 dark:text-yellow-200">
-                      ⚠️ Você está próximo do limite mensal. Restam apenas {remaining} estudos.
+                      ⚠️ Você está próximo do limite mensal. Restam apenas {usageData.remaining} estudos.
                     </p>
                     {studies && studies.length > 0 && (
                       <p className="text-xs text-yellow-700 dark:text-yellow-300 mt-2">
-                        Estimativa de esgotamento: {calculateExhaustionDate(used, studies.length)}
+                        Estimativa de esgotamento: {calculateExhaustionDate(usageData.used, studies.length)}
                       </p>
                     )}
                   </div>
@@ -268,16 +250,14 @@ export default function Dashboard() {
               </div>
             </CardContent>
           </Card>
-        );
-        })()}
+        )}
 
         {/* Action Cards */}
         <h2 className="text-xl md:text-2xl font-bold mb-4">Acesso Rápido</h2>
         <div className="grid gap-6 md:gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 mb-8 md:mb-12 animate-stagger">
           {actionCards.map((card, index) => {
             const isAdmin = user?.role === 'admin_bp';
-            const remaining = usageData ? Math.max(0, (usageData.tenant?.limitsJson?.quickQueriesPerMonth || 10) - (usageData.usage?.quickQueriesUsed || 0)) : 0;
-            const isLimitReached = !isAdmin && usageData && remaining <= 0 && card.title === 'Solicitar Estudo';
+            const isLimitReached = !isAdmin && usageData && usageData.remaining <= 0 && card.title === 'Solicitar Estudo';
             const cardContent = (
               <Card className={`group transition-all border-2 ${
                 isLimitReached 
@@ -336,8 +316,8 @@ export default function Dashboard() {
           <div className="mt-6 md:mt-8">
             <h2 className="text-xl md:text-2xl font-bold mb-4">Estudos Recentes</h2>
             <div className="grid gap-4">
-              {studies.slice(0, 3).map((study: any, idx) => (
-                <Link key={`study-${study.id}-${idx}`} href={`/estudos/${study.id}`}>
+              {studies.slice(0, 3).map((study) => (
+                <Link key={study.id} href={`/estudos/${study.id}`}>
                   <Card className="cursor-pointer hover:shadow-md transition-shadow">
                     <CardHeader>
                       <div className="flex items-center justify-between">

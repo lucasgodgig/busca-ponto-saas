@@ -1,8 +1,8 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "e1951460-4bab-4256-8a37-22d0fd4a4fd8",
-  "prevId": "be527ddc-12b3-4b11-8a21-16d350498228",
+  "id": "10b57257-1455-4fe2-b1d1-0ec7d7d2ff59",
+  "prevId": "e1951460-4bab-4256-8a37-22d0fd4a4fd8",
   "tables": {
     "auditLogs": {
       "name": "auditLogs",
@@ -162,6 +162,20 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": true
+        },
+        "tenantId": {
+          "name": "tenantId",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "createdBy": {
+          "name": "createdBy",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
         },
         "title": {
           "name": "title",

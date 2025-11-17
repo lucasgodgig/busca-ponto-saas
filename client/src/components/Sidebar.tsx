@@ -64,8 +64,8 @@ export default function Sidebar({ className }: SidebarProps) {
     },
   ];
 
-  // Adicionar Admin BP se for admin_bp ou analyst_bp
-  if (user?.role === "admin_bp" || user?.role === "analyst_bp") {
+  // Adicionar Admin BP se for admin_bp ou analyst_bp ou admin
+  if (user?.role === "admin_bp" || user?.role === "analyst_bp" || user?.role === "admin") {
     if (user?.role === "admin_bp" || user?.role === "analyst_bp") {
       menuItems.push({
         title: "Admin BP",
@@ -101,7 +101,7 @@ export default function Sidebar({ className }: SidebarProps) {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => toggleTheme?.()}
+            onClick={() => toggleTheme()}
           >
             {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
           </Button>

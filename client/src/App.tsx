@@ -10,7 +10,6 @@ import Dashboard from "./pages/Dashboard";
 import MapPage from "./pages/MapPage";
 import InviteCodeValidation from "./pages/InviteCodeValidation";
 import Cadastro from "./pages/Cadastro";
-import CadastroConfirmacao from "./pages/CadastroConfirmacao";
 import AnalysisDashboard from "./pages/AnalysisDashboard";
 import AppLayout from "./components/AppLayout";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -33,11 +32,6 @@ const AdminStudyRequests = lazy(() => import("./pages/AdminStudyRequests"));
 const UsageHistory = lazy(() => import("./pages/UsageHistory"));
 const Analytics = lazy(() => import("./pages/Analytics"));
 const CommercialPoints = lazy(() => import("./pages/CommercialPoints"));
-const CommercialPointDetails = lazy(() => import("./pages/CommercialPointDetails"));
-const RegistrationAnalytics = lazy(() => import("./pages/RegistrationAnalytics"));
-// const AdminCommercialPointRequests = lazy(() => import("./pages/AdminCommercialPointRequests"));
-// const CommercialPointValidation = lazy(() => import("./pages/CommercialPointValidation"));
-const AdminSolicitations = lazy(() => import("./pages/AdminSolicitations"));
 
 // Loading component
 const PageLoader = () => (
@@ -53,7 +47,6 @@ function Router() {
       <Switch>
       <Route path={"/"} component={Home} />
       <Route path={"/cadastro"} component={Cadastro} />
-      <Route path={"/cadastro-confirmacao"} component={CadastroConfirmacao} />
       <Route path={"/invite"} component={InviteCodeValidation} />
       
       {/* Rotas com Sidebar */}
@@ -146,7 +139,7 @@ function Router() {
       <Route path={"/admin-bp/solicitacoes"}>
         <ProtectedRoute>
           <AppLayout>
-            <AdminSolicitations />
+            <AdminStudyRequests />
           </AppLayout>
         </ProtectedRoute>
       </Route>
@@ -171,34 +164,6 @@ function Router() {
           </AppLayout>
         </ProtectedRoute>
       </Route>
-      <Route path={"/commercial-points/:id"}>
-        <ProtectedRoute>
-          <AppLayout>
-            <CommercialPointDetails />
-          </AppLayout>
-        </ProtectedRoute>
-      </Route>
-      <Route path={"/admin-bp/analise-registros"}>
-        <ProtectedRoute>
-          <AppLayout>
-            <RegistrationAnalytics />
-          </AppLayout>
-        </ProtectedRoute>
-      </Route>
-      {/* <Route path={"/admin-bp/solicitacoes-pontos"}>
-        <ProtectedRoute>
-          <AppLayout>
-            <AdminCommercialPointRequests />
-          </AppLayout>
-        </ProtectedRoute>
-      </Route> */}
-      {/* <Route path={"/validar-pontos"}>
-        <ProtectedRoute>
-          <AppLayout>
-            <CommercialPointValidation />
-          </AppLayout>
-        </ProtectedRoute>
-      </Route> */}
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
