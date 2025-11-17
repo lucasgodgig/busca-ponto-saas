@@ -118,3 +118,16 @@
 - [ ] Testar fluxo completo cadastro → confirmação → login
 ### Status
 ✅ **Simplificação Completa**: Formulário de cadastro simples e elegante com design visual da LP (sem seções extras)
+
+---
+
+## 🔄 Sessão 11 - Corrigir Erro da Procedure commercialPoints.createRequest
+
+### Bug Reportado
+- [x] Corrigir erro "No procedure found on path 'commercialPoints.createRequest'" no formulário de indicação
+
+### Solução Implementada
+- [x] Adicionar import do `commercialPointsRouter` em `server/routers.ts`
+- [x] Registrar o router no `appRouter` com a chave `commercialPoints`
+- [x] Testar o formulário de indicação de ponto comercial
+- [x] Validar que a procedure está funcionando corretamente
