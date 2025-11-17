@@ -34,7 +34,6 @@ const UsageHistory = lazy(() => import("./pages/UsageHistory"));
 const Analytics = lazy(() => import("./pages/Analytics"));
 const CommercialPoints = lazy(() => import("./pages/CommercialPoints"));
 const CommercialPointDetails = lazy(() => import("./pages/CommercialPointDetails"));
-const EditCommercialPointRequest = lazy(() => import("./pages/EditCommercialPointRequest"));
 const RegistrationAnalytics = lazy(() => import("./pages/RegistrationAnalytics"));
 
 // Loading component
@@ -176,13 +175,7 @@ function Router() {
           </AppLayout>
         </ProtectedRoute>
       </Route>
-      <Route path={"/commercial-points/:id/edit"}>
-        <ProtectedRoute>
-          <AppLayout>
-            <EditCommercialPointRequest />
-          </AppLayout>
-        </ProtectedRoute>
-      </Route>
+
       <Route path={"/admin-bp/analise-registros"}>
         <ProtectedRoute>
           <AppLayout>
