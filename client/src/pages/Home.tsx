@@ -33,7 +33,7 @@ export default function Home() {
             <h1 className="text-xl font-bold text-gray-900">{APP_TITLE}</h1>
           </div>
           <a
-            href="https://www.buscaponto.com.br"
+            href="https://www.buscapontooficial.com.br"
             target="_blank"
             rel="noopener noreferrer"
             className="text-sm text-gray-600 hover:text-gray-900 transition-colors"

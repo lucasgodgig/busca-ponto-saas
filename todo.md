@@ -217,4 +217,10 @@
 ### Solução Implementada
 - [x] Atualizar validação em auth.me para excluir role 'admin_bp'
 - [x] Admins agora podem fazer login sem estar registrados como leads
-- [x] Usuários comuns continuam precisando da validação de leads00eancia
+- [x] Usuários comuns continuam precisando da validação de leads
+
+## 🔄 Sessão 17 - Corrigir Link do Botão Saiba Mais
+
+### Correção Realizada
+- [x] Atualizar link do botão "Saber mais" na página Home.tsx
+- [x] Link alterado de www.buscaponto.com.br para www.buscapontooficial.com.br00eancia
