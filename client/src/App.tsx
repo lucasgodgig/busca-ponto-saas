@@ -35,8 +35,9 @@ const Analytics = lazy(() => import("./pages/Analytics"));
 const CommercialPoints = lazy(() => import("./pages/CommercialPoints"));
 const CommercialPointDetails = lazy(() => import("./pages/CommercialPointDetails"));
 const RegistrationAnalytics = lazy(() => import("./pages/RegistrationAnalytics"));
-const AdminCommercialPointRequests = lazy(() => import("./pages/AdminCommercialPointRequests"));
-const CommercialPointValidation = lazy(() => import("./pages/CommercialPointValidation"));
+// const AdminCommercialPointRequests = lazy(() => import("./pages/AdminCommercialPointRequests"));
+// const CommercialPointValidation = lazy(() => import("./pages/CommercialPointValidation"));
+const AdminSolicitations = lazy(() => import("./pages/AdminSolicitations"));
 
 // Loading component
 const PageLoader = () => (
@@ -145,7 +146,7 @@ function Router() {
       <Route path={"/admin-bp/solicitacoes"}>
         <ProtectedRoute>
           <AppLayout>
-            <AdminStudyRequests />
+            <AdminSolicitations />
           </AppLayout>
         </ProtectedRoute>
       </Route>
@@ -184,20 +185,20 @@ function Router() {
           </AppLayout>
         </ProtectedRoute>
       </Route>
-      <Route path={"/admin-bp/solicitacoes-pontos"}>
+      {/* <Route path={"/admin-bp/solicitacoes-pontos"}>
         <ProtectedRoute>
           <AppLayout>
             <AdminCommercialPointRequests />
           </AppLayout>
         </ProtectedRoute>
-      </Route>
-      <Route path={"/validar-pontos"}>
+      </Route> */}
+      {/* <Route path={"/validar-pontos"}>
         <ProtectedRoute>
           <AppLayout>
             <CommercialPointValidation />
           </AppLayout>
         </ProtectedRoute>
-      </Route>
+      </Route> */}
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
