@@ -17,6 +17,7 @@ import { usageRouter } from "./routes/usage";
 import { analyticsRouter } from "./routes/analytics";
 import { registrationAnalyticsRouter } from "./routes/registrationAnalytics";
 import { commercialPointsRouter } from "./routes/commercialPoints";
+import { backupRouter } from "./routers/backup";
 import { sendEmail, generateLimitAlertEmail, generateLimitReachedEmail } from "./services/emailService";
 
 export const appRouter = router({
@@ -29,6 +30,7 @@ export const appRouter = router({
   analytics: analyticsRouter,
   registrationAnalytics: registrationAnalyticsRouter,
   commercialPoints: commercialPointsRouter,
+  backup: backupRouter,
 
   auth: router({
     me: publicProcedure.query(async ({ ctx }) => {
