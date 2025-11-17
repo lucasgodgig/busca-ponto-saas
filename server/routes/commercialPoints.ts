@@ -3,6 +3,9 @@ import { protectedProcedure, router } from "../_core/trpc";
 import { TRPCError } from "@trpc/server";
 import * as db from "../db";
 import { validateTenantAccess } from "../_core/tenantContext";
+import { getDb } from "../db";
+import { commercialPointRequests, commercialPoints, commercialPointPhotos } from "../../drizzle/schema";
+import { eq } from "drizzle-orm";
 
 export const commercialPointsRouter = router({
   createRequest: protectedProcedure
@@ -77,6 +80,10 @@ export const commercialPointsRouter = router({
       };
     }),
 
+  /**
+   * Criar ponto comercial + atualizar status da solicitação
+   * TRANSACAO: Ambas operações em uma única transação
+   */
   createPoint: protectedProcedure
     .input(z.object({
       requestId: z.number(),
@@ -104,32 +111,72 @@ export const commercialPointsRouter = router({
 
       await validateTenantAccess(ctx, input.tenantId);
 
-      const result = await db.createCommercialPoint({
-        requestId: input.requestId,
-        tenantId: input.tenantId,
-        address: input.address,
-        lat: input.lat,
-        lng: input.lng,
-        propertyType: input.propertyType,
-        totalAreaM2: input.totalAreaM2,
-        usableAreaM2: input.usableAreaM2,
-        rentalPrice: input.rentalPrice,
-        salePrice: input.salePrice,
-        ownerName: input.ownerName,
-        ownerPhone: input.ownerPhone,
-        brokerName: input.brokerName,
-        brokerPhone: input.brokerPhone,
-        brokerEmail: input.brokerEmail,
-        description: input.description,
-        amenitiesJson: input.amenitiesJson,
-      });
+      const drizzleDb = await getDb();
+      if (!drizzleDb) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Database não disponível",
+        });
+      }
 
-      // Atualizar status da solicitação para "encontrado"
-      await db.updateCommercialPointRequestStatus(input.requestId, "encontrado");
+      let pointId: number = 0;
 
-      return { success: true, pointId: (result as any).insertId };
+      try {
+        // TRANSACAO: Criar ponto + atualizar status em uma única transação
+        await drizzleDb.transaction(async (tx) => {
+          // 1. Criar ponto comercial
+          const result = await tx.insert(commercialPoints).values({
+            requestId: input.requestId,
+            tenantId: input.tenantId,
+            address: input.address,
+            lat: input.lat,
+            lng: input.lng,
+            propertyType: input.propertyType,
+            totalAreaM2: input.totalAreaM2,
+            usableAreaM2: input.usableAreaM2,
+            rentalPrice: input.rentalPrice,
+            salePrice: input.salePrice,
+            ownerName: input.ownerName,
+            ownerPhone: input.ownerPhone,
+            brokerName: input.brokerName,
+            brokerPhone: input.brokerPhone,
+            brokerEmail: input.brokerEmail,
+            description: input.description,
+            amenitiesJson: input.amenitiesJson,
+          });
+
+          pointId = Number((result as any).insertId);
+
+          // 2. Atualizar status da solicitação para "encontrado"
+          const updateResult = await tx
+            .update(commercialPointRequests)
+            .set({ status: "encontrado", updatedAt: new Date() })
+            .where(eq(commercialPointRequests.id, input.requestId));
+
+          // Validar que solicitação foi atualizada
+          if ((updateResult as any).rowsAffected === 0) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Solicitação não encontrada",
+            });
+          }
+        });
+      } catch (error) {
+        if (error instanceof TRPCError) throw error;
+        console.error("[commercialPoints.createPoint] Erro ao criar ponto:", error);
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Erro ao criar ponto comercial. Tente novamente.",
+        });
+      }
+
+      return { success: true, pointId };
     }),
 
+  /**
+   * Listar pontos com fotos
+   * MELHORADO: Usar Promise.allSettled para não falhar tudo se uma foto falhar
+   */
   getPoints: protectedProcedure
     .input(z.object({ requestId: z.number() }))
     .query(async ({ ctx, input }) => {
@@ -146,8 +193,9 @@ export const commercialPointsRouter = router({
 
       const points = await db.getCommercialPointsByRequestId(input.requestId);
       
-      // Buscar fotos para cada ponto
-      const pointsWithPhotos = await Promise.all(
+      // Buscar fotos para cada ponto usando Promise.allSettled
+      // Se uma foto falhar, as outras continuam sendo processadas
+      const photoResults = await Promise.allSettled(
         points.map(async (point) => {
           const photos = await db.getCommercialPointPhotos(point.id);
           return {
@@ -156,6 +204,21 @@ export const commercialPointsRouter = router({
           };
         })
       );
+
+      // Filtrar resultados bem-sucedidos e logar erros
+      const pointsWithPhotos = photoResults
+        .map((result, index) => {
+          if (result.status === "fulfilled") {
+            return result.value;
+          } else {
+            console.error(`[commercialPoints.getPoints] Erro ao buscar fotos do ponto ${points[index].id}:`, result.reason);
+            // Retornar ponto sem fotos em caso de erro
+            return {
+              ...points[index],
+              photos: [],
+            };
+          }
+        });
 
       return pointsWithPhotos;
     }),
@@ -209,4 +272,3 @@ export const commercialPointsRouter = router({
       return { success: true, photoId: (result as any).insertId };
     }),
 });
-

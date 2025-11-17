@@ -224,3 +224,56 @@
 ### Correção Realizada
 - [x] Atualizar link do botão "Saber mais" na página Home.tsx
 - [x] Link alterado de www.buscaponto.com.br para www.buscapontooficial.com.br00eancia
+
+---
+
+## 🔄 Sessão 18 - Corrigir Problemas de Auditoria de Segurança
+
+### Fase 1: Transações em Operações Multi-Passo
+- [x] Implementar transações em `studyRequests.create`
+- [x] Implementar transações em `commercialPoints.createPoint`
+- [x] Implementar transações em upload + atualização de BD
+- [x] Criar tabela `processed_webhooks` para idempotência
+
+### Fase 2: Idempotência em Webhooks Stripe
+- [x] Adicionar verificação de evento duplicado
+- [x] Armazenar eventos processados em `processed_webhooks`
+- [x] Implementar verificação antes de processar
+
+### Fase 3: Handlers de Eventos Stripe
+- [x] Implementar `handlePaymentIntentSucceeded`
+- [x] Implementar `handlePaymentIntentFailed`
+- [x] Implementar `handleChargeRefunded`
+- [x] Implementar `handleSubscriptionCreated`
+- [x] Implementar `handleSubscriptionUpdated`
+- [x] Implementar `handleSubscriptionDeleted`
+
+### Fase 4: Validação de Existência em Updates
+- [x] Adicionar verificação de resultado em updates
+- [x] Lançar erro se nenhum registro foi afetado
+- [x] Aplicar em `studyRequests.update`
+- [x] Aplicar em `studyRequests.uploadPdf`
+- [x] Aplicar em `commercialPoints.createPoint`
+- [x] Aplicar em `updateCommercialPointRequestStatus`
+- [x] Aplicar em `notifications.markAsRead`
+
+### Fase 5: Melhorar Promise.all
+- [x] Usar `Promise.allSettled()` em `commercialPoints.getPoints`
+- [ ] Usar `Promise.allSettled()` em `admin.ts` (se necessário)
+- [x] Implementar tratamento de erro individual
+
+### Fase 6: Audit Trail
+- [x] Tabela `auditLogs` já existe no schema
+- [ ] Integrar audit logs nas operações críticas
+- [ ] Registrar quem fez a operação e quando
+
+### Fase 7: Testes
+- [ ] Testar transações com falhas simuladas
+- [ ] Testar idempotência de webhooks
+- [ ] Testar validação de existência
+- [ ] Testar Promise.allSettled
+
+### Fase 8: Finalização
+- [x] Documentar fluxo de transações
+- [x] Revisar todos os DELETE statements (soft delete implementado)
+- [x] Criar checkpoint
