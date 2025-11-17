@@ -277,3 +277,41 @@
 - [x] Documentar fluxo de transações
 - [x] Revisar todos os DELETE statements (soft delete implementado)
 - [x] Criar checkpoint
+
+
+## 🔄 Sessão 19 - Implementar Sistema de Versionamento
+
+### Sistema de Versão Automático
+- [x] Criar arquivo de versão (version.ts) com hash do commit
+- [x] Implementar componente Footer com exibição de versão
+- [x] Testar exibição de versão no rodapé
+- [x] Validar rollback automático de versão
+- [x] Criar script de geração automática de versão (generate-version.mjs)
+- [x] Integrar script nos comandos npm (dev, build)
+- [x] Documentar sistema de versionamento
+
+
+### Documentação do Sistema de Versionamento
+
+O sistema de versionamento automático foi implementado para rastrear mudanças, rollbacks e correções:
+
+**Arquivos criados:**
+- `shared/version.ts` - Arquivo de versão gerado automaticamente
+- `scripts/generate-version.mjs` - Script que gera a versão baseada no commit hash
+- `client/src/components/Footer.tsx` - Componente Footer atualizado com versão
+- `client/src/pages/Home.tsx` - Página Home atualizada com versão
+
+**Como funciona:**
+1. O script `generate-version.mjs` extrai o hash do commit (8 primeiros caracteres)
+2. Gera um timestamp ISO 8601 da build
+3. Cria o arquivo `shared/version.ts` com essas informações
+4. O Footer exibe a versão em formato: `v1.0.0 (hash) - data`
+
+**Scripts disponíveis:**
+- `npm run generate-version` - Gera versão manualmente
+- `npm run dev` - Gera versão antes de iniciar servidor de desenvolvimento
+- `npm run build` - Gera versão antes de fazer build para produção
+- `npm run version:info` - Exibe informações de versão atual
+
+**Rastreamento de Rollbacks:**
+Quando um rollback automático ocorre, o hash do commit muda, e a versão exibida no rodapé será atualizada automaticamente na próxima build/dev, permitindo identificar qual versão está rodando.

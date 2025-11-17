@@ -1,9 +1,11 @@
+import { getVersionString } from "@shared/version";
+
 /**
  * Componente de rodapé profissional para todas as páginas
- * Exibe informações da empresa, versão e contato
+ * Exibe informações da empresa, versão com hash do commit e contato
  */
 export default function Footer() {
-  const APP_VERSION = "1.0.0";
+  const versionString = getVersionString();
   const currentYear = new Date().getFullYear();
   
   return (
@@ -30,9 +32,10 @@ export default function Footer() {
             </a>
           </div>
 
-          {/* Versão */}
-          <div className="text-xs">
-            <span className="font-medium">Versão {APP_VERSION}</span>
+          {/* Versão com Hash do Commit */}
+          <div className="text-xs font-mono">
+            <span className="font-medium">{versionString}</span>
+            <p className="text-xs opacity-75 mt-1">Sistema de rastreamento automático</p>
           </div>
         </div>
 

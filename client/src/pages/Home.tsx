@@ -6,6 +6,7 @@ import { getLoginUrl } from "@/const";
 import { APP_LOGO, APP_TITLE } from "@/const";
 import { useLocation } from "wouter";
 import { ArrowRight, MapPin, BarChart3, Zap } from "lucide-react";
+import { getVersionString } from "@shared/version";
 
 export default function Home() {
   const { user, loading } = useAuth();
@@ -155,8 +156,14 @@ export default function Home() {
 
       {/* Footer */}
       <div className="border-t border-slate-200/50 bg-white/50 backdrop-blur-sm mt-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center text-xs text-gray-600">
-          <p>© 2025 {APP_TITLE}. Todos os direitos reservados.</p>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-gray-600">
+            <p>© 2025 {APP_TITLE}. Todos os direitos reservados.</p>
+            <div className="text-right font-mono text-xs">
+              <p>{getVersionString()}</p>
+              <p className="opacity-75">Sistema de rastreamento automático</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
