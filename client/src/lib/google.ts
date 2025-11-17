@@ -1,24 +1,17 @@
 // Cache da API key
 let cachedApiKey: string | null = null;
 
-// Buscar API key do servidor
+// Buscar API key das variáveis disponíveis no cliente
 async function fetchApiKey(): Promise<string> {
   if (cachedApiKey) {
     return cachedApiKey;
   }
 
-  try {
-    const response = await fetch("/api/config");
-    if (!response.ok) {
-      throw new Error("Failed to fetch API config");
-    }
-    const data = await response.json();
-    cachedApiKey = (data.googleMapsApiKey as string) || "";
-    return cachedApiKey;
-  } catch (error) {
-    console.error("[Google Maps] Erro ao buscar API key:", error);
-    return "";
+  cachedApiKey = getApiKeySync();
+  if (!cachedApiKey) {
+    console.error("[Google Maps] API key is missing. Configure VITE_GOOGLE_MAPS_API_KEY ou GOOGLE_PLACES_API_KEY.");
   }
+  return cachedApiKey;
 }
 
 // Tentar múltiplas fontes para API key
@@ -47,9 +40,8 @@ export async function loadGoogleMapsScript(): Promise<typeof window.google> {
       // Tentar API key síncrona primeiro
       let apiKey = getApiKeySync();
 
-      // Se não encontrar, buscar do servidor
+      // Se não encontrar, tenta novamente via resolução assíncrona (window global)
       if (!apiKey) {
-        console.log("[Google Maps] API key não encontrada em variáveis de ambiente, buscando do servidor...");
         apiKey = await fetchApiKey();
       }
 

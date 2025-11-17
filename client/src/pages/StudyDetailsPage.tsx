@@ -64,7 +64,7 @@ export default function StudyDetailsPage() {
     return (
       <div className="min-h-screen p-4 bg-gray-50">
         <div className="max-w-4xl mx-auto">
-          <Button variant="ghost" onClick={() => setLocation("/studies")} className="mb-4">
+          <Button variant="ghost" onClick={() => setLocation("/estudos")} className="mb-4">
             <ArrowLeft className="w-4 h-4 mr-2" />
             Voltar
           </Button>
@@ -81,7 +81,7 @@ export default function StudyDetailsPage() {
   return (
     <div className="min-h-screen p-4 bg-gray-50">
       <div className="max-w-4xl mx-auto">
-        <Button variant="ghost" onClick={() => setLocation("/studies")} className="mb-4">
+        <Button variant="ghost" onClick={() => setLocation("/estudos")} className="mb-4">
           <ArrowLeft className="w-4 h-4 mr-2" />
           Voltar
         </Button>

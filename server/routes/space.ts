@@ -1,37 +1,202 @@
+import { TRPCError } from '@trpc/server';
 import { Request, Response } from 'express';
+import { z } from 'zod';
+import { ENV } from '../_core/env';
+import { validateSpaceApiRateLimit } from '../_core/securityMiddleware';
+import { sdk } from '../_core/sdk';
 
-// Fallback para credenciais da API Space
-// Prioridade: 1) Variáveis de ambiente, 2) Valores hardcoded
-const BASE = process.env.SPACE_API_BASE_URL?.trim() || 'https://gs.greatspaces.com.br/api/';
-const KEY = process.env.SPACE_API_KEY?.trim() || 'ICZN3OS030JVXKFPMWOHWYGWD6JVW7';
-const MAXR = Number(process.env.SPACE_MAX_RADIUS ?? 5000);
+const SPACE_BASE_URL = ENV.spaceApiBaseUrl;
+const SPACE_API_KEY = ENV.spaceApiKey;
+const MAXR = Number.isFinite(ENV.spaceMaxRadius) ? ENV.spaceMaxRadius : 5000;
+const MAX_POLYGON_VERTICES = 50;
+const MAX_POLYGON_SPAN_DEGREES = 1; // ~111km
 
-// Validar formato da URL base
-if (BASE) {
+if (!SPACE_BASE_URL) {
+  throw new Error('[Space API] SPACE_API_BASE_URL must be configured');
+}
+
+if (!SPACE_API_KEY) {
+  throw new Error('[Space API] SPACE_API_KEY must be configured');
+}
+
+try {
+  new URL(SPACE_BASE_URL);
+} catch (e) {
+  throw new Error('[Space API] SPACE_API_BASE_URL has an invalid format');
+}
+
+const baseQuerySchema = z.object({
+  lat: z.coerce.number().min(-90).max(90),
+  lng: z.coerce.number().min(-180).max(180),
+  radius: z.coerce.number().min(1).max(MAXR),
+});
+
+const polygonSchema = z
+  .object({
+    polygon: z
+      .array(
+        z.object({
+          lat: z.coerce.number().min(-90).max(90),
+          lng: z.coerce.number().min(-180).max(180),
+        })
+      )
+      .min(3)
+      .max(MAX_POLYGON_VERTICES),
+  })
+  .superRefine((value, ctx) => {
+    const lats = value.polygon.map((p) => p.lat);
+    const lngs = value.polygon.map((p) => p.lng);
+    const latSpan = Math.max(...lats) - Math.min(...lats);
+    const lngSpan = Math.max(...lngs) - Math.min(...lngs);
+    if (latSpan > MAX_POLYGON_SPAN_DEGREES || lngSpan > MAX_POLYGON_SPAN_DEGREES) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `Polígono deve ter extensão máxima de ${MAX_POLYGON_SPAN_DEGREES}° por eixo`,
+      });
+    }
+  });
+
+const NUMERIC_FIELDS: ReadonlyArray<string> = [
+  'people',
+  'population',
+  'habitantes',
+  'pop_total',
+  'income',
+  'renda',
+  'avg_income',
+  'renda_per_capita',
+  'consumer',
+  'cons_a_total',
+  'consumo_total',
+  'cons_b_current',
+  'consumo_corrente',
+  'cons_c_expenditure',
+  'despesas',
+  'class_a1',
+  'class_a2',
+  'class_b1',
+  'class_b2',
+  'class_c',
+  'class_d',
+  'class_e',
+  'cons_1_food',
+  'cons_2_housing',
+  'cons_3_clothing',
+  'cons_4_transport',
+  'cons_5_hygiene_care',
+  'cons_6_health',
+  'cons_7_education',
+  'cons_8_recreation',
+  'cons_9_tobacco',
+  'cons_10_personal_services',
+  'cons_12_others',
+  'cons_13_asset_increase',
+  'cons_14_liability_reduction',
+];
+
+type PolygonPoint = { lat: number; lng: number };
+
+async function authenticateAndRateLimit(req: Request, res: Response) {
   try {
-    new URL(BASE);
-  } catch (e) {
-    console.error('[SPACE API] SPACE_API_BASE_URL tem formato inválido:', BASE);
+    const user = await sdk.authenticateRequest(req);
+    try {
+      await validateSpaceApiRateLimit(user.id, req.ip);
+    } catch (error) {
+      if (error instanceof TRPCError && error.code === 'TOO_MANY_REQUESTS') {
+        res.status(429).json({ error: 'RATE_LIMITED', message: error.message });
+        return null;
+      }
+      console.error('[Space API] Rate-limit validation failed', {
+        userId: user.id,
+        message: (error as Error)?.message,
+      });
+      res.status(500).json({ error: 'UNEXPECTED' });
+      return null;
+    }
+    return user;
+  } catch (error: any) {
+    console.warn('[Space API] Unauthorized request blocked', {
+      ip: req.ip,
+      reason: error?.message,
+    });
+    res.status(401).json({ error: 'UNAUTHORIZED' });
+    return null;
   }
 }
 
-// Validar variáveis de ambiente críticas
-console.log('[SPACE API] Inicializando...');
-console.log('[SPACE API] NODE_ENV:', process.env.NODE_ENV);
-
-const usingEnvBase = !!process.env.SPACE_API_BASE_URL;
-const usingEnvKey = !!process.env.SPACE_API_KEY;
-
-console.log('[SPACE API] SPACE_API_BASE_URL:', usingEnvBase ? `✅ Env (${BASE.substring(0, 30)}...)` : `⚠️ Fallback (${BASE.substring(0, 30)}...)`);
-console.log('[SPACE API] SPACE_API_KEY:', usingEnvKey ? `✅ Env (${KEY.substring(0, 10)}...)` : `⚠️ Fallback (${KEY.substring(0, 10)}...)`);
-console.log('[SPACE API] SPACE_MAX_RADIUS:', MAXR);
-
-if (!usingEnvBase || !usingEnvKey) {
-  console.warn('[SPACE API] ⚠️ Usando valores fallback hardcoded');
-  console.warn('[SPACE API] Para usar variáveis customizadas, configure em Settings → Secrets');
+function extractLatLng(candidate: any): PolygonPoint | null {
+  const lat = Number(candidate?.lat ?? candidate?.latitude ?? candidate?.Lat);
+  const lng = Number(candidate?.lng ?? candidate?.longitude ?? candidate?.Lng);
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+    if (
+      candidate?.geometry?.type === 'Point' &&
+      Array.isArray(candidate?.geometry?.coordinates) &&
+      candidate.geometry.coordinates.length >= 2
+    ) {
+      const [coordLng, coordLat] = candidate.geometry.coordinates;
+      if (Number.isFinite(coordLat) && Number.isFinite(coordLng)) {
+        return { lat: coordLat, lng: coordLng };
+      }
+    }
+    return null;
+  }
+  return { lat, lng };
 }
 
-console.log('[SPACE API] ✅ Pronto para uso');
+function aggregatePolygonPayload(raw: any, polygon: PolygonPoint[]) {
+  const pointsSource = Array.isArray(raw?.points)
+    ? raw.points
+    : Array.isArray(raw?.data)
+    ? raw.data
+    : [];
+
+  if (!Array.isArray(pointsSource) || pointsSource.length === 0) {
+    return null;
+  }
+
+  const filtered = pointsSource.filter((point: any) => {
+    const coords = extractLatLng(point);
+    return coords ? isPointInPolygon(coords, polygon) : false;
+  });
+
+  const filteredCount = filtered.length;
+  const totalCount = pointsSource.length;
+
+  if (filteredCount === 0) {
+    const zeroed = Object.fromEntries(NUMERIC_FIELDS.map((field) => [field, 0]));
+    return { ...zeroed, points: [] };
+  }
+
+  const aggregated: Record<string, number> = {};
+  for (const field of NUMERIC_FIELDS) {
+    aggregated[field] = 0;
+  }
+
+  for (const point of filtered) {
+    for (const field of NUMERIC_FIELDS) {
+      const value = Number(point?.[field]);
+      if (Number.isFinite(value)) {
+        aggregated[field] += value;
+      }
+    }
+  }
+
+  const scalingRatio = totalCount > 0 ? filteredCount / totalCount : 1;
+  const scaled: Record<string, number> = {};
+  for (const field of NUMERIC_FIELDS) {
+    const originalValue = Number(raw?.[field]);
+    if (Number.isFinite(originalValue)) {
+      scaled[field] = originalValue * scalingRatio;
+    }
+  }
+
+  return {
+    ...raw,
+    ...scaled,
+    ...aggregated,
+    points: filtered,
+  };
+}
 
 function num(v: any, d = 0) {
   const n = Number(v);
@@ -113,89 +278,84 @@ function normalize(raw: any) {
 
 // Rota de debug para inspecionar retorno real da Space API
 export async function handleSpaceDebug(req: Request, res: Response) {
+  const user = await authenticateAndRateLimit(req, res);
+  if (!user) return;
+
+  const parsed = baseQuerySchema.safeParse(req.query);
+  if (!parsed.success) {
+    return res.status(400).json({
+      error: 'INVALID_PARAMS',
+      issues: parsed.error.issues,
+    });
+  }
+
   try {
-    const lat = num(req.query.lat);
-    const lng = num(req.query.lng);
-    const radius = Math.min(num(req.query.radius, 0), MAXR);
-
-    if (!Number.isFinite(lat) || !Number.isFinite(lng) || radius <= 0) {
-      return res.status(400).json({
-        error: 'INVALID_PARAMS',
-        lat,
-        lng,
-        radius,
-      });
-    }
-
-    // Construir URL com encoding adequado
+    const { lat, lng, radius } = parsed.data;
     const params = new URLSearchParams({
       lat: String(lat),
       lng: String(lng),
       radius: String(radius),
-      key: KEY!,
+      key: SPACE_API_KEY,
     });
-    const url = `${BASE}?${params.toString()}`;
-    const r = await fetch(url, { cache: 'no-store' });
-    const raw = await r.json().catch(() => null);
+    const url = `${SPACE_BASE_URL}?${params.toString()}`;
+    const response = await fetch(url, { cache: 'no-store' });
+    const raw = await response.json().catch(() => null);
     const keys = raw ? Object.keys(raw).slice(0, 50) : [];
-    const sample = Object.fromEntries(
-      keys.map((k) => [k, raw?.[k]])
-    );
-
+    const sample = Object.fromEntries(keys.map((k) => [k, raw?.[k]]));
     return res.json({
-      ok: r.ok,
-      status: r.status,
-      forwarded: url.replace(KEY, '***'),
+      ok: response.ok,
+      status: response.status,
       keys,
       sample,
     });
-  } catch (e: any) {
-    console.error('[Space Debug Error]', e?.message);
-    return res.status(500).json({
-      error: 'UNEXPECTED',
-      message: e?.message,
+  } catch (error: any) {
+    console.error('[Space Debug Error]', {
+      userId: user.id,
+      message: error?.message,
     });
+    return res.status(500).json({ error: 'UNEXPECTED' });
   }
 }
 
 export async function handleSpaceQuery(req: Request, res: Response) {
+  const user = await authenticateAndRateLimit(req, res);
+  if (!user) return;
+
+  const parsed = baseQuerySchema.safeParse(req.query);
+  if (!parsed.success) {
+    return res.status(400).json({
+      error: 'INVALID_PARAMS',
+      issues: parsed.error.issues,
+    });
+  }
+
   try {
-    // BASE e KEY agora sempre existem (env ou fallback), então não precisa verificar
-
-    const lat = num(req.query.lat);
-    const lng = num(req.query.lng);
-    const radius = Math.min(num(req.query.radius, 0), MAXR);
-
-    if (!Number.isFinite(lat) || !Number.isFinite(lng) || radius <= 0) {
-      return res.status(400).json({
-        error: 'INVALID_PARAMS',
-        received: { lat, lng, radius },
-      });
-    }
-
-    // Construir URL com encoding adequado
+    const { lat, lng, radius } = parsed.data;
     const params = new URLSearchParams({
       lat: String(lat),
       lng: String(lng),
       radius: String(radius),
-      key: KEY!,
+      key: SPACE_API_KEY,
     });
-    const url = `${BASE}?${params.toString()}`;
-    const r = await fetch(url, { cache: 'no-store' });
-    if (!r.ok) {
-      const text = await r.text().catch(() => '');
-      console.error('[SPACE_ERROR]', { lat, lng, radius, status: r.status, text: text.slice(0, 200) });
-      return res.status(502).json({ error: 'SPACE_DOWN', status: r.status });
+    const url = `${SPACE_BASE_URL}?${params.toString()}`;
+    const response = await fetch(url, { cache: 'no-store' });
+    if (!response.ok) {
+      console.error('[Space API] Upstream failure', {
+        userId: user.id,
+        status: response.status,
+      });
+      return res.status(502).json({ error: 'SPACE_DOWN', status: response.status });
     }
 
-    const raw = await r.json();
+    const raw = await response.json();
     const data = normalize(raw);
     return res.json({ ok: true, data });
-  } catch (e: any) {
-    console.error('[Space API Error]', e?.message);
-    return res
-      .status(500)
-      .json({ error: 'UNEXPECTED', message: e?.message });
+  } catch (error: any) {
+    console.error('[Space API] Unexpected error', {
+      userId: user.id,
+      message: error?.message,
+    });
+    return res.status(500).json({ error: 'UNEXPECTED' });
   }
 }
 
@@ -248,83 +408,70 @@ function getDistance(lat1: number, lng1: number, lat2: number, lng2: number): nu
 
 // Nova rota: análise de polígono
 export async function handleSpacePolygonQuery(req: Request, res: Response) {
+  const user = await authenticateAndRateLimit(req, res);
+  if (!user) return;
+
+  const parsed = polygonSchema.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({
+      error: 'INVALID_POLYGON',
+      issues: parsed.error.issues,
+    });
+  }
+
+  const { polygon } = parsed.data;
+  const bbox = getBoundingBox(polygon);
+  const centerLat = (bbox.minLat + bbox.maxLat) / 2;
+  const centerLng = (bbox.minLng + bbox.maxLng) / 2;
+
+  let maxRadius = 0;
+  for (const point of polygon) {
+    const dist = getDistance(centerLat, centerLng, point.lat, point.lng);
+    if (dist > maxRadius) maxRadius = dist;
+  }
+
+  const queryRadius = Math.max(1, Math.min(Math.ceil(maxRadius * 1.2), MAXR));
+
   try {
-    const { polygon } = req.body;
-    
-    // Validar polígono
-    if (!Array.isArray(polygon) || polygon.length < 3) {
-      return res.status(400).json({
-        error: 'INVALID_POLYGON',
-        message: 'Polígono deve ter pelo menos 3 vértices',
-      });
-    }
-    
-    // Validar coordenadas
-    for (const point of polygon) {
-      if (!Number.isFinite(point.lat) || !Number.isFinite(point.lng)) {
-        return res.status(400).json({
-          error: 'INVALID_COORDINATES',
-          message: 'Todas as coordenadas devem ser números válidos',
-        });
-      }
-    }
-    
-    // Calcular bounding box
-    const bbox = getBoundingBox(polygon);
-    const centerLat = (bbox.minLat + bbox.maxLat) / 2;
-    const centerLng = (bbox.minLng + bbox.maxLng) / 2;
-    
-    // Calcular raio que cobre todo o polígono (distância do centro ao ponto mais distante)
-    let maxRadius = 0;
-    for (const point of polygon) {
-      const dist = getDistance(centerLat, centerLng, point.lat, point.lng);
-      if (dist > maxRadius) maxRadius = dist;
-    }
-    
-    // Adicionar margem de segurança (20%)
-    const queryRadius = Math.min(Math.ceil(maxRadius * 1.2), MAXR);
-    
-    console.log('[SPACE POLYGON] Bounding box:', bbox);
-    console.log('[SPACE POLYGON] Center:', { lat: centerLat, lng: centerLng });
-    console.log('[SPACE POLYGON] Query radius:', queryRadius);
-    
-    // Fazer consulta na Space API usando o centro e raio expandido
     const params = new URLSearchParams({
       lat: String(centerLat),
       lng: String(centerLng),
       radius: String(queryRadius),
-      key: KEY!,
+      key: SPACE_API_KEY,
     });
-    const url = `${BASE}?${params.toString()}`;
-    const r = await fetch(url, { cache: 'no-store' });
-    
-    if (!r.ok) {
-      const text = await r.text().catch(() => '');
-      console.error('[SPACE_POLYGON_ERROR]', { status: r.status, text: text.slice(0, 200) });
-      return res.status(502).json({ error: 'SPACE_DOWN', status: r.status });
+    const url = `${SPACE_BASE_URL}?${params.toString()}`;
+    const response = await fetch(url, { cache: 'no-store' });
+
+    if (!response.ok) {
+      console.error('[Space Polygon] Upstream failure', {
+        userId: user.id,
+        status: response.status,
+      });
+      return res.status(502).json({ error: 'SPACE_DOWN', status: response.status });
     }
-    
-    const raw = await r.json();
-    
-    // Por enquanto, retornar dados normalizados
-    // TODO: Se a API retornar pontos individuais, filtrar apenas os que estão dentro do polígono
-    const data = normalize(raw);
-    
-    return res.json({ 
-      ok: true, 
+
+    const raw = await response.json();
+    const polygonScopedRaw = aggregatePolygonPayload(raw, polygon) ?? raw;
+    const data = normalize(polygonScopedRaw);
+
+    return res.json({
+      ok: true,
       data,
       meta: {
-        polygon: polygon.length + ' vértices',
+        polygonVertices: polygon.length,
         boundingBox: bbox,
         queryRadius,
-        method: 'center_with_expanded_radius'
-      }
+        filteredPoints: Array.isArray(polygonScopedRaw?.points)
+          ? polygonScopedRaw.points.length
+          : undefined,
+      },
     });
-  } catch (e: any) {
-    console.error('[Space Polygon API Error]', e?.message);
-    return res
-      .status(500)
-      .json({ error: 'UNEXPECTED', message: e?.message });
+  } catch (error: any) {
+    console.error('[Space Polygon] Unexpected error', {
+      userId: user.id,
+      message: error?.message,
+    });
+    return res.status(500).json({ error: 'UNEXPECTED' });
   }
 }
 

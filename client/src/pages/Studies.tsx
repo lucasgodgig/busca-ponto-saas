@@ -130,7 +130,7 @@ export default function Studies() {
                 <Download className="w-4 h-4 mr-2" />
                 CSV
               </Button>
-              <Button onClick={() => setLocation("/studies/new")}>
+              <Button onClick={() => setLocation("/estudos/novo")}>
                 <Plus className="w-4 h-4 mr-2" />
                 Novo Estudo
               </Button>
@@ -209,7 +209,7 @@ export default function Studies() {
               <p className="text-sm text-muted-foreground mb-4">
                 {hasActiveFilters ? "Tente ajustar os filtros" : "Crie seu primeiro estudo de mercado"}
               </p>
-              <Button onClick={() => setLocation("/studies/new")}>
+              <Button onClick={() => setLocation("/estudos/novo")}>
                 <Plus className="w-4 h-4 mr-2" />
                 Novo Estudo
               </Button>
@@ -221,7 +221,7 @@ export default function Studies() {
               <Card
                 key={item.study.id}
                 className="cursor-pointer hover:shadow-md transition-shadow"
-                onClick={() => setLocation(`/studies/${item.study.id}`)}
+                onClick={() => setLocation(`/estudos/${item.study.id}`)}
               >
                 <CardHeader>
                   <div className="flex items-start justify-between">

@@ -1,5 +1,7 @@
 import { WebSocketServer, WebSocket } from "ws";
-import { Server } from "http";
+import { Server, type IncomingMessage } from "http";
+import type { Request } from "express";
+import { sdk } from "./sdk";
 
 interface NotificationPayload {
   type: "study_created" | "study_status_changed" | "study_updated";
@@ -24,92 +26,119 @@ class NotificationManager {
 
   private setupWebSocketServer() {
     this.wss.on("connection", (ws: WebSocket, req) => {
-      console.log("[WebSocket] Nova conexão recebida");
+      this.handleConnection(ws, req).catch((error) => {
+        console.error("[WebSocket] Erro na conexão:", error);
+        try {
+          ws.close(1011, "Internal error");
+        } catch (closeError) {
+          console.error("[WebSocket] Falha ao fechar conexão com erro:", closeError);
+        }
+      });
+    });
+  }
 
-      let userId: number | null = null;
-      let isAdmin = false;
-      let clientId: string = "";
+  private async authenticateClient(req: IncomingMessage) {
+    const fakeRequest = { headers: req.headers } as Request;
+    return sdk.authenticateRequest(fakeRequest);
+  }
 
-      // Enviar mensagem pedindo autenticação
+  private async handleConnection(ws: WebSocket, req: IncomingMessage) {
+    console.log("[WebSocket] Nova conexão recebida");
+
+    let clientId = "";
+    let registered = false;
+    const authTimeoutMs = 5000;
+    const user = await this.authenticateClient(req).catch((error) => {
+      console.warn("[WebSocket] Autenticação falhou durante handshake:", error);
+      ws.close(1008, "Authentication failed");
+      return null;
+    });
+
+    if (!user) {
+      return;
+    }
+
+    const authenticatedUserId = user.id;
+    const authenticatedIsAdmin = user.role === "admin_bp";
+
+    ws.send(
+      JSON.stringify({
+        type: "auth_required",
+        message: "Por favor, confirme a autenticação",
+        timestamp: new Date(),
+      })
+    );
+
+    const registerClient = () => {
+      if (registered) {
+        return;
+      }
+
+      clientId = `${authenticatedUserId}-${Date.now()}`;
+      const clientConnection: ClientConnection = {
+        ws,
+        userId: authenticatedUserId,
+        isAdmin: authenticatedIsAdmin,
+      };
+
+      this.clients.set(clientId, clientConnection);
+      registered = true;
+      console.log(
+        `[WebSocket] Cliente autenticado: ${clientId} (Admin: ${authenticatedIsAdmin})`
+      );
+
       ws.send(
         JSON.stringify({
-          type: "auth_required",
-          message: "Por favor, envie dados de autenticação",
+          type: "auth_success",
+          message: "Autenticado com sucesso",
           timestamp: new Date(),
         })
       );
+    };
 
-      // Lidar com mensagens do cliente
-      ws.on("message", (data: string) => {
-        try {
-          const message = JSON.parse(data);
-          
-          // Primeira mensagem deve ser autenticação
-          if (message.type === "auth" && !userId) {
-            userId = message.userId;
-            isAdmin = message.isAdmin || false;
-            const newClientId = `${userId}-${Date.now()}`;
-            clientId = newClientId;
-            
-            const clientConnection: ClientConnection = {
-              ws,
-              userId: userId as number,
-              isAdmin,
-            };
-            
-            this.clients.set(clientId, clientConnection);
-            console.log(`[WebSocket] Cliente autenticado: ${clientId} (Admin: ${isAdmin})`);
-            
-            // Confirmar autenticação
-            ws.send(
-              JSON.stringify({
-                type: "auth_success",
-                message: "Autenticado com sucesso",
-                timestamp: new Date(),
-              })
-            );
-            return;
-          }
-          
-          if (!userId) {
-            console.log("[WebSocket] Mensagem rejeitada: cliente não autenticado");
-            return;
-          }
-          
-          console.log(`[WebSocket] Mensagem recebida de ${clientId}:`, message);
+    const authTimeout = setTimeout(() => {
+      if (!registered) {
+        console.log("[WebSocket] Conexão fechada: timeout de autenticação");
+        ws.close(1008, "Authentication timeout");
+      }
+    }, authTimeoutMs);
 
-          // Responder com pong se receber ping
-          if (message.type === "ping") {
-            ws.send(JSON.stringify({ type: "pong", timestamp: new Date() }));
-          }
-        } catch (error) {
-          console.error("[WebSocket] Erro ao processar mensagem:", error);
+    ws.on("message", (data: string) => {
+      try {
+        const message = JSON.parse(data);
+
+        if (message.type === "auth" && !registered) {
+          // Ignora dados enviados pelo cliente e usa o usuário autenticado no servidor
+          registerClient();
+          clearTimeout(authTimeout);
+          return;
         }
-      });
 
-      // Lidar com desconexão
-      ws.on("close", () => {
-        if (clientId) {
-          this.clients.delete(clientId);
-          console.log(`[WebSocket] Cliente desconectado: ${clientId}`);
+        if (!registered) {
+          console.log("[WebSocket] Mensagem rejeitada: cliente não autenticado");
+          return;
         }
-      });
 
-      // Lidar com erros
-      ws.on("error", (error) => {
-        console.error(`[WebSocket] Erro no cliente ${clientId || 'desconhecido'}:`, error);
-      });
-      
-      // Timeout de autenticação (5 segundos)
-      const authTimeout = setTimeout(() => {
-        if (!userId) {
-          console.log("[WebSocket] Conexão fechada: timeout de autenticação");
-          ws.close(1008, "Authentication timeout");
+        console.log(`[WebSocket] Mensagem recebida de ${clientId}:`, message);
+
+        if (message.type === "ping") {
+          ws.send(JSON.stringify({ type: "pong", timestamp: new Date() }));
         }
-      }, 5000);
-      
-      // Guardar timeout para limpeza
-      (ws as any).authTimeout = authTimeout;
+      } catch (error) {
+        console.error("[WebSocket] Erro ao processar mensagem:", error);
+      }
+    });
+
+    ws.on("close", () => {
+      clearTimeout(authTimeout);
+      if (clientId) {
+        this.clients.delete(clientId);
+        console.log(`[WebSocket] Cliente desconectado: ${clientId}`);
+      }
+    });
+
+    ws.on("error", (error) => {
+      console.error(`[WebSocket] Erro no cliente ${clientId || "desconhecido"}:`, error);
     });
   }
 

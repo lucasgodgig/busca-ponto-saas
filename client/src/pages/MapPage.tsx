@@ -132,7 +132,7 @@ export default function Dashboard() {
               variant="outline"
               size="sm"
               className="text-xs md:text-sm px-3 md:px-4 h-9 md:h-10"
-              onClick={() => setLocation("/studies")}
+              onClick={() => setLocation("/estudos")}
             >
               <FileText className="w-4 h-4 md:w-5 md:h-5 mr-1 md:mr-2 flex-shrink-0" />
               <span className="hidden sm:inline">Estudos</span>

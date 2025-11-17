@@ -1,9 +1,52 @@
-import { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
+import {
+  COOKIE_NAME,
+  ONE_YEAR_MS,
+  OAUTH_STATE_COOKIE_NAME,
+  OAUTH_STATE_MAX_AGE_MS,
+} from "@shared/const";
 import type { Express, Request, Response } from "express";
+import { parse as parseCookieHeader } from "cookie";
 import * as db from "../db";
-import { getSessionCookieOptions } from "./cookies";
+import { getSessionCookieOptions, isSecureRequest } from "./cookies";
 import { sdk } from "./sdk";
 import { ENV } from "./env";
+
+type OAuthStatePayload = {
+  redirectUri: string;
+  nonce: string;
+  issuedAt: number;
+};
+
+const getCookieValue = (req: Request, key: string): string | undefined => {
+  if (req.cookies && typeof req.cookies[key] === "string") {
+    return req.cookies[key] as string;
+  }
+
+  const header = req.headers.cookie;
+  if (!header) return undefined;
+
+  return parseCookieHeader(header)[key];
+};
+
+const decodeState = (rawState: string): OAuthStatePayload | null => {
+  try {
+    const decoded = Buffer.from(rawState, "base64").toString("utf-8");
+    const payload = JSON.parse(decoded) as Partial<OAuthStatePayload>;
+
+    if (
+      typeof payload.redirectUri !== "string" ||
+      typeof payload.nonce !== "string" ||
+      typeof payload.issuedAt !== "number"
+    ) {
+      return null;
+    }
+
+    return payload as OAuthStatePayload;
+  } catch (error) {
+    console.error("[OAuth] Invalid state payload", error);
+    return null;
+  }
+};
 
 function getQueryParam(req: Request, key: string): string | undefined {
   const value = req.query[key];
@@ -22,6 +65,31 @@ export function registerOAuthRoutes(app: Express) {
       res.status(400).json({ error: "code and state are required" });
       return;
     }
+
+    const decodedState = decodeState(state);
+    const expectedNonce = getCookieValue(req, OAUTH_STATE_COOKIE_NAME);
+    const now = Date.now();
+
+    // validação de state para mitigar CSRF
+    if (!decodedState || !expectedNonce) {
+      console.error("[OAuth] Invalid or missing OAuth state");
+      res.status(400).json({ error: "Invalid OAuth state" });
+      return;
+    }
+
+    const isExpired = now - decodedState.issuedAt > OAUTH_STATE_MAX_AGE_MS;
+    if (isExpired || decodedState.nonce !== expectedNonce) {
+      console.error("[OAuth] State validation failed", { isExpired });
+      res.status(400).json({ error: "State validation failed" });
+      return;
+    }
+
+    res.cookie(OAUTH_STATE_COOKIE_NAME, "", {
+      path: "/",
+      sameSite: "lax",
+      secure: isSecureRequest(req),
+      maxAge: 0,
+    });
 
     try {
       console.log("[OAuth] [Token exchange] Starting at", new Date().toISOString());

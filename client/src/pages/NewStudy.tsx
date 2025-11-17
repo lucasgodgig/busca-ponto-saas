@@ -32,7 +32,7 @@ export default function NewStudy() {
   const createStudyMutation = trpc.studies.create.useMutation({
     onSuccess: () => {
       toast.success("Estudo criado com sucesso!");
-      setLocation("/studies");
+      setLocation("/estudos");
     },
     onError: (error) => {
       toast.error(error.message || "Erro ao criar estudo");
@@ -134,7 +134,7 @@ export default function NewStudy() {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => setLocation("/studies")}
+              onClick={() => setLocation("/estudos")}
             >
               <ArrowLeft className="w-4 h-4" />
             </Button>
@@ -281,7 +281,7 @@ export default function NewStudy() {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => setLocation("/studies")}
+                  onClick={() => setLocation("/estudos")}
                   disabled={createStudyMutation.isPending}
                 >
                   Cancelar
