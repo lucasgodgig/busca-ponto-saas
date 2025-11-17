@@ -40,7 +40,11 @@ export default defineConfig({
       strict: true,
       deny: ["**/.*"],
     },
-    hmr: false, // Desabilitar HMR completamente em produção
+    hmr: {
+      protocol: "wss",
+      host: "localhost",
+      port: 5173,
+    },
     middlewareMode: true,
   },
 });

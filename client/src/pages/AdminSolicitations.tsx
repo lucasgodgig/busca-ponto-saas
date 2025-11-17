@@ -127,37 +127,10 @@ export default function AdminSolicitations() {
     studyStatusFilter === "all" ? {} : { status: studyStatusFilter as any }
   );
 
-  const [commercialPoints, setCommercialPoints] = useState<any[]>([]);
-  const [pointsLoading, setPointsLoading] = useState(false);
-
-  const refetchPoints = useCallback(async () => {
-    setPointsLoading(true);
-    try {
-      // tRPC queries use GET, not POST
-      const params = new URLSearchParams();
-      params.set('input', JSON.stringify({}));
-      const response = await fetch(`/api/trpc/commercialPoints.getRequestsForAdmin?${params}`, {
-        credentials: 'include'
-      });
-      const data = await response.json();
-      if (response.ok) {
-        const points = data.result?.data || [];
-        setCommercialPoints(points);
-      } else if (data.error) {
-        console.error('API Error:', data.error.json?.message);
-        setCommercialPoints([]);
-      }
-    } catch (error) {
-      console.error('Fetch error:', error);
-      setCommercialPoints([]);
-    } finally {
-      setPointsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    refetchPoints();
-  }, [refetchPoints]);
+  // Queries
+  const { data: commercialPoints = [], isLoading: pointsLoading, refetch: refetchPoints } = trpc.commercialPoints.getRequestsForAdmin.useQuery(
+    { tenantId: undefined }
+  );
 
   // Mutations
   const updateStudyMutation = trpc.studyRequests.update.useMutation({
