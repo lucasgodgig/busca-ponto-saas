@@ -423,3 +423,43 @@ Ativar e implementar a funcionalidade completa da aba "Pontos Comerciais" no pai
 ✅ Projeto compila sem erros
 ✅ Servidor rodando na porta 3000
 ✅ Funcionalidade pronta para testes
+
+
+## 🔄 Sessão 23 - Implementar Funcionalidade de Pontos Comerciais no Admin
+
+### Objetivo
+Implementar a aba "Pontos Comerciais" no painel de Solicitações do admin com a seguinte funcionalidade:
+- Visualizar solicitações de pontos comerciais feitas por usuários (apenas leitura)
+- Botão "Adicionar Opções de Ponto" para adicionar múltiplas opções de pontos para uma solicitação
+- Cada opção pode ter dados diferentes (endereço, tipo, preços, fotos, etc.)
+
+### Features a Implementar
+- [ ] Ativar query `getRequestsForAdmin` em AdminSolicitations.tsx
+- [ ] Implementar tabela de solicitações de pontos comerciais
+- [ ] Criar modal de visualização de solicitação (apenas leitura)
+- [ ] Criar modal/formulário para "Adicionar Opções de Ponto"
+- [ ] Implementar upload de imagens para cada opção
+- [ ] Implementar procedure tRPC para criar ponto comercial
+- [ ] Testar fluxo completo
+
+### Status
+⏳ **Em Progresso**
+
+
+### Status Final da Sessão 23
+✅ **Completo**: Funcionalidade de Pontos Comerciais totalmente implementada!
+
+#### Implementado:
+- [x] Carregamento de solicitações de pontos comerciais
+- [x] Modal de visualizacao (apenas leitura) com dados da solicitacao
+- [x] Modal "Adicionar Opcoes de Ponto" com formulario completo
+- [x] Upload de imagens (ate 10 por opcao)
+- [x] Handlers para criar pontos comerciais
+- [x] Integracao com API de pontos comerciais
+
+#### Fluxo de Uso:
+1. Admin acessa "Solicitacoes" → "Pontos Comerciais"
+2. Clica no icone "Olho" para ver detalhes da solicitacao
+3. Clica no icone "Upload" para abrir modal "Adicionar Opcoes de Ponto"
+4. Preenche os dados (endereco, areas, valores, contatos, fotos)
+5. Clica "Adicionar Opcao" para salvar
