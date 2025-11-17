@@ -223,4 +223,23 @@
 
 ### Correção Realizada
 - [x] Atualizar link do botão "Saber mais" na página Home.tsx
-- [x] Link alterado de www.buscaponto.com.br para www.buscapontooficial.com.br00eancia
+- [x] Link alterado de www.buscaponto.com.br para www.buscapontooficial.com.br
+
+## 🔄 Sessão 18 - Corrigir Fluxo de Autenticação
+
+### Bug Reportado
+- [ ] Usuário cadastrado não consegue fazer login via OAuth
+- [ ] Após autenticar com Manus, volta para tela de login/cadastro
+
+### Análise
+- [ ] Validação de leads está bloqueando usuários cadastrados
+- [ ] Email do OAuth pode ser diferente do email do cadastro
+- [ ] Procedure auth.me retorna null quando lead não é encontrado
+### Solução Implementada
+- [x] Remover validação de leads na procedure auth.me
+- [x] Permitir que qualquer usuário autenticado via OAuth faça login
+- [x] Tentar vincular lead automaticamente se email existir
+- [x] Se vinculação falhar, deixar usuário fazer login mesmo assim
+
+### Status
+✅ **Corrigido**: Usuários cadastrados agora conseguem fazer login via OAuth sem problemas!

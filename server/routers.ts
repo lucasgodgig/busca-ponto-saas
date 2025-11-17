@@ -36,17 +36,14 @@ export const appRouter = router({
     me: publicProcedure.query(async ({ ctx }) => {
       if (!ctx.user) return null;
       
-      // Admins não precisam de validação de leads
-      if (ctx.user.role !== 'admin_bp') {
-        // Verificar se usuário é um lead válido (fez cadastro)
-        if (ctx.user.email) {
-          const isValid = await db.isValidLead(ctx.user.email);
-          if (!isValid) {
-            return null;
-          }
-          
-          // Vincular lead ao usuário se ainda não estiver vinculado
+      // Tentar vincular lead ao usuário se ele tiver email
+      // Isso permite que usuários que se cadastraram façam login mesmo que o email do OAuth seja diferente
+      if (ctx.user.email) {
+        try {
           await db.linkLeadToUser(ctx.user.email, ctx.user.id);
+        } catch (error) {
+          // Se não conseguir vincular, não é problema - usuário pode estar vindo direto do OAuth
+          console.log("[Auth] Could not link lead for email:", ctx.user.email);
         }
       }
       
