@@ -574,14 +574,11 @@ export const commercialPoints = mysqlTable("commercialPoints", {
   brokerEmail: varchar("brokerEmail", { length: 320 }),
   description: text("description"),
   amenitiesJson: json("amenitiesJson").$type<string[]>(), // ["estacionamento", "elevador", etc]
-  isOption: boolean("isOption").default(false).notNull(), // true = opção alternativa, false = opção principal
-  status: mysqlEnum("status", ["pendente", "aprovado", "rejeitado"]).default("pendente").notNull(), // Status de aprovação pelo usuário
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 }, (table) => ({
   requestIdIdx: index("requestId_idx").on(table.requestId),
   tenantIdIdx: index("tenantId_idx").on(table.tenantId),
-  statusIdx: index("status_idx").on(table.status),
 }));
 
 /**
