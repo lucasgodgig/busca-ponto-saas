@@ -10,7 +10,8 @@ import {
   BarChart3,
   TrendingUp,
   Clock,
-  CheckCircle2
+  CheckCircle2,
+  MapPin
 } from "lucide-react";
 import { Link } from "wouter";
 import { trpc } from "@/lib/trpc";
@@ -120,6 +121,14 @@ export default function Dashboard() {
       href: "/estudos",
       color: "text-purple-600 dark:text-purple-400",
       bgColor: "bg-purple-50 dark:bg-purple-950/30",
+    },
+    {
+      title: "Pontos Comerciais",
+      description: "Solicite e acompanhe pontos comerciais",
+      icon: MapPin,
+      href: "/solicitacoes-pontos",
+      color: "text-red-600 dark:text-red-400",
+      bgColor: "bg-red-50 dark:bg-red-950/30",
     },
     {
       title: "Relatórios",
