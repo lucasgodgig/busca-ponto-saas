@@ -641,6 +641,15 @@ export const appRouter = router({
         return { success: true };
       }),
 
+    attachPoint: protectedProcedure
+      .input(z.object({
+        studyId: z.number(),
+        pointId: z.number(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        return { success: true, message: "Ponto anexado com sucesso" };
+      }),
+
     // Comentários
     comments: router({
       list: protectedProcedure
@@ -990,105 +999,7 @@ export const appRouter = router({
         };
       }),
 
-    // Users sub-router
-    users: router({
-      // Obter uso mensal de estudos do usuario atual
-      getCurrentUsage: protectedProcedure
-        .query(async ({ ctx }) => {
-          const dbInstance = await db.getDb();
-          if (!dbInstance) {
-            throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database nao disponivel" });
-          }
 
-          const { generatedStudies, tenants } = await import("../drizzle/schema");
-          const { eq, and, count, sql } = await import("drizzle-orm");
-
-          // Obter tenant do usuario
-          const memberships = await db.getUserMemberships(ctx.user.id);
-          if (!memberships.length) {
-            throw new TRPCError({ code: "FORBIDDEN", message: "Usuario nao pertence a nenhum tenant" });
-          }
-
-          const tenantId = memberships[0].membership.tenantId;
-          const tenant = await dbInstance
-            .select()
-            .from(tenants)
-            .where(eq(tenants.id, tenantId))
-            .limit(1);
-
-          if (!tenant.length) {
-            throw new TRPCError({ code: "NOT_FOUND", message: "Tenant nao encontrado" });
-          }
-
-          // Contar estudos do mes atual
-          const now = new Date();
-          const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-          const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-
-          const monthlyStudies = await dbInstance
-            .select({ count: count() })
-            .from(generatedStudies)
-            .where(
-              and(
-                eq(generatedStudies.tenantId, tenantId),
-                sql`DATE(${generatedStudies.createdAt}) >= DATE(${monthStart}) AND DATE(${generatedStudies.createdAt}) <= DATE(${monthEnd})`
-              )
-            );
-
-          const used = monthlyStudies[0]?.count || 0;
-          // Usar limite de estudos do plano, nao de consultas rapidas
-          const limit = tenant[0].limitsJson?.simultaneousStudies || ctx.user.monthlyStudyLimit || 10;
-          const remaining = Math.max(0, limit - used);
-
-          return {
-            used,
-            limit,
-            remaining,
-          };
-        }),
-
-      sendLimitAlertEmail: protectedProcedure
-        .input(z.object({
-          userId: z.number(),
-          email: z.string().email(),
-          userName: z.string(),
-          used: z.number(),
-          limit: z.number(),
-        }))
-        .mutation(async ({ input }) => {
-          const percentage = Math.round((input.used / input.limit) * 100);
-          const html = generateLimitAlertEmail(input.userName, input.used, input.limit, percentage);
-          
-          const success = await sendEmail({
-            to: input.email,
-            subject: `Alerta: Você utilizou ${percentage}% do seu limite mensal`,
-            html,
-          });
-
-          return { success };
-        }),
-
-      list: adminProcedure.query(async ({ ctx }) => {
-        const dbInstance = await db.getDb();
-        if (!dbInstance) {
-          throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Database nao disponivel' });
-        }
-
-        const { users: usersTable } = await import('../drizzle/schema');
-        const allUsers = await dbInstance.select().from(usersTable);
-        
-        return allUsers.map(u => ({
-          id: u.id,
-          openId: u.openId,
-          name: u.name,
-          email: u.email,
-          role: u.role,
-          isActive: u.isActive,
-          createdAt: u.createdAt,
-          lastSignedIn: u.lastSignedIn,
-        }));
-      }),
-    }),
   }),
 
   // Saved Locations (Pontos e Polígonos salvos)
@@ -1164,6 +1075,27 @@ export const appRouter = router({
       .mutation(async ({ ctx, input }) => {
         const { deleteSavedLocation } = await import("./db/savedLocations");
         return await deleteSavedLocation(input.id, ctx.user.id);
+      }),
+  }),
+
+  commercialPoints: router({
+    list: protectedProcedure
+      .input(z.object({ tenantId: z.number() }))
+      .query(async ({ ctx, input }) => {
+        const dbInstance = await db.getDb();
+        if (!dbInstance) {
+          throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database nao disponivel" });
+        }
+
+        const { commercialPoints } = await import("../drizzle/schema");
+        const { eq } = await import("drizzle-orm");
+
+        const points = await dbInstance
+          .select()
+          .from(commercialPoints)
+          .where(eq(commercialPoints.tenantId, input.tenantId));
+
+        return points;
       }),
   }),
 });
