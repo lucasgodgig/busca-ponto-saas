@@ -115,7 +115,7 @@ export default function CommercialPointDetails() {
           <h1 className="text-3xl font-bold">Solicitação #{requestId}</h1>
           {request.status === "aberto" && (
             <Button
-              onClick={() => navigate(`/commercial-points/${requestId}/edit`)}
+              onClick={() => navigate(`/pontos-comerciais?highlight=${requestId}`)}
               className="bg-blue-600 hover:bg-blue-700"
             >
               Editar Solicitação

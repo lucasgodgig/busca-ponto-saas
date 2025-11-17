@@ -1,4 +1,4 @@
-import { and, desc, eq, or } from "drizzle-orm";
+import { and, desc, eq, gte, lt, or } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { 
   InsertUser, 
@@ -11,6 +11,8 @@ import {
   auditLogs,
   Tenant,
   Membership,
+  billingCustomers,
+  BillingCustomer,
   commercialPointRequests,
   commercialPoints,
   commercialPointPhotos,
@@ -20,6 +22,17 @@ import {
   leads
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
+
+function normalizeUtcMidnight(date: Date) {
+  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+}
+
+function getMonthlyPeriodBounds(reference = new Date()) {
+  const currentUtc = normalizeUtcMidnight(reference);
+  const periodStart = new Date(Date.UTC(currentUtc.getUTCFullYear(), currentUtc.getUTCMonth(), 1));
+  const periodEndExclusive = new Date(Date.UTC(currentUtc.getUTCFullYear(), currentUtc.getUTCMonth() + 1, 1));
+  return { periodStart, periodEndExclusive };
+}
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
@@ -176,52 +189,54 @@ export async function getCurrentPlanUsage(tenantId: number) {
   const db = await getDb();
   if (!db) return undefined;
 
-  try {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = now.getMonth();
-    const periodStart = new Date(year, month, 1);
-    const periodEnd = new Date(year, month + 1, 0, 23, 59, 59);
+  const { periodStart, periodEndExclusive } = getMonthlyPeriodBounds();
 
-    // Buscar registro existente para o período atual
-    const result = await db
+  try {
+    const [existing] = await db
       .select()
       .from(planUsage)
       .where(
         and(
           eq(planUsage.tenantId, tenantId),
-          eq(planUsage.periodStart, periodStart)
+          gte(planUsage.periodStart, periodStart),
+          lt(planUsage.periodStart, periodEndExclusive)
         )
       )
       .limit(1);
 
-    if (result.length > 0) {
-      return result[0];
+    if (existing) {
+      return existing;
     }
 
-    // Criar novo registro de uso para o período atual
-    const [newUsage] = await db.insert(planUsage).values({
-      tenantId,
-      periodStart,
-      periodEnd,
-      quickQueriesUsed: 0,
-      studiesOpened: 0,
-    }).$returningId();
+    await db
+      .insert(planUsage)
+      .values({
+        tenantId,
+        periodStart,
+        periodEnd: periodEndExclusive,
+        quickQueriesUsed: 0,
+        studiesOpened: 0,
+      })
+      .onDuplicateKeyUpdate({
+        set: { periodEnd: periodEndExclusive },
+      });
 
-    const newResult = await db.select().from(planUsage).where(eq(planUsage.id, newUsage.id)).limit(1);
-    return newResult[0];
+    const [fresh] = await db
+      .select()
+      .from(planUsage)
+      .where(
+        and(
+          eq(planUsage.tenantId, tenantId),
+          gte(planUsage.periodStart, periodStart),
+          lt(planUsage.periodStart, periodEndExclusive)
+        )
+      )
+      .limit(1);
+
+    return fresh;
   } catch (error) {
     console.error("[Database] Error in getCurrentPlanUsage:", error);
-    // Retornar um objeto padrão em caso de erro para não bloquear a consulta
-    return {
-      id: 0,
-      tenantId,
-      periodStart: new Date(),
-      periodEnd: new Date(),
-      quickQueriesUsed: 0,
-      studiesOpened: 0,
-      createdAt: new Date(),
-    };
+    throw error;
   }
 }
 
@@ -508,12 +523,92 @@ export async function getCommercialPointPhotos(pointId: number) {
       .from(commercialPointPhotos)
       .where(eq(commercialPointPhotos.pointId, pointId))
       .orderBy(commercialPointPhotos.order);
-    
+
     return result;
   } catch (error) {
     console.error("[Database] Failed to get photos:", error);
     throw error;
   }
+}
+
+export async function findBillingCustomerByStripeIdentifiers(params: {
+  tenantId?: number;
+  stripeCustomerId?: string;
+  stripeSubscriptionId?: string;
+}): Promise<BillingCustomer | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const clauses: any[] = [];
+
+  if (params.tenantId) {
+    clauses.push(eq(billingCustomers.tenantId, params.tenantId));
+  }
+
+  if (params.stripeCustomerId) {
+    clauses.push(eq(billingCustomers.stripeCustomerId, params.stripeCustomerId));
+  }
+
+  if (params.stripeSubscriptionId) {
+    clauses.push(eq(billingCustomers.stripeSubscriptionId, params.stripeSubscriptionId));
+  }
+
+  if (clauses.length === 0) {
+    return undefined;
+  }
+
+  const whereClause = clauses.length === 1 ? clauses[0] : or(...clauses);
+  const result = await db.select().from(billingCustomers).where(whereClause).limit(1);
+  return result[0];
+}
+
+export async function saveBillingCustomerRecord(params: {
+  tenantId: number;
+  stripeCustomerId: string;
+  stripeSubscriptionId?: string | null;
+  subscriptionStatus?: string | null;
+}): Promise<void> {
+  const db = await getDb();
+  if (!db) {
+    throw new Error("[Database] Cannot persist billing customer without a database connection");
+  }
+
+  const now = new Date();
+  await db
+    .insert(billingCustomers)
+    .values({
+      tenantId: params.tenantId,
+      stripeCustomerId: params.stripeCustomerId,
+      stripeSubscriptionId: params.stripeSubscriptionId ?? null,
+      subscriptionStatus: params.subscriptionStatus ?? null,
+      updatedAt: now,
+    })
+    .onDuplicateKeyUpdate({
+      set: {
+        stripeCustomerId: params.stripeCustomerId,
+        stripeSubscriptionId: params.stripeSubscriptionId ?? null,
+        subscriptionStatus: params.subscriptionStatus ?? null,
+        updatedAt: now,
+      },
+    });
+}
+
+export async function updateTenantPlanValue(
+  tenantId: number,
+  plan: Tenant["plan"]
+): Promise<void> {
+  const db = await getDb();
+  if (!db) {
+    throw new Error("[Database] Cannot update tenant plan without a database connection");
+  }
+
+  await db
+    .update(tenants)
+    .set({
+      plan,
+      updatedAt: new Date(),
+    })
+    .where(eq(tenants.id, tenantId));
 }
 
 export async function updateCommercialPointRequestStatus(requestId: number, status: string) {

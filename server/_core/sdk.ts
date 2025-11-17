@@ -39,8 +39,27 @@ class OAuthService {
   }
 
   private decodeState(state: string): string {
-    const redirectUri = atob(state);
-    return redirectUri;
+    const decoded = Buffer.from(state, "base64").toString("utf-8");
+
+    try {
+      const parsed = JSON.parse(decoded);
+
+      if (typeof parsed === "string") {
+        return parsed;
+      }
+
+      if (parsed && typeof parsed.redirectUri === "string") {
+        return parsed.redirectUri;
+      }
+    } catch (error) {
+      console.warn("[OAuth] State JSON parse failed", error);
+    }
+
+    if (decoded.startsWith("http")) {
+      return decoded;
+    }
+
+    throw new Error("[OAuth] Invalid state payload received");
   }
 
   async getTokenByCode(
@@ -156,6 +175,9 @@ class SDKServer {
 
   private getSessionSecret() {
     const secret = ENV.cookieSecret;
+    if (!secret) {
+      throw new Error("[Auth] JWT_SECRET is required for session signing");
+    }
     return new TextEncoder().encode(secret);
   }
 
@@ -168,6 +190,9 @@ class SDKServer {
     openId: string,
     options: { expiresInMs?: number; name?: string } = {}
   ): Promise<string> {
+    if (!ENV.appId) {
+      throw new Error("[Auth] APP_ID is required to issue sessions");
+    }
     return this.signSession(
       {
         openId,

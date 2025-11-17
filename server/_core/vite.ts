@@ -5,6 +5,7 @@ import { nanoid } from "nanoid";
 import path from "path";
 import { createServer as createViteServer } from "vite";
 import viteConfig from "../../vite.config";
+import { ENV } from "./env";
 
 export async function setupVite(app: Express, server: Server) {
   const serverOptions = {
@@ -40,7 +41,7 @@ export async function setupVite(app: Express, server: Server) {
       );
       
       // Injetar API key do Google Maps no HTML
-      const googleApiKey = process.env.VITE_GOOGLE_MAPS_API_KEY || process.env.GOOGLE_PLACES_API_KEY || "";
+      const googleApiKey = ENV.googleMapsApiKey;
       template = template.replace(
         "</head>",
         `<script>window.GOOGLE_MAPS_API_KEY = "${googleApiKey}";</script></head>`
@@ -79,7 +80,7 @@ export function serveStatic(app: Express) {
       }
       
       // Injetar API key do Google Maps no HTML
-      const googleApiKey = process.env.VITE_GOOGLE_MAPS_API_KEY || process.env.GOOGLE_PLACES_API_KEY || "";
+      const googleApiKey = ENV.googleMapsApiKey;
       const modifiedHtml = html.replace(
         "</head>",
         `<script>window.GOOGLE_MAPS_API_KEY = "${googleApiKey}";</script></head>`

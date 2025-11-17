@@ -1,4 +1,15 @@
-import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, json, index, boolean } from "drizzle-orm/mysql-core";
+import {
+  int,
+  mysqlEnum,
+  mysqlTable,
+  text,
+  timestamp,
+  varchar,
+  json,
+  index,
+  boolean,
+  uniqueIndex,
+} from "drizzle-orm/mysql-core";
 import { relations } from "drizzle-orm";
 
 /**
@@ -146,7 +157,9 @@ export const planUsage = mysqlTable("planUsage", {
   studiesOpened: int("studiesOpened").default(0).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-});
+}, (table) => ({
+  tenantPeriodIdx: uniqueIndex("planUsage_tenant_period_idx").on(table.tenantId, table.periodStart),
+}));
 
 /**
  * AuditLog - auditoria de ações críticas
@@ -170,6 +183,7 @@ export const billingCustomers = mysqlTable("billingCustomers", {
   tenantId: int("tenantId").notNull().unique(),
   stripeCustomerId: varchar("stripeCustomerId", { length: 255 }).notNull().unique(),
   stripeSubscriptionId: varchar("stripeSubscriptionId", { length: 255 }),
+  subscriptionStatus: varchar("subscriptionStatus", { length: 32 }),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });

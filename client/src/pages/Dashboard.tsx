@@ -127,7 +127,7 @@ export default function Dashboard() {
       title: "Pontos Comerciais",
       description: "Solicite e acompanhe pontos comerciais",
       icon: MapPin,
-      href: "/solicitacoes-pontos",
+      href: "/pontos-comerciais",
       color: "text-red-600 dark:text-red-400",
       bgColor: "bg-red-50 dark:bg-red-950/30",
     },
