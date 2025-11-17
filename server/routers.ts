@@ -36,6 +36,17 @@ export const appRouter = router({
     me: publicProcedure.query(async ({ ctx }) => {
       if (!ctx.user) return null;
       
+      // Verificar se usuário é um lead válido (fez cadastro)
+      if (ctx.user.email) {
+        const isValid = await db.isValidLead(ctx.user.email);
+        if (!isValid) {
+          return null;
+        }
+        
+        // Vincular lead ao usuário se ainda não estiver vinculado
+        await db.linkLeadToUser(ctx.user.email, ctx.user.id);
+      }
+      
       // Buscar memberships do usuário
       const memberships = await db.getUserMemberships(ctx.user.id);
       

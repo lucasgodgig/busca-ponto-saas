@@ -20,7 +20,7 @@ export const users = mysqlTable("users", {
 });
 
 /**
- * Tenant (Franqueadora) - cada franqueadora é um tenant isolado
+ * Tenant (Empresa) - cada empresa é um tenant isolado
  */
 export const tenants = mysqlTable("tenants", {
   id: int("id").autoincrement().primaryKey(),
@@ -56,7 +56,7 @@ export const memberships = mysqlTable("memberships", {
 }));
 
 /**
- * Study - estudos de mercado solicitados pelas franqueadoras
+ * Study - estudos de mercado solicitados pelas empresas
  */
 export const studies = mysqlTable("studies", {
   id: int("id").autoincrement().primaryKey(),

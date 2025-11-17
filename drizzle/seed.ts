@@ -22,8 +22,8 @@ async function seed() {
 
   // 1. Criar tenant de exemplo
   const [tenant] = await db.insert(tenants).values({
-    name: "Franqueadora Demo",
-    slug: "franqueadora-demo",
+    name: "Empresa Demo",
+    slug: "empresa-demo",
     logoUrl: "https://placehold.co/200x200/0F172A/FFFFFF/png?text=FD",
     colorPrimary: "#0F172A",
     colorDark: "#020617",
@@ -41,7 +41,7 @@ async function seed() {
   const [adminUser] = await db.insert(users).values({
     openId: "demo-admin-001",
     name: "Admin Demo",
-    email: "admin@franqueadorademo.com",
+    email: "admin@empresademo.com",
     loginMethod: "email",
     role: "tenant_admin",
   }).$returningId();
@@ -49,7 +49,7 @@ async function seed() {
   const [member1] = await db.insert(users).values({
     openId: "demo-member-001",
     name: "Ana Silva",
-    email: "ana.silva@franqueadorademo.com",
+    email: "ana.silva@empresademo.com",
     loginMethod: "email",
     role: "member",
   }).$returningId();
@@ -57,7 +57,7 @@ async function seed() {
   const [member2] = await db.insert(users).values({
     openId: "demo-member-002",
     name: "Carlos Santos",
-    email: "carlos.santos@franqueadorademo.com",
+    email: "carlos.santos@empresademo.com",
     loginMethod: "email",
     role: "member",
   }).$returningId();
@@ -253,7 +253,7 @@ async function seed() {
 
   console.log("\n🎉 Seed concluído com sucesso!");
   console.log("\n📊 Resumo:");
-  console.log(`   - 1 tenant: Franqueadora Demo`);
+  console.log(`   - 1 tenant: Empresa Demo`);
   console.log(`   - 4 usuários: 1 admin, 2 membros, 1 consultor BP`);
   console.log(`   - 2 estudos: 1 em análise, 1 aberto`);
   console.log(`   - 5 consultas rápidas no histórico`);

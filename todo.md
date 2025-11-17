@@ -189,3 +189,21 @@
 - [x] Testar com dados de teste (franqueadora + membership criadas)
 - [x] Validar que página exibe configurações corretamente
 
+
+## 🔄 Sessão 15 - Validar Cadastro no Login + Trocar Terminologia
+
+### Validau00e7u00e3o de Cadastro
+- [x] Verificar se usuu00e1rio fez cadastro antes de permitir acesso u00e0 plataforma
+- [x] Redirecionar para /cadastro se usuu00e1rio nu00e3o estu00e1 registrado como lead
+- [x] Implementar verificau00e7u00e3o na procedure auth.me
+- [x] Adicionar funuu00e7u00f5es isValidLead e linkLeadToUser em db.ts
+- [x] Testar validau00e7u00e3o com usuu00e1rio nu00e3o registrado
+
+### Trocar Terminologia Franqueadora u2192 Empresa
+- [x] Procurar e substituir "Franqueadora" por "Empresa" em Settings.tsx
+- [x] Procurar e substituir "franqueadora" por "empresa" em AdminDashboard.tsx
+- [x] Procurar e substituir "franqueadora" por "empresa" em MapPage.tsx
+- [x] Procurar e substituir "Franqueadora" por "Empresa" em schema.ts
+- [x] Procurar e substituir "franqueadora" por "empresa" em seed.ts
+- [x] Atualizar mensagens de erro e labels
+- [x] Testar todas as pu00e1ginas para garantir consistu00eancia

@@ -154,9 +154,9 @@ export default function Settings() {
       <div className="flex items-center justify-center min-h-screen">
         <Card className="w-full max-w-md">
           <CardHeader>
-            <CardTitle>Nenhuma franqueadora encontrada</CardTitle>
+            <CardTitle>Nenhuma empresa encontrada</CardTitle>
             <CardDescription>
-              Você precisa estar associado a uma franqueadora para acessar as configurações.
+              Você precisa estar associado a uma empresa para acessar as configurações.
             </CardDescription>
           </CardHeader>
           <CardContent>

@@ -16,7 +16,8 @@ import {
   commercialPointPhotos,
   InsertCommercialPointRequest,
   InsertCommercialPoint,
-  InsertCommercialPointPhoto
+  InsertCommercialPointPhoto,
+  leads
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -536,3 +537,36 @@ export async function updateCommercialPointRequestStatus(requestId: number, stat
   }
 }
 
+
+// Verificar se usuário é um lead válido (fez cadastro prévio)
+export async function isValidLead(email: string): Promise<boolean> {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot check lead: database not available");
+    return false;
+  }
+
+  try {
+    const result = await db.select().from(leads).where(eq(leads.email, email)).limit(1);
+    return result.length > 0;
+  } catch (error) {
+    console.error("[Database] Failed to check lead:", error);
+    return false;
+  }
+}
+
+// Vincular lead ao usuário após login
+export async function linkLeadToUser(email: string, userId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot link lead: database not available");
+    return;
+  }
+
+  try {
+    await db.update(leads).set({ userId }).where(eq(leads.email, email));
+    console.log("[Database] Lead linked to user:", userId);
+  } catch (error) {
+    console.error("[Database] Failed to link lead:", error);
+  }
+}

@@ -170,7 +170,7 @@ export default function AdminDashboard() {
         <Card>
           <CardHeader>
             <CardTitle>Estudos por Tenant</CardTitle>
-            <CardDescription>Volume de estudos por franqueadora</CardDescription>
+            <CardDescription>Volume de estudos por empresa</CardDescription>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
