@@ -67,42 +67,42 @@ export default function AdminPanel() {
   });
 
   // Queries
-  const { data: users, isLoading, refetch } = trpc.admin.users.list.useQuery();
+  const { data: users, isLoading, refetch } = trpc.users.list.useQuery();
 
   // Mutations
-  const createUserMutation = trpc.admin.users.create.useMutation({
+  const createUserMutation = trpc.users.create.useMutation({
     onSuccess: () => {
       toast.success("Usuário criado com sucesso");
       setCreateModalOpen(false);
       resetForm();
       refetch();
     },
-    onError: (error) => {
-      toast.error(error.message);
+    onError: (error: any) => {
+      toast.error(error?.message || "Erro ao criar usuário");
     },
   });
 
-  const updateUserMutation = trpc.admin.users.update.useMutation({
+  const updateUserMutation = trpc.users.update.useMutation({
     onSuccess: () => {
       toast.success("Usuário atualizado com sucesso");
       setEditModalOpen(false);
       setSelectedUser(null);
       refetch();
     },
-    onError: (error) => {
-      toast.error(error.message);
+    onError: (error: any) => {
+      toast.error(error?.message || "Erro ao criar usuário");
     },
   });
 
-  const deleteUserMutation = trpc.admin.users.delete.useMutation({
+  const deleteUserMutation = trpc.users.delete.useMutation({
     onSuccess: () => {
       toast.success("Usuário deletado com sucesso");
       setDeleteDialogOpen(false);
       setSelectedUser(null);
       refetch();
     },
-    onError: (error) => {
-      toast.error(error.message);
+    onError: (error: any) => {
+      toast.error(error?.message || "Erro ao criar usuário");
     },
   });
 
@@ -122,7 +122,7 @@ export default function AdminPanel() {
   }
 
   // Filtrar usuários
-  const filteredUsers = users?.filter((u) => {
+  const filteredUsers = users?.filter((u: any) => {
     const matchesSearch =
       u.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       u.email?.toLowerCase().includes(searchTerm.toLowerCase());
@@ -169,11 +169,10 @@ export default function AdminPanel() {
   const handleUpdate = () => {
     if (!selectedUser) return;
     updateUserMutation.mutate({
-      userId: selectedUser.id,
+      id: selectedUser.id,
       name: formData.name || undefined,
       email: formData.email || undefined,
-      role: formData.role,
-      monthlyStudyLimit: formData.monthlyStudyLimit,
+      role: formData.role as any,
       isActive: formData.isActive,
     });
   };
@@ -288,7 +287,7 @@ export default function AdminPanel() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredUsers.map((u) => (
+                  {filteredUsers.map((u: any) => (
                     <TableRow key={u.id}>
                       <TableCell className="font-medium">{u.name || "—"}</TableCell>
                       <TableCell>{u.email || "—"}</TableCell>

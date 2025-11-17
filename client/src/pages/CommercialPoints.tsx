@@ -234,7 +234,7 @@ export default function CommercialPoints() {
                       <h3 className="font-bold text-lg">{request.segment}</h3>
                       <p className="text-sm text-muted-foreground flex items-center gap-2 mt-2">
                         <MapPin size={16} />
-                        {request.address}
+                        {request.city || 'Localização não definida'}
                       </p>
                     </div>
                     <span
@@ -256,7 +256,7 @@ export default function CommercialPoints() {
 
                   <div className="space-y-2 text-sm mb-4">
                     <p className="text-muted-foreground">
-                      <strong>Raio:</strong> {request.radiusM}m
+                      <strong>Raio:</strong> Não definido
                     </p>
                     {request.requirements && (
                       <p className="text-muted-foreground line-clamp-2">

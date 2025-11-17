@@ -694,7 +694,7 @@ export const appRouter = router({
               body: input.body,
             });
 
-          return { success: true, id: 0 };
+          return { success: true, id: (result as any)[0]?.insertId || 0 };
         }),
     }),
   }),

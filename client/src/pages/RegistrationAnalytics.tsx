@@ -55,12 +55,14 @@ export default function RegistrationAnalytics() {
 
   // Preparar dados para gráfico de linha
   const trendData: Record<string, any> = {};
-  registrationTrends?.forEach((item) => {
+  trend?.forEach((item) => {
     const date = new Date(item.date).toLocaleDateString('pt-BR');
     if (!trendData[date]) {
       trendData[date] = { date };
     }
-    (trendData[date] as any)[item.method] = item.count;
+    if (item.method) {
+      (trendData[date] as any)[item.method] = item.count;
+    }
   });
   const chartData = Object.values(trendData);
 

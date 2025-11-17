@@ -69,7 +69,7 @@ export default function Dashboard() {
   
   useWebSocketNotifications(handleStudyNotification);
   
-  const { data: usageData } = trpc.admin.users.getCurrentUsage.useQuery(
+  const { data: usageData } = trpc.tenants.usage.useQuery(
     undefined,
     { enabled: !!user }
   );
@@ -77,19 +77,20 @@ export default function Dashboard() {
   // Notificar quando limite eh atingido
   const hasNotifiedRef = useRef(false);
   useEffect(() => {
-    if (usageData && usageData.remaining <= 0 && !hasNotifiedRef.current) {
+    const remaining = usageData?.usage?.remaining || 0;
+    if (usageData && remaining <= 0 && !hasNotifiedRef.current) {
       toast.error("Voce atingiu o limite mensal de estudos!", {
         description: "Entre em contato com o administrador para aumentar seu limite.",
         duration: 5000,
       });
       hasNotifiedRef.current = true;
-    } else if (usageData && usageData.remaining > 0) {
+    } else if (usageData && remaining > 0) {
       hasNotifiedRef.current = false;
     }
-  }, [usageData?.remaining]);
+  }, [usageData?.usage?.remaining]);
 
-  const pendingStudies = studies?.filter((s) => s.status === 'aberto' || s.status === 'em_analise').length || 0;
-  const completedStudies = studies?.filter(s => s.status === 'concluido').length || 0;
+  const pendingStudies = studies?.filter((s) => s.study?.status === 'aberto' || s.study?.status === 'em_analise').length || 0;
+  const completedStudies = studies?.filter(s => s.study?.status === 'concluido').length || 0;
 
   const actionCards = [
     {
@@ -196,48 +197,48 @@ export default function Dashboard() {
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">Utilizados</span>
                   <span className="text-2xl font-bold">
-                    {usageData.used} / {usageData.limit}
+                    {usageData?.usage?.used || 0} / {usageData?.usage?.limit || 0}
                   </span>
                 </div>
                 <div className="w-full bg-secondary rounded-full h-3 overflow-hidden">
                   <div
                     className={`h-full transition-all duration-300 ${
-                      usageData.used / usageData.limit >= 0.9
+                      (usageData?.usage?.used || 0) / (usageData?.usage?.limit || 1) >= 0.9
                         ? "bg-red-500"
-                        : usageData.used / usageData.limit >= 0.7
+                        : (usageData?.usage?.used || 0) / (usageData?.usage?.limit || 1) >= 0.7
                         ? "bg-yellow-500"
                         : "bg-green-500"
                     }`}
-                    style={{ width: `${Math.min((usageData.used / usageData.limit) * 100, 100)}%` }}
+                    style={{ width: `${Math.min(((usageData?.usage?.used || 0) / (usageData?.usage?.limit || 1)) * 100, 100)}%` }}
                   />
                 </div>
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Restantes</span>
-                  <span className={
-                    usageData.remaining <= 0
+                  <span className={`${
+                    (usageData?.usage?.remaining || 0) <= 0
                       ? "text-red-600 font-semibold"
-                      : usageData.remaining <= 3
+                      : (usageData?.usage?.remaining || 0) <= 3
                       ? "text-yellow-600 font-semibold"
                       : "text-green-600 font-semibold"
-                  }>
-                    {usageData.remaining} estudos
+                  }`}>
+                    {usageData?.usage?.remaining || 0} estudos
                   </span>
                 </div>
-                {usageData.remaining <= 0 && (
+                {(usageData?.usage?.remaining || 0) <= 0 && (
                   <div className="mt-3 p-3 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-md">
                     <p className="text-sm text-red-800 dark:text-red-200">
                       ⚠️ Você atingiu o limite mensal de estudos. Entre em contato com o administrador para aumentar seu limite.
                     </p>
                   </div>
                 )}
-                {usageData.remaining > 0 && usageData.remaining <= 3 && (
+                {(usageData?.usage?.remaining || 0) > 0 && (usageData?.usage?.remaining || 0) <= 3 && (
                   <div className="mt-3 p-3 bg-yellow-50 dark:bg-yellow-950/30 border border-yellow-200 dark:border-yellow-800 rounded-md">
                     <p className="text-sm text-yellow-800 dark:text-yellow-200">
-                      ⚠️ Você está próximo do limite mensal. Restam apenas {usageData.remaining} estudos.
+                      ⚠️ Você está próximo do limite mensal. Restam apenas {usageData?.usage?.remaining || 0} estudos.
                     </p>
                     {studies && studies.length > 0 && (
                       <p className="text-xs text-yellow-700 dark:text-yellow-300 mt-2">
-                        Estimativa de esgotamento: {calculateExhaustionDate(usageData.used, studies.length)}
+                        Estimativa de esgotamento: {calculateExhaustionDate(usageData?.usage?.used || 0, studies.length)}
                       </p>
                     )}
                   </div>
@@ -257,7 +258,7 @@ export default function Dashboard() {
         <div className="grid gap-6 md:gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 mb-8 md:mb-12 animate-stagger">
           {actionCards.map((card, index) => {
             const isAdmin = user?.role === 'admin_bp';
-            const isLimitReached = !isAdmin && usageData && usageData.remaining <= 0 && card.title === 'Solicitar Estudo';
+            const isLimitReached = !isAdmin && usageData && (usageData?.usage?.remaining || 0) <= 0 && card.title === 'Solicitar Estudo';
             const cardContent = (
               <Card className={`group transition-all border-2 ${
                 isLimitReached 
