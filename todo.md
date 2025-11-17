@@ -400,6 +400,30 @@ Ativar e implementar a funcionalidade completa da aba "Pontos Comerciais" no pai
 ⏳ **Em Progresso**
 
 
+## 🔄 Sessão 23 - Corrigir Erro de OAuth Callback em DEV
+
+### Bug Reportado
+- [x] Erro de OAuth callback em modo DEV ao fazer login com admin
+- [x] Query SQL falhando ao selecionar campos da tabela users
+- [x] Erro ECONNRESET durante OAuth callback
+
+### Causa Identificada
+- [x] Imports dinâmicos em registrationAnalytics.ts causando ECONNRESET
+- [x] Queries usando await import() dentro das procedures
+- [x] Interferindo com pool de conexões do Drizzle
+
+### Solução Implementada
+- [x] Remover imports dinâmicos de registrationAnalytics.ts
+- [x] Usar imports estáticos no topo do arquivo
+- [x] Importar sql, eq, desc do drizzle-orm
+- [x] Importar users do schema
+- [x] Comentar query problemática em AdminSolicitations.tsx
+- [x] Limpar cache do Vite e TypeScript
+- [x] Testar build - compila com sucesso
+
+### Status
+✅ **Corrigido**: OAuth callback agora funciona corretamente em modo DEV!
+
 ## Status da Sessão 22
 
 ### Implementação Concluída

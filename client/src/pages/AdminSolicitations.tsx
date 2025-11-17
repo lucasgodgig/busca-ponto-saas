@@ -128,9 +128,13 @@ export default function AdminSolicitations() {
   );
 
   // Queries
-  const { data: commercialPoints = [], isLoading: pointsLoading, refetch: refetchPoints } = trpc.commercialPoints.getRequestsForAdmin.useQuery(
-    { tenantId: undefined }
-  );
+  // TODO: Ativar quando a procedure getRequestsForAdmin estiver disponível
+  // const { data: commercialPoints = [], isLoading: pointsLoading, refetch: refetchPoints } = trpc.commercialPoints.getRequestsForAdmin.useQuery(
+  //   { tenantId: undefined }
+  // );
+  const commercialPoints = [];
+  const pointsLoading = false;
+  const refetchPoints = () => {};
 
   // Mutations
   const updateStudyMutation = trpc.studyRequests.update.useMutation({

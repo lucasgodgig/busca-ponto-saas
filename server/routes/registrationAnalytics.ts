@@ -2,7 +2,8 @@ import { adminProcedure, router } from "../_core/trpc";
 import { z } from "zod";
 import * as db from "../db";
 import { TRPCError } from "@trpc/server";
-import { sql } from "drizzle-orm";
+import { sql, eq, desc } from "drizzle-orm";
+import { users } from "../../drizzle/schema";
 
 export const registrationAnalyticsRouter = router({
   /**
@@ -16,8 +17,6 @@ export const registrationAnalyticsRouter = router({
     }
 
     try {
-      const { users } = await import("../../drizzle/schema");
-      
       // Obter contagem por método de registro
       const stats = await dbInstance
         .select({
@@ -70,9 +69,6 @@ export const registrationAnalyticsRouter = router({
       }
 
       try {
-        const { users } = await import("../../drizzle/schema");
-        const { eq, desc } = await import("drizzle-orm");
-
         let query: any = dbInstance.select().from(users);
 
         if (input.method) {
@@ -115,21 +111,18 @@ export const registrationAnalyticsRouter = router({
       }
 
       try {
-        const { users } = await import("../../drizzle/schema");
-        const { sql: drizzleSql } = await import("drizzle-orm");
-
         const daysAgo = new Date();
         daysAgo.setDate(daysAgo.getDate() - input.days);
 
         const trend = await dbInstance
           .select({
-            date: drizzleSql<string>`DATE(${users.createdAt}) as date`,
+            date: sql<string>`DATE(${users.createdAt}) as date`,
             method: users.loginMethod,
-            count: drizzleSql<number>`COUNT(*) as count`,
+            count: sql<number>`COUNT(*) as count`,
           })
           .from(users)
-          .where(drizzleSql`${users.createdAt} >= ${daysAgo}`)
-          .groupBy(drizzleSql`DATE(${users.createdAt})`, users.loginMethod);
+          .where(sql`${users.createdAt} >= ${daysAgo}`)
+          .groupBy(sql`DATE(${users.createdAt})`, users.loginMethod);
 
         return trend;
       } catch (error) {
