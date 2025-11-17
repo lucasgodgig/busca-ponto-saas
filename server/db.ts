@@ -526,14 +526,8 @@ export async function updateCommercialPointRequestStatus(requestId: number, stat
   try {
     const result = await db
       .update(commercialPointRequests)
-      .set({ status: status as any, updatedAt: new Date() })
+      .set({ status: status as any })
       .where(eq(commercialPointRequests.id, requestId));
-    
-    // Validar que pelo menos um registro foi atualizado
-    if ((result as any).rowsAffected === 0) {
-      console.warn("[Database] No commercial point request found with ID:", requestId);
-      throw new Error(`Commercial point request not found: ${requestId}`);
-    }
     
     console.log("[Database] Request status updated successfully");
     return result;

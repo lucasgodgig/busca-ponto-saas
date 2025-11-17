@@ -1,6 +1,5 @@
 import { ReactNode, useState } from "react";
 import Sidebar from "./Sidebar";
-import Footer from "./Footer";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import ShortcutsHelp from "./ShortcutsHelp";
 import CommandPalette from "./CommandPalette";
@@ -49,14 +48,11 @@ export default function AppLayout({ children }: AppLayoutProps) {
     <>
       <CommandPalette open={showCommandPalette} onOpenChange={setShowCommandPalette} />
       <ShortcutsHelp open={showShortcuts} onOpenChange={setShowShortcuts} />
-      <div className="flex flex-col min-h-screen">
-        <div className="flex flex-1">
-          <Sidebar />
-          <main className="flex-1 lg:ml-64 mt-16 lg:mt-0">
-            {children}
-          </main>
-        </div>
-        <Footer />
+      <div className="flex min-h-screen">
+        <Sidebar />
+        <main className="flex-1 lg:ml-64 mt-16 lg:mt-0">
+          {children}
+        </main>
       </div>
     </>
   );

@@ -14,7 +14,6 @@ import { storagePut } from "../storage";
 export const studyRequestsRouter = router({
   /**
    * Cliente cria nova solicitação de estudo
-   * TRANSACAO: Criar estudo + incrementar uso em uma única transação
    */
   create: protectedProcedure
     .input(
@@ -39,72 +38,55 @@ export const studyRequestsRouter = router({
         });
       }
 
-      let studyId: number = 0;
+      const result = await db.insert(studyRequests).values({
+        tenantId: input.tenantId,
+        createdBy: ctx.user.id,
+        title: input.title,
+        segment: input.segment,
+        address: input.address,
+        lat: input.lat,
+        lng: input.lng,
+        radiusM: input.radiusM,
+        description: input.description,
+        objectives: input.objectives,
+        status: "pendente",
+        priority: "media",
+      });
 
-      try {
-        // TRANSACAO: Criar estudo + incrementar uso em uma única transação
-        // Se qualquer operação falhar, TODAS são revertidas
-        await db.transaction(async (tx) => {
-          // 1. Inserir novo estudo
-          const result = await tx.insert(studyRequests).values({
-            tenantId: input.tenantId,
-            createdBy: ctx.user.id,
-            title: input.title,
-            segment: input.segment,
-            address: input.address,
-            lat: input.lat,
-            lng: input.lng,
-            radiusM: input.radiusM,
-            description: input.description,
-            objectives: input.objectives,
-            status: "pendente",
-            priority: "media",
-          });
+      // Incrementar contador de uso mensal
+      const now = new Date();
+      const currentMonth = now.getMonth() + 1;
+      const currentYear = now.getFullYear();
 
-          studyId = Number((result as any).insertId);
+      const [existingUsage] = await db
+        .select()
+        .from(studyUsage)
+        .where(
+          and(
+            eq(studyUsage.userId, ctx.user.id),
+            eq(studyUsage.month, currentMonth),
+            eq(studyUsage.year, currentYear)
+          )
+        )
+        .limit(1);
 
-          // 2. Incrementar contador de uso mensal
-          const now = new Date();
-          const currentMonth = now.getMonth() + 1;
-          const currentYear = now.getFullYear();
-
-          const [existingUsage] = await tx
-            .select()
-            .from(studyUsage)
-            .where(
-              and(
-                eq(studyUsage.userId, ctx.user.id),
-                eq(studyUsage.month, currentMonth),
-                eq(studyUsage.year, currentYear)
-              )
-            )
-            .limit(1);
-
-          if (existingUsage) {
-            await tx
-              .update(studyUsage)
-              .set({ count: existingUsage.count + 1 })
-              .where(eq(studyUsage.id, existingUsage.id));
-          } else {
-            await tx.insert(studyUsage).values({
-              userId: ctx.user.id,
-              month: currentMonth,
-              year: currentYear,
-              count: 1,
-            });
-          }
-        });
-      } catch (error) {
-        console.error("[studyRequests.create] Erro ao criar estudo com transação:", error);
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Erro ao criar estudo. Tente novamente.",
+      if (existingUsage) {
+        await db
+          .update(studyUsage)
+          .set({ count: existingUsage.count + 1 })
+          .where(eq(studyUsage.id, existingUsage.id));
+      } else {
+        await db.insert(studyUsage).values({
+          userId: ctx.user.id,
+          month: currentMonth,
+          year: currentYear,
+          count: 1,
         });
       }
 
       return {
         success: true,
-        id: studyId,
+        id: Number((result as any).insertId),
       };
     }),
 
@@ -298,25 +280,16 @@ export const studyRequestsRouter = router({
       if (input.assignedTo !== undefined) updateData.assignedTo = input.assignedTo;
       if (input.adminNotes !== undefined) updateData.adminNotes = input.adminNotes;
 
-      const result = await db
+      await db
         .update(studyRequests)
         .set(updateData)
         .where(eq(studyRequests.id, input.id));
-
-      // Validar que pelo menos um registro foi atualizado
-      if ((result as any).rowsAffected === 0) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Solicitação não encontrada",
-        });
-      }
 
       return { success: true };
     }),
 
   /**
    * Admin BP faz upload do PDF final
-   * TRANSACAO: Upload S3 + atualização BD + notificação em uma transação
    */
   uploadPdf: adminProcedure
     .input(
@@ -343,7 +316,10 @@ export const studyRequestsRouter = router({
       const randomSuffix = Math.random().toString(36).substring(7);
       const fileKey = `study-requests/${input.requestId}/${timestamp}-${randomSuffix}.pdf`;
 
-      // Obter dados da solicitacao para notificacao (ANTES do upload)
+      // Upload para S3
+      const { url } = await storagePut(fileKey, pdfBuffer, "application/pdf");
+
+      // Obter dados da solicitacao para notificacao
       const studyRequest = await db
         .select()
         .from(studyRequests)
@@ -359,58 +335,32 @@ export const studyRequestsRouter = router({
 
       const study = studyRequest[0];
 
-      let pdfUrl: string;
+      // Atualizar registro no banco
+      await db
+        .update(studyRequests)
+        .set({
+          pdfUrl: url,
+          pdfFileKey: fileKey,
+          status: "concluido",
+          completedAt: new Date(),
+        })
+        .where(eq(studyRequests.id, input.requestId));
 
-      try {
-        // 1. Upload para S3
-        const uploadResult = await storagePut(fileKey, pdfBuffer, "application/pdf");
-        pdfUrl = uploadResult.url;
-
-        // TRANSACAO: Atualizar BD + criar notificação
-        // Se notificação falhar, atualização é revertida
-        await db.transaction(async (tx) => {
-          // 2. Atualizar registro no banco
-          const updateResult = await tx
-            .update(studyRequests)
-            .set({
-              pdfUrl: pdfUrl,
-              pdfFileKey: fileKey,
-              status: "concluido",
-              completedAt: new Date(),
-            })
-            .where(eq(studyRequests.id, input.requestId));
-
-          // Validar que registro foi atualizado
-          if ((updateResult as any).rowsAffected === 0) {
-            throw new TRPCError({
-              code: "NOT_FOUND",
-              message: "Solicitacao nao encontrada",
-            });
-          }
-
-          // 3. Criar notificacao para o usuario
-          await tx
-            .insert(notifications)
-            .values({
-              userId: study.createdBy,
-              title: `Estudo Pronto: ${study.title}`,
-              content: `Seu estudo "${study.title}" esta pronto para download. Acesse a pagina "Meus Estudos" para visualizar.`,
-              type: "study_ready",
-              relatedStudyRequestId: input.requestId,
-              isRead: false,
-            });
+      // Criar notificacao para o usuario
+      await db
+        .insert(notifications)
+        .values({
+          userId: study.createdBy,
+          title: `Estudo Pronto: ${study.title}`,
+          content: `Seu estudo "${study.title}" esta pronto para download. Acesse a pagina "Meus Estudos" para visualizar.`,
+          type: "study_ready",
+          relatedStudyRequestId: input.requestId,
+          isRead: false,
         });
-      } catch (error) {
-        console.error("[studyRequests.uploadPdf] Erro ao fazer upload:", error);
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Erro ao fazer upload do PDF. Tente novamente.",
-        });
-      }
 
       return {
         success: true,
-        pdfUrl: pdfUrl,
+        pdfUrl: url,
       };
     }),
 
@@ -499,7 +449,7 @@ export const notificationsRouter = router({
         });
       }
 
-      const result = await db
+      await db
         .update(notifications)
         .set({ isRead: true })
         .where(
@@ -509,14 +459,7 @@ export const notificationsRouter = router({
           )
         );
 
-      // Validar que notificação foi atualizada
-      if ((result as any).rowsAffected === 0) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Notificação não encontrada",
-        });
-      }
-
       return { success: true };
     }),
 });
+

@@ -4,9 +4,8 @@
   "type": "module",
   "license": "MIT",
   "scripts": {
-    "generate-version": "node scripts/generate-version.mjs",
-    "dev": "npm run generate-version && NODE_ENV=development tsx watch server/_core/index.ts",
-    "build": "npm run generate-version && vite build && esbuild server/_core/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist",
+    "dev": "NODE_ENV=development tsx watch server/_core/index.ts",
+    "build": "vite build && esbuild server/_core/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist",
     "start": "NODE_ENV=production node dist/index.js",
     "check": "tsc --noEmit",
     "format": "prettier --write .",
@@ -14,8 +13,7 @@
     "lint": "eslint . --ext .ts,.tsx",
     "lint:fix": "eslint . --ext .ts,.tsx --fix",
     "test": "vitest run",
-    "db:push": "drizzle-kit generate && drizzle-kit migrate",
-    "version:info": "node -e \"import('./shared/version.ts').then(m => console.log(m.getVersionString()))\""
+    "db:push": "drizzle-kit generate && drizzle-kit migrate"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.693.0",

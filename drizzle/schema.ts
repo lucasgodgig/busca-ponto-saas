@@ -630,19 +630,5 @@ export const commercialPointPhotosRelations = relations(commercialPointPhotos, (
   }),
 }));
 
-/**
- * ProcessedWebhook - Rastreamento de webhooks processados para idempotência
- */
-export const processedWebhooks = mysqlTable("processedWebhooks", {
-  id: int("id").autoincrement().primaryKey(),
-  eventId: varchar("eventId", { length: 255 }).notNull().unique(),
-  eventType: varchar("eventType", { length: 100 }).notNull(),
-  processedAt: timestamp("processedAt").defaultNow().notNull(),
-}, (table) => ({
-  eventIdIdx: index("eventId_idx").on(table.eventId),
-  eventTypeIdx: index("eventType_idx").on(table.eventType),
-}));
 
-export type ProcessedWebhook = typeof processedWebhooks.$inferSelect;
-export type InsertProcessedWebhook = typeof processedWebhooks.$inferInsert;
 
