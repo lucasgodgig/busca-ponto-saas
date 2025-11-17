@@ -463,3 +463,21 @@ Implementar a aba "Pontos Comerciais" no painel de Solicitações do admin com a
 3. Clica no icone "Upload" para abrir modal "Adicionar Opcoes de Ponto"
 4. Preenche os dados (endereco, areas, valores, contatos, fotos)
 5. Clica "Adicionar Opcao" para salvar
+
+
+## 🔄 Sessão 23 - Corrigir Bug: Solicitações não aparecem na página de Solicitações
+
+### Bug Reportado
+- [ ] Página de Solicitações mostra "Nenhuma solicitação encontrada"
+- [ ] Usuários já fizeram solicitações mas elas não aparecem
+- [ ] Aba "Estudos" e "Pontos Comerciais" vazias
+
+### Investigação
+- [ ] Verificar página AdminSolicitations.tsx
+- [ ] Verificar procedures tRPC para buscar solicitações
+- [ ] Verificar banco de dados para confirmar dados salvos
+- [ ] Verificar filtros de status
+- [ ] Verificar permissões de acesso
+
+### Status
+⏳ **Em Progresso**

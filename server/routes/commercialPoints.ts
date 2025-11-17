@@ -213,8 +213,8 @@ export const commercialPointsRouter = router({
   getRequestsForAdmin: protectedProcedure
     .input(z.object({ tenantId: z.number().optional() }))
     .query(async ({ ctx, input }) => {
-      if (!ctx.user || ctx.user.role !== 'admin_bp') {
-        throw new TRPCError({ code: "FORBIDDEN", message: "Apenas admin BP pode acessar" });
+      if (!ctx.user || (ctx.user.role !== 'admin_bp' && ctx.user.role !== 'analyst_bp')) {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Apenas admin BP ou analyst BP pode acessar" });
       }
 
       const requests = await db.getCommercialPointRequestsForAdmin(input.tenantId);

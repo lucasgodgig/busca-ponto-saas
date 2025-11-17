@@ -583,14 +583,6 @@ export async function getCommercialPointRequestsForAdmin(tenantId?: number) {
   try {
     let query = db.select().from(commercialPointRequests);
     
-    // Filtrar apenas solicitações abertas ou em análise
-    query = query.where(
-      or(
-        eq(commercialPointRequests.status, 'aberto'),
-        eq(commercialPointRequests.status, 'em_analise')
-      )
-    ) as any;
-    
     if (tenantId) {
       query = query.where(eq(commercialPointRequests.tenantId, tenantId)) as any;
     }
