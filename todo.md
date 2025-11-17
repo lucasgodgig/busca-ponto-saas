@@ -507,19 +507,25 @@ Implementar a aba "Pontos Comerciais" no painel de Solicitações do admin com a
 ⏳ **Em Progresso**
 
 
-## 🔄 Sessão 24 - Corrigir Bug: Solicitações não aparecem no painel admin
+## 🔄 Sessão 25 - Ativar Aba de Pontos Comerciais no Admin
 
-### Bug Reportado
-- [ ] Solicitações de pontos comerciais não aparecem na aba "Pontos Comerciais"
-- [ ] Painel mostra "Nenhuma solicitação encontrada"
-- [ ] Usuários já fizeram solicitações mas elas não aparecem
+### Objetivo
+Ativar a aba de pontos comerciais no painel admin, permitindo gerenciamento completo de estabelecimentos (CRUD, busca, filtros).
 
-### Investigação Necessária
-- [ ] Verificar se as solicitações estão sendo salvas no banco de dados
-- [ ] Verificar a query `getRequestsForAdmin` em db.ts
-- [ ] Verificar se a procedure tRPC está retornando dados
-- [ ] Verificar se o componente AdminSolicitations está chamando a query corretamente
-- [ ] Verificar filtros de status e tenant
+### Análise Realizada
+- [x] Verificar se tabela `commercialPoints` existe no schema ✅
+- [x] Verificar se procedure `getRequestsForAdmin` existe ✅
+- [x] Verificar se função `getCommercialPointRequestsForAdmin` existe em db.ts ✅
+- [x] Verificar se router está registrado em routers.ts ✅
+- [x] Verificar se aba "Pontos Comerciais" existe em AdminSolicitations.tsx ✅
+- [x] Verificar status da query - DESATIVADA (comentada) em AdminSolicitations.tsx
+
+### Tarefas
+- [x] Ativar query `getRequestsForAdmin` em AdminSolicitations.tsx
+- [x] Testar carregamento de dados
+- [x] Validar filtros por status
+- [x] Testar ações (visualizar, editar, upload)
+- [ ] Salvar checkpoint
 
 ### Status
-⏳ **Em Progresso**
+✅ **Completo**: Aba de pontos comerciais ativada com sucesso!
