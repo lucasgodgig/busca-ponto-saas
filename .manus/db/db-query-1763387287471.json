@@ -1,0 +1,28 @@
+{
+  "query": "SELECT id, segment, city, status, userId, tenantId, createdAt FROM commercialPointRequests;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user KpBuSok2NkZmZXX.root --database 7GaR8dGShizifRGBM35LMu --execute SELECT id, segment, city, status, userId, tenantId, createdAt FROM commercialPointRequests;",
+  "rows": [
+    {
+      "id": "1",
+      "segment": "Igreja",
+      "city": "Belém",
+      "status": "aberto",
+      "userId": "1",
+      "tenantId": "1",
+      "createdAt": "2025-11-17 03:41:15"
+    },
+    {
+      "id": "30001",
+      "segment": "academia ",
+      "city": "são paulo ",
+      "status": "aberto",
+      "userId": "60001",
+      "tenantId": "60001",
+      "createdAt": "2025-11-17 12:40:08"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tsegment\tcity\tstatus\tuserId\ttenantId\tcreatedAt\n1\tIgreja\tBelém\taberto\t1\t1\t2025-11-17 03:41:15\n30001\tacademia \tsão paulo \taberto\t60001\t60001\t2025-11-17 12:40:08\n",
+  "stderr": "",
+  "execution_time_ms": 56
+}

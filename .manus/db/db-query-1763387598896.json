@@ -1,0 +1,30 @@
+{
+  "query": "SELECT 'Admin tenantId' as description, m.tenantId FROM users u LEFT JOIN memberships m ON u.id = m.userId WHERE u.role = 'admin_bp' LIMIT 1;\nSELECT 'Solicitação 1 tenantId' as description, tenantId FROM commercialPointRequests LIMIT 1;\nSELECT 'Solicitação 2 tenantId' as description, tenantId FROM commercialPointRequests LIMIT 1 OFFSET 1;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user KpBuSok2NkZmZXX.root --database 7GaR8dGShizifRGBM35LMu --execute SELECT 'Admin tenantId' as description, m.tenantId FROM users u LEFT JOIN memberships m ON u.id = m.userId WHERE u.role = 'admin_bp' LIMIT 1;\nSELECT 'Solicitação 1 tenantId' as description, tenantId FROM commercialPointRequests LIMIT 1;\nSELECT 'Solicitação 2 tenantId' as description, tenantId FROM commercialPointRequests LIMIT 1 OFFSET 1;",
+  "rows": [
+    {
+      "description": "Admin tenantId",
+      "tenantId": "1"
+    },
+    {
+      "description": "description",
+      "tenantId": "tenantId"
+    },
+    {
+      "description": "Solicitação 1 tenantId",
+      "tenantId": "1"
+    },
+    {
+      "description": "description",
+      "tenantId": "tenantId"
+    },
+    {
+      "description": "Solicitação 2 tenantId",
+      "tenantId": "60001"
+    }
+  ],
+  "messages": [],
+  "stdout": "description\ttenantId\nAdmin tenantId\t1\ndescription\ttenantId\nSolicitação 1 tenantId\t1\ndescription\ttenantId\nSolicitação 2 tenantId\t60001\n",
+  "stderr": "",
+  "execution_time_ms": 63
+}

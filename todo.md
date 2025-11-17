@@ -481,3 +481,21 @@ Implementar a aba "Pontos Comerciais" no painel de Solicitações do admin com a
 
 ### Status
 ⏳ **Em Progresso**
+
+
+## 🔄 Sessão 24 - Corrigir Bug: Solicitações não aparecem no painel admin
+
+### Bug Reportado
+- [ ] Solicitações de pontos comerciais não aparecem na aba "Pontos Comerciais"
+- [ ] Painel mostra "Nenhuma solicitação encontrada"
+- [ ] Usuários já fizeram solicitações mas elas não aparecem
+
+### Investigação Necessária
+- [ ] Verificar se as solicitações estão sendo salvas no banco de dados
+- [ ] Verificar a query `getRequestsForAdmin` em db.ts
+- [ ] Verificar se a procedure tRPC está retornando dados
+- [ ] Verificar se o componente AdminSolicitations está chamando a query corretamente
+- [ ] Verificar filtros de status e tenant
+
+### Status
+⏳ **Em Progresso**

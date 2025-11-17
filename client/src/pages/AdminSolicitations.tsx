@@ -126,17 +126,20 @@ export default function AdminSolicitations() {
     studyStatusFilter === "all" ? {} : { status: studyStatusFilter as any }
   );
 
-  // Carregar pontos comerciais usando fetch para evitar problema de cache do TypeScript
   const [commercialPoints, setCommercialPoints] = useState<any[]>([]);
   const [pointsLoading, setPointsLoading] = useState(false);
 
   const refetchPoints = async () => {
     setPointsLoading(true);
     try {
-      const response = await fetch('/api/trpc/commercialPoints.getRequestsForAdmin?input={}');
+      const response = await fetch('/api/trpc/commercialPoints.getRequestsForAdmin?input={}', {
+        credentials: 'include'
+      });
       if (response.ok) {
         const data = await response.json();
         setCommercialPoints(data.result?.data || []);
+      } else {
+        console.error('Erro na resposta:', response.status);
       }
     } catch (error) {
       console.error('Erro ao carregar pontos comerciais:', error);

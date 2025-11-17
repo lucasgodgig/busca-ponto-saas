@@ -1,0 +1,28 @@
+{
+  "query": "SELECT \n  cpr.id,\n  cpr.segment,\n  cpr.city,\n  cpr.tenantId,\n  cpr.userId,\n  u.name as userName,\n  t.name as tenantName\nFROM commercialPointRequests cpr\nLEFT JOIN users u ON cpr.userId = u.id\nLEFT JOIN tenants t ON cpr.tenantId = t.id;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user KpBuSok2NkZmZXX.root --database 7GaR8dGShizifRGBM35LMu --execute SELECT \n  cpr.id,\n  cpr.segment,\n  cpr.city,\n  cpr.tenantId,\n  cpr.userId,\n  u.name as userName,\n  t.name as tenantName\nFROM commercialPointRequests cpr\nLEFT JOIN users u ON cpr.userId = u.id\nLEFT JOIN tenants t ON cpr.tenantId = t.id;",
+  "rows": [
+    {
+      "id": "1",
+      "segment": "Igreja",
+      "city": "Belém",
+      "tenantId": "1",
+      "userId": "1",
+      "userName": "Busca Ponto",
+      "tenantName": "Franqueadora Teste"
+    },
+    {
+      "id": "30001",
+      "segment": "academia ",
+      "city": "são paulo ",
+      "tenantId": "60001",
+      "userId": "60001",
+      "userName": "Davi Cristiano de Andrade",
+      "tenantName": "Davi Cristiano de Andrade "
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tsegment\tcity\ttenantId\tuserId\tuserName\ttenantName\n1\tIgreja\tBelém\t1\t1\tBusca Ponto\tFranqueadora Teste\n30001\tacademia \tsão paulo \t60001\t60001\tDavi Cristiano de Andrade\tDavi Cristiano de Andrade \n",
+  "stderr": "",
+  "execution_time_ms": 53
+}

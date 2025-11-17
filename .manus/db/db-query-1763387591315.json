@@ -1,0 +1,28 @@
+{
+  "query": "SELECT \n  'Admin' as type,\n  u.id,\n  u.name,\n  m.tenantId\nFROM users u\nLEFT JOIN memberships m ON u.id = m.userId\nWHERE u.role IN ('admin_bp', 'analyst_bp')\n\nUNION ALL\n\nSELECT \n  'Solicitação' as type,\n  cpr.id,\n  cpr.segment,\n  cpr.tenantId\nFROM commercialPointRequests cpr;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user KpBuSok2NkZmZXX.root --database 7GaR8dGShizifRGBM35LMu --execute SELECT \n  'Admin' as type,\n  u.id,\n  u.name,\n  m.tenantId\nFROM users u\nLEFT JOIN memberships m ON u.id = m.userId\nWHERE u.role IN ('admin_bp', 'analyst_bp')\n\nUNION ALL\n\nSELECT \n  'Solicitação' as type,\n  cpr.id,\n  cpr.segment,\n  cpr.tenantId\nFROM commercialPointRequests cpr;",
+  "rows": [
+    {
+      "type": "Solicitação",
+      "id": "1",
+      "name": "Igreja",
+      "tenantId": "1"
+    },
+    {
+      "type": "Solicitação",
+      "id": "30001",
+      "name": "academia ",
+      "tenantId": "60001"
+    },
+    {
+      "type": "Admin",
+      "id": "1",
+      "name": "Busca Ponto",
+      "tenantId": "1"
+    }
+  ],
+  "messages": [],
+  "stdout": "type\tid\tname\ttenantId\nSolicitação\t1\tIgreja\t1\nSolicitação\t30001\tacademia \t60001\nAdmin\t1\tBusca Ponto\t1\n",
+  "stderr": "",
+  "execution_time_ms": 55
+}

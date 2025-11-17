@@ -217,7 +217,16 @@ export const commercialPointsRouter = router({
         throw new TRPCError({ code: "FORBIDDEN", message: "Apenas admin BP ou analyst BP pode acessar" });
       }
 
-      const requests = await db.getCommercialPointRequestsForAdmin(input.tenantId);
+      // Se tenantId não foi passado, buscar o primeiro tenantId do admin
+      let tenantId = input.tenantId;
+      if (!tenantId) {
+        const memberships = await db.getUserMemberships(ctx.user.id);
+        if (memberships.length > 0) {
+          tenantId = memberships[0].membership.tenantId;
+        }
+      }
+
+      const requests = await db.getCommercialPointRequestsForAdmin(tenantId);
       return requests.map(req => ({
         ...req,
         neighborhoods: req.neighborhoods ? (typeof req.neighborhoods === 'string' ? req.neighborhoods.split(',').map(n => n.trim()) : req.neighborhoods) : [],
