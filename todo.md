@@ -315,3 +315,12 @@ O sistema de versionamento automático foi implementado para rastrear mudanças,
 
 **Rastreamento de Rollbacks:**
 Quando um rollback automático ocorre, o hash do commit muda, e a versão exibida no rodapé será atualizada automaticamente na próxima build/dev, permitindo identificar qual versão está rodando.
+
+
+## 🔄 Sessão 20 - Simplificar Rodapé
+
+### Simplificação do Footer
+- [x] Remover informações extras do rodapé (empresa, CNPJ, contato, copyright)
+- [x] Manter apenas a versão (número e hash do commit)
+- [x] Centralizar versão no rodapé
+- [x] Testar exibição do rodapé simplificado
