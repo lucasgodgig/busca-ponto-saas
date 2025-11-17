@@ -1,0 +1,28 @@
+{
+  "query": "SELECT u.id, u.openId, u.name, m.id as membership_id, m.role, t.id as tenant_id, t.name as tenant_name FROM users u LEFT JOIN memberships m ON u.id = m.userId LEFT JOIN tenants t ON m.tenantId = t.id LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user KpBuSok2NkZmZXX.root --database 7GaR8dGShizifRGBM35LMu --execute SELECT u.id, u.openId, u.name, m.id as membership_id, m.role, t.id as tenant_id, t.name as tenant_name FROM users u LEFT JOIN memberships m ON u.id = m.userId LEFT JOIN tenants t ON m.tenantId = t.id LIMIT 10;",
+  "rows": [
+    {
+      "id": "1",
+      "openId": "PH9e3QgX4rCyRqUwYdDkqW",
+      "name": "Busca Ponto",
+      "membership_id": "NULL",
+      "role": "NULL",
+      "tenant_id": "NULL",
+      "tenant_name": "NULL"
+    },
+    {
+      "id": "2",
+      "openId": "NM5S6vq5BkR93YK5tMeTDi",
+      "name": "Lucas Godgig",
+      "membership_id": "NULL",
+      "role": "NULL",
+      "tenant_id": "NULL",
+      "tenant_name": "NULL"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\topenId\tname\tmembership_id\trole\ttenant_id\ttenant_name\n1\tPH9e3QgX4rCyRqUwYdDkqW\tBusca Ponto\tNULL\tNULL\tNULL\tNULL\n2\tNM5S6vq5BkR93YK5tMeTDi\tLucas Godgig\tNULL\tNULL\tNULL\tNULL\n",
+  "stderr": "",
+  "execution_time_ms": 59
+}

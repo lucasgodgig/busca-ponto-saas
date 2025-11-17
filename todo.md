@@ -177,3 +177,15 @@
 - [x] Salvar filtros em localStorage para persistência
 - [x] Adicionar botão "Limpar Filtros"
 
+## 🔄 Sessão 14 - Corrigir Bug da Página de Configurações
+
+### Bug Reportado
+- [x] Página de Configurações exibe "Nenhuma franqueadora encontrada" mesmo quando usuário está associado a uma franqueadora
+
+### Solução Implementada
+- [x] Mover lógica de seleção de tenant para useEffect apropriado
+- [x] Reorganizar ordem de verificações (auth -> memberships -> tenant data)
+- [x] Remover logs de debug
+- [x] Testar com dados de teste (franqueadora + membership criadas)
+- [x] Validar que página exibe configurações corretamente
+

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
@@ -15,10 +15,15 @@ export default function Settings() {
   const { user, loading: authLoading } = useAuth();
   const [selectedTenant, setSelectedTenant] = useState<number | null>(null);
 
-  // Selecionar tenant automaticamente
-  if (!authLoading && user && user.memberships && user.memberships.length > 0 && !selectedTenant) {
-    setSelectedTenant(user.memberships[0].tenant?.id || null);
-  }
+  // Selecionar tenant automaticamente com useEffect
+  useEffect(() => {
+    if (!authLoading && user && user.memberships && user.memberships.length > 0) {
+      const tenantId = user.memberships[0].tenant?.id;
+      if (tenantId && tenantId !== selectedTenant) {
+        setSelectedTenant(tenantId);
+      }
+    }
+  }, [authLoading, user]);
 
   // Buscar dados do tenant
   const { data: tenant, isLoading: tenantLoading } = trpc.tenants.list.useQuery();
@@ -134,7 +139,17 @@ export default function Settings() {
     return null;
   }
 
-  if (!selectedTenant || !tenant) {
+  // Aguardar carregamento de auth
+  if (authLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  // Verificar se usuário tem memberships
+  if (!user || !user.memberships || user.memberships.length === 0) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <Card className="w-full max-w-md">
@@ -150,6 +165,15 @@ export default function Settings() {
             </Button>
           </CardContent>
         </Card>
+      </div>
+    );
+  }
+
+  // Aguardar carregamento de dados do tenant
+  if (tenantLoading || !selectedTenant || !currentTenant) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
   }
