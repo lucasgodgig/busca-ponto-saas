@@ -131,3 +131,21 @@
 - [x] Registrar o router no `appRouter` com a chave `commercialPoints`
 - [x] Testar o formulário de indicação de ponto comercial
 - [x] Validar que a procedure está funcionando corretamente
+
+---
+
+## 🔄 Sessão 12 - Corrigir Erro 404 ao Clicar em Detalhes
+
+### Bug Reportado
+- [x] Corrigir erro 404 ao clicar em "Detalhes" na lista de pontos comerciais
+  - [x] Rota `/commercial-points/:id` nao existe no App.tsx
+  - [x] Criar componente `CommercialPointDetails.tsx`
+  - [x] Adicionar rota no App.tsx
+  - [x] Testar navegacao
+
+### Solucao Implementada
+- [x] Criar novo componente CommercialPointDetails.tsx
+- [x] Adicionar rota /commercial-points/:id no App.tsx
+- [x] Corrigir nomes das procedures
+- [x] Testar navegacao e validar que pagina carrega corretamente
+
