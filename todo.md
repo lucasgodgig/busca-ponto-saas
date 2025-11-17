@@ -243,3 +243,84 @@
 
 ### Status
 ✅ **Corrigido**: Usuários cadastrados agora conseguem fazer login via OAuth sem problemas!
+
+
+## 🔄 Sessão 19 - Implementar Fluxo de Gerenciamento de Pontos Comerciais para Admin
+
+### Features a Implementar
+- [ ] Atualizar schema: adicionar status "em_analise" e "validacao" ao commercialPointRequests
+- [ ] Adicionar campo adminNotes em commercialPoints para observações do admin
+- [ ] Implementar procedures tRPC para admin gerenciar pontos:
+  - [ ] `commercialPoints.getRequestsForAdmin` - listar solicitações pendentes
+  - [ ] `commercialPoints.updatePointData` - atualizar dados do ponto
+  - [ ] `commercialPoints.sendToValidation` - enviar para validação
+  - [ ] `commercialPoints.getUserValidationRequests` - usuário visualizar pontos em validação
+  - [ ] `commercialPoints.approvePoint` - usuário aprovar ponto
+  - [ ] `commercialPoints.rejectPoint` - usuário rejeitar ponto com comentário
+- [ ] Criar painel admin com aba "Solicitações":
+  - [ ] Sub-aba "Estudos" (já existe)
+  - [ ] Sub-aba "Pontos Comerciais" (novo)
+  - [ ] Lista de solicitações pendentes
+  - [ ] Modal para adicionar dados do ponto
+  - [ ] Upload de imagens (galeria)
+  - [ ] Formulário com dados do imóvel
+  - [ ] Botão "Enviar para Validação"
+- [ ] Criar página do usuário para validação de pontos:
+  - [ ] Listar pontos em validação
+  - [ ] Visualizar dados e fotos do ponto
+  - [ ] Botão "Aprovar" e "Rejeitar"
+  - [ ] Campo para comentários ao rejeitar
+  - [ ] Notificação ao admin sobre decisão
+- [ ] Testar fluxo completo
+
+
+
+## 🔄 Sessão 19 - Implementar Fluxo de Gerenciamento de Pontos Comerciais para Admin
+
+### Features Implementadas
+- [x] Atualizar schema: adicionar status "em_analise" e "validacao" ao commercialPointRequests
+- [x] Adicionar campo adminNotes em commercialPoints para observações do admin
+- [x] Implementar 6 procedures tRPC para admin gerenciar pontos:
+  - [x] getRequestsForAdmin - listar solicitações pendentes
+  - [x] updatePointData - atualizar dados do ponto
+  - [x] sendToValidation - enviar para validação
+  - [x] getValidationRequests - usuário visualizar pontos em validação
+  - [x] approvePoint - usuário aprovar ponto
+  - [x] rejectPoint - usuário rejeitar ponto com comentário
+- [x] Criar painel admin (AdminCommercialPointRequests.tsx):
+  - [x] Lista de solicitações com filtros por status
+  - [x] Modal para visualizar detalhes da solicitação
+  - [x] Modal para editar dados do ponto comercial
+  - [x] Upload de imagens com preview
+  - [x] Formulário com todos os dados do imóvel
+  - [x] Botão "Enviar para Validação"
+- [x] Criar página de validação (CommercialPointValidation.tsx):
+  - [x] Listar pontos em validação
+  - [x] Visualizar dados completos e fotos
+  - [x] Botões "Aprovar" e "Rejeitar"
+  - [x] Modal para adicionar comentário ao rejeitar
+- [x] Adicionar rotas no App.tsx:
+  - [x] /admin-bp/solicitacoes-pontos (painel admin)
+  - [x] /validar-pontos (página de validação do usuário)
+
+### Fluxo Implementado
+1. Usuário solicita ponto comercial (já existia)
+2. Admin acessa /admin-bp/solicitacoes-pontos
+3. Admin seleciona solicitação e clica "Editar"
+4. Admin adiciona:
+   - Fotos do ponto (upload com preview)
+   - Endereço, tipo de imóvel, áreas
+   - Valores de aluguel/venda
+   - Dados do proprietário e corretor
+   - Descrição e observações
+5. Admin clica "Enviar para Validação"
+6. Status muda para "validacao"
+7. Notificação enviada ao proprietário (via notifyOwner)
+8. Usuário acessa /validar-pontos
+9. Usuário visualiza ponto com todas as informações
+10. Usuário pode:
+    - Aprovar: status muda para "encontrado"
+    - Rejeitar: status volta para "em_busca" + comentário salvo
+
+### Status
+✅ **Completo**: Todas as features implementadas com sucesso!

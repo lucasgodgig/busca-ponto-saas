@@ -22,6 +22,13 @@
       "when": 1763350621258,
       "tag": "0002_whole_lady_bullseye",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1763351568415,
+      "tag": "0003_parched_blade",
+      "breakpoints": true
     }
   ]
 }

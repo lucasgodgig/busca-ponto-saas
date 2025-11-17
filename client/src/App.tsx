@@ -35,6 +35,8 @@ const Analytics = lazy(() => import("./pages/Analytics"));
 const CommercialPoints = lazy(() => import("./pages/CommercialPoints"));
 const CommercialPointDetails = lazy(() => import("./pages/CommercialPointDetails"));
 const RegistrationAnalytics = lazy(() => import("./pages/RegistrationAnalytics"));
+const AdminCommercialPointRequests = lazy(() => import("./pages/AdminCommercialPointRequests"));
+const CommercialPointValidation = lazy(() => import("./pages/CommercialPointValidation"));
 
 // Loading component
 const PageLoader = () => (
@@ -175,11 +177,24 @@ function Router() {
           </AppLayout>
         </ProtectedRoute>
       </Route>
-
       <Route path={"/admin-bp/analise-registros"}>
         <ProtectedRoute>
           <AppLayout>
             <RegistrationAnalytics />
+          </AppLayout>
+        </ProtectedRoute>
+      </Route>
+      <Route path={"/admin-bp/solicitacoes-pontos"}>
+        <ProtectedRoute>
+          <AppLayout>
+            <AdminCommercialPointRequests />
+          </AppLayout>
+        </ProtectedRoute>
+      </Route>
+      <Route path={"/validar-pontos"}>
+        <ProtectedRoute>
+          <AppLayout>
+            <CommercialPointValidation />
           </AppLayout>
         </ProtectedRoute>
       </Route>

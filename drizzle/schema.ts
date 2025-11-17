@@ -542,7 +542,7 @@ export const commercialPointRequests = mysqlTable("commercialPointRequests", {
   propertySize: int("propertySize"), // Tamanho do imóvel em m²
   maxRent: int("maxRent"), // Valor máximo de aluguel em reais
   requirements: text("requirements").notNull(), // Requisitos adicionais (OBRIGATÓRIO)
-  status: mysqlEnum("status", ["aberto", "em_busca", "encontrado", "cancelado"]).default("aberto").notNull(),
+  status: mysqlEnum("status", ["aberto", "em_busca", "em_analise", "validacao", "encontrado", "cancelado"]).default("aberto").notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 }, (table) => ({
@@ -574,6 +574,7 @@ export const commercialPoints = mysqlTable("commercialPoints", {
   brokerEmail: varchar("brokerEmail", { length: 320 }),
   description: text("description"),
   amenitiesJson: json("amenitiesJson").$type<string[]>(), // ["estacionamento", "elevador", etc]
+  adminNotes: text("adminNotes"), // Observações do admin durante análise
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 }, (table) => ({

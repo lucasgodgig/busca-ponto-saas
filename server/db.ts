@@ -570,3 +570,75 @@ export async function linkLeadToUser(email: string, userId: number): Promise<voi
     console.error("[Database] Failed to link lead:", error);
   }
 }
+
+// Novas funções para o fluxo de admin
+
+export async function getCommercialPointRequestsForAdmin(tenantId?: number) {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot get requests for admin: database not available");
+    return [];
+  }
+
+  try {
+    let query = db.select().from(commercialPointRequests);
+    
+    if (tenantId) {
+      query = query.where(eq(commercialPointRequests.tenantId, tenantId)) as any;
+    }
+    
+    const result = await query.orderBy(desc(commercialPointRequests.createdAt));
+    return result;
+  } catch (error) {
+    console.error("[Database] Failed to get requests for admin:", error);
+    throw error;
+  }
+}
+
+export async function updateCommercialPointData(pointId: number, data: Partial<InsertCommercialPoint>) {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot update commercial point: database not available");
+    return null;
+  }
+
+  try {
+    const result = await db
+      .update(commercialPoints)
+      .set(data)
+      .where(eq(commercialPoints.id, pointId));
+    
+    console.log("[Database] Commercial point updated successfully");
+    return result;
+  } catch (error) {
+    console.error("[Database] Failed to update commercial point:", error);
+    throw error;
+  }
+}
+
+export async function getCommercialPointsInValidation(userId: number, tenantId: number) {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot get points in validation: database not available");
+    return [];
+  }
+
+  try {
+    const result = await db
+      .select()
+      .from(commercialPointRequests)
+      .where(
+        and(
+          eq(commercialPointRequests.userId, userId),
+          eq(commercialPointRequests.tenantId, tenantId),
+          eq(commercialPointRequests.status, "validacao")
+        )
+      )
+      .orderBy(desc(commercialPointRequests.updatedAt));
+    
+    return result;
+  } catch (error) {
+    console.error("[Database] Failed to get points in validation:", error);
+    throw error;
+  }
+}
