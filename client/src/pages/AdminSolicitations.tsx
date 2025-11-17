@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useRef } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
@@ -22,7 +24,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FileText, Upload, Loader2, Download, Eye, CheckCircle2, Clock, AlertCircle, Send, X } from "lucide-react";
+import { FileText, Upload, Loader2, Download, Eye, CheckCircle2, Clock, AlertCircle, Send, X, Image as ImageIcon } from "lucide-react";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -95,7 +97,7 @@ const commercialPointStatusConfig = {
 
 export default function AdminSolicitations() {
   const { user, loading } = useAuth();
-  const [activeTab, setActiveTab] = useState("estudos");
+  const [activeTab, setActiveTab] = useState<string>("estudos");
   
   // Study states
   const [studyStatusFilter, setStudyStatusFilter] = useState<string>("all");
@@ -109,17 +111,18 @@ export default function AdminSolicitations() {
   // Commercial Point states
   const [pointStatusFilter, setPointStatusFilter] = useState<string>("all");
   const [pointDetailsModalOpen, setPointDetailsModalOpen] = useState(false);
+  const [pointEditModalOpen, setPointEditModalOpen] = useState(false);
   const [selectedPoint, setSelectedPoint] = useState<any>(null);
+  const [pointFormData, setPointFormData] = useState<any>(null);
+  const [pointImages, setPointImages] = useState<File[]>([]);
+  const imageInputRef = useRef<HTMLInputElement>(null);
 
   // Queries
   const { data: studies, isLoading: studiesLoading, refetch: refetchStudies } = trpc.studyRequests.listAll.useQuery(
     studyStatusFilter === "all" ? {} : { status: studyStatusFilter as any }
   );
 
-  // const { data: commercialPoints, isLoading: pointsLoading, refetch: refetchPoints } = trpc.commercialPoints.getRequestsForAdmin.useQuery();
-  const commercialPoints: any[] = [];
-  const pointsLoading = false;
-  const refetchPoints = () => {};
+  const { data: commercialPoints, isLoading: pointsLoading, refetch: refetchPoints } = trpc.commercialPoints.getRequestsForAdmin.useQuery({});
 
   // Mutations
   const updateStudyMutation = trpc.studyRequests.update.useMutation({
@@ -127,7 +130,7 @@ export default function AdminSolicitations() {
       toast.success("Solicitação atualizada com sucesso");
       refetchStudies();
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast.error("Erro ao atualizar", { description: error.message });
     },
   });
@@ -140,8 +143,22 @@ export default function AdminSolicitations() {
       setPdfFile(null);
       refetchStudies();
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast.error("Erro ao enviar PDF", { description: error.message });
+    },
+  });
+
+  const updatePointMutation = trpc.commercialPoints.updatePointData.useMutation({
+    onSuccess: () => {
+      toast.success("Ponto comercial atualizado com sucesso");
+      setPointEditModalOpen(false);
+      setSelectedPoint(null);
+      setPointFormData(null);
+      setPointImages([]);
+      refetchPoints();
+    },
+    onError: (error: any) => {
+      toast.error("Erro ao atualizar", { description: error.message });
     },
   });
 
@@ -213,9 +230,107 @@ export default function AdminSolicitations() {
     setStudyDetailsModalOpen(false);
   };
 
+  // Commercial Point handlers
   const openPointDetailsModal = (point: any) => {
     setSelectedPoint(point);
     setPointDetailsModalOpen(true);
+  };
+
+  const openPointEditModal = (point: any) => {
+    setSelectedPoint(point);
+    setPointFormData({
+      address: point.address || "",
+      lat: point.lat || "",
+      lng: point.lng || "",
+      propertyType: point.propertyType || "",
+      totalAreaM2: point.totalAreaM2 || "",
+      usableAreaM2: point.usableAreaM2 || "",
+      rentalPrice: point.rentalPrice || "",
+      salePrice: point.salePrice || "",
+      ownerName: point.ownerName || "",
+      ownerPhone: point.ownerPhone || "",
+      brokerName: point.brokerName || "",
+      brokerPhone: point.brokerPhone || "",
+      brokerEmail: point.brokerEmail || "",
+      description: point.description || "",
+      adminNotes: point.adminNotes || "",
+    });
+    setPointImages([]);
+    setPointEditModalOpen(true);
+  };
+
+  const handlePointFormChange = (field: string, value: any) => {
+    setPointFormData((prev: any) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  const handlePointImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files) {
+      const newFiles = Array.from(files).filter(file => file.type.startsWith('image/'));
+      if (newFiles.length + pointImages.length > 10) {
+        toast.error("Máximo de 10 imagens permitidas");
+        return;
+      }
+      setPointImages([...pointImages, ...newFiles]);
+    }
+  };
+
+  const removePointImage = (index: number) => {
+    setPointImages(pointImages.filter((_, i) => i !== index));
+  };
+
+  const handleSavePointData = async () => {
+    if (!selectedPoint || !pointFormData) return;
+
+    try {
+      await updatePointMutation.mutateAsync({
+        pointId: selectedPoint.id,
+        tenantId: selectedPoint.tenantId,
+        ...pointFormData,
+      });
+    } catch (error) {
+      console.error("Erro ao salvar dados:", error);
+    }
+  };
+
+  const handleSendToValidation = async () => {
+    if (!selectedPoint) return;
+    
+    try {
+      // Primeiro salvar os dados
+      await updatePointMutation.mutateAsync({
+        pointId: selectedPoint.id,
+        tenantId: selectedPoint.tenantId,
+        ...pointFormData,
+      });
+
+      // Depois enviar para validação via tRPC
+      const response = await fetch('/api/trpc/commercialPoints.sendToValidation?batch=1', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify([{
+          0: {
+            requestId: selectedPoint.requestId,
+            tenantId: selectedPoint.tenantId,
+          }
+        }]),
+      });
+      
+      if (response.ok) {
+        toast.success("Ponto enviado para validação com sucesso");
+        setPointEditModalOpen(false);
+        setSelectedPoint(null);
+        setPointFormData(null);
+        setPointImages([]);
+        refetchPoints();
+      }
+    } catch (error) {
+      console.error("Erro ao enviar para validação:", error);
+      toast.error("Erro ao enviar para validação");
+    }
   };
 
   if (loading || !user) {
@@ -312,8 +427,8 @@ export default function AdminSolicitations() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {studies.map((item) => {
-                        const status = studyStatusConfig[item.request.status];
+                      {studies.map((item: any) => {
+                        const status = studyStatusConfig[item.request.status as keyof typeof studyStatusConfig];
                         const StatusIcon = status.icon;
 
                         return (
@@ -473,9 +588,9 @@ export default function AdminSolicitations() {
                               </div>
                             </TableCell>
                             <TableCell>
-                              <Badge variant={status.variant} className="flex items-center gap-1.5 w-fit">
-                                <StatusIcon className="w-3.5 h-3.5" />
-                                {status.label}
+                              <Badge variant={status?.variant} className="flex items-center gap-1.5 w-fit">
+                                {StatusIcon && <StatusIcon className="w-3.5 h-3.5" />}
+                                {status?.label}
                               </Badge>
                             </TableCell>
                             <TableCell className="text-sm text-muted-foreground">
@@ -485,13 +600,22 @@ export default function AdminSolicitations() {
                               })}
                             </TableCell>
                             <TableCell className="text-right">
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => openPointDetailsModal(item)}
-                              >
-                                <Eye className="w-4 h-4" />
-                              </Button>
+                              <div className="flex justify-end gap-2">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => openPointDetailsModal(item)}
+                                >
+                                  <Eye className="w-4 h-4" />
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => openPointEditModal(item)}
+                                >
+                                  <Upload className="w-4 h-4" />
+                                </Button>
+                              </div>
                             </TableCell>
                           </TableRow>
                         );
@@ -660,6 +784,248 @@ export default function AdminSolicitations() {
           <DialogFooter>
             <Button onClick={() => setPointDetailsModalOpen(false)}>
               Fechar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Point Edit Modal */}
+      <Dialog open={pointEditModalOpen} onOpenChange={setPointEditModalOpen}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Editar Ponto Comercial</DialogTitle>
+            <DialogDescription>
+              Solicitação #{selectedPoint?.id}
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedPoint && pointFormData && (
+            <div className="space-y-6">
+              {/* Informações Básicas */}
+              <div>
+                <h3 className="font-semibold mb-4">Informações Básicas</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label>Endereço</Label>
+                    <Input
+                      value={pointFormData.address}
+                      onChange={(e) => handlePointFormChange("address", e.target.value)}
+                      placeholder="Endereço completo"
+                    />
+                  </div>
+                  <div>
+                    <Label>Tipo de Imóvel</Label>
+                    <Input
+                      value={pointFormData.propertyType}
+                      onChange={(e) => handlePointFormChange("propertyType", e.target.value)}
+                      placeholder="Ex: Loja, Sala, Galpão"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Áreas */}
+              <div>
+                <h3 className="font-semibold mb-4">Áreas</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label>Área Total (m²)</Label>
+                    <Input
+                      type="number"
+                      value={pointFormData.totalAreaM2}
+                      onChange={(e) => handlePointFormChange("totalAreaM2", parseInt(e.target.value) || "")}
+                      placeholder="0"
+                    />
+                  </div>
+                  <div>
+                    <Label>Área Útil (m²)</Label>
+                    <Input
+                      type="number"
+                      value={pointFormData.usableAreaM2}
+                      onChange={(e) => handlePointFormChange("usableAreaM2", parseInt(e.target.value) || "")}
+                      placeholder="0"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Valores */}
+              <div>
+                <h3 className="font-semibold mb-4">Valores</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label>Valor do Aluguel (R$)</Label>
+                    <Input
+                      type="number"
+                      value={pointFormData.rentalPrice}
+                      onChange={(e) => handlePointFormChange("rentalPrice", parseInt(e.target.value) || "")}
+                      placeholder="0"
+                    />
+                  </div>
+                  <div>
+                    <Label>Valor de Venda (R$)</Label>
+                    <Input
+                      type="number"
+                      value={pointFormData.salePrice}
+                      onChange={(e) => handlePointFormChange("salePrice", parseInt(e.target.value) || "")}
+                      placeholder="0"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Contatos */}
+              <div>
+                <h3 className="font-semibold mb-4">Contatos</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label>Nome do Proprietário</Label>
+                    <Input
+                      value={pointFormData.ownerName}
+                      onChange={(e) => handlePointFormChange("ownerName", e.target.value)}
+                      placeholder="Nome"
+                    />
+                  </div>
+                  <div>
+                    <Label>Telefone do Proprietário</Label>
+                    <Input
+                      value={pointFormData.ownerPhone}
+                      onChange={(e) => handlePointFormChange("ownerPhone", e.target.value)}
+                      placeholder="Telefone"
+                    />
+                  </div>
+                  <div>
+                    <Label>Nome do Corretor</Label>
+                    <Input
+                      value={pointFormData.brokerName}
+                      onChange={(e) => handlePointFormChange("brokerName", e.target.value)}
+                      placeholder="Nome"
+                    />
+                  </div>
+                  <div>
+                    <Label>Telefone do Corretor</Label>
+                    <Input
+                      value={pointFormData.brokerPhone}
+                      onChange={(e) => handlePointFormChange("brokerPhone", e.target.value)}
+                      placeholder="Telefone"
+                    />
+                  </div>
+                  <div className="col-span-2">
+                    <Label>Email do Corretor</Label>
+                    <Input
+                      type="email"
+                      value={pointFormData.brokerEmail}
+                      onChange={(e) => handlePointFormChange("brokerEmail", e.target.value)}
+                      placeholder="Email"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Descrição */}
+              <div>
+                <h3 className="font-semibold mb-4">Descrição</h3>
+                <Textarea
+                  value={pointFormData.description}
+                  onChange={(e) => handlePointFormChange("description", e.target.value)}
+                  placeholder="Descrição do imóvel"
+                  rows={3}
+                />
+              </div>
+
+              {/* Notas do Admin */}
+              <div>
+                <h3 className="font-semibold mb-4">Notas do Admin</h3>
+                <Textarea
+                  value={pointFormData.adminNotes}
+                  onChange={(e) => handlePointFormChange("adminNotes", e.target.value)}
+                  placeholder="Observações internas"
+                  rows={3}
+                />
+              </div>
+
+              {/* Imagens */}
+              <div>
+                <h3 className="font-semibold mb-4">Imagens</h3>
+                <div className="space-y-4">
+                  <input
+                    ref={imageInputRef}
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    onChange={handlePointImageChange}
+                    className="hidden"
+                  />
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => imageInputRef.current?.click()}
+                  >
+                    <ImageIcon className="w-4 h-4 mr-2" />
+                    Adicionar Imagens ({pointImages.length}/10)
+                  </Button>
+
+                  {pointImages.length > 0 && (
+                    <div className="grid grid-cols-3 gap-4">
+                      {pointImages.map((image, idx) => (
+                        <div key={idx} className="relative">
+                          <img
+                            src={URL.createObjectURL(image)}
+                            alt={`Preview ${idx}`}
+                            className="w-full h-32 object-cover rounded border"
+                          />
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            className="absolute top-1 right-1"
+                            onClick={() => removePointImage(idx)}
+                          >
+                            <X className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setPointEditModalOpen(false)}>
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleSavePointData}
+              disabled={updatePointMutation.isPending}
+            >
+              {updatePointMutation.isPending ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Salvando...
+                </>
+              ) : (
+                <>
+                  <Upload className="w-4 h-4 mr-2" />
+                  Salvar Dados
+                </>
+              )}
+            </Button>
+            <Button
+              onClick={handleSendToValidation}
+              disabled={updatePointMutation.isPending}
+            >
+              {updatePointMutation.isPending ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Enviando...
+                </>
+              ) : (
+                <>
+                  <Send className="w-4 h-4 mr-2" />
+                  Enviar para Validação
+                </>
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>

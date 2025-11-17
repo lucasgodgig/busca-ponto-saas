@@ -378,3 +378,48 @@ Criar uma página unificada de "Solicitações" no painel admin com abas para:
 
 ### Status
 ✅ **Corrigido**: Solicitações agora aparecem corretamente no painel admin!
+
+
+## 🔄 Sessão 22 - Ativar Aba de Pontos Comerciais no Admin
+
+### Objetivo
+Ativar e implementar a funcionalidade completa da aba "Pontos Comerciais" no painel de Solicitações do admin.
+
+### Features a Implementar
+- [ ] Analisar estrutura existente de commercialPointRequests no banco
+- [ ] Verificar procedures tRPC para pontos comerciais
+- [ ] Ativar query `getRequestsForAdmin` em AdminSolicitations.tsx
+- [ ] Implementar modal de detalhes do ponto comercial
+- [ ] Implementar funcionalidade de edição de dados do ponto
+- [ ] Implementar upload de imagens
+- [ ] Implementar mudança de status
+- [ ] Testar fluxo completo
+- [ ] Validar filtros por status
+
+### Status
+⏳ **Em Progresso**
+
+
+## Status da Sessão 22
+
+### Implementação Concluída
+- [x] Ativada a query `getRequestsForAdmin` para listar solicitações de pontos comerciais
+- [x] Implementado modal de visualização de detalhes do ponto
+- [x] Implementado modal de edição com formulário completo
+- [x] Adicionados filtros por status
+- [x] Estrutura para upload de imagens (até 10 imagens)
+- [x] Botões de ação (Visualizar, Editar)
+- [x] Integração com procedures tRPC existentes
+
+### Funcionalidades Disponíveis
+1. Listagem de solicitações de pontos comerciais com filtros
+2. Visualização de detalhes da solicitação
+3. Edição de dados do ponto (endereço, áreas, valores, contatos)
+4. Adição de notas do admin
+5. Preparação para upload de imagens
+6. Envio para validação com salvamento de dados
+
+### Build Status
+✅ Projeto compila sem erros
+✅ Servidor rodando na porta 3000
+✅ Funcionalidade pronta para testes
