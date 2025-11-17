@@ -70,19 +70,7 @@ export default function AdminPanel() {
   const { data: users, isLoading, refetch } = trpc.users.list.useQuery();
 
   // Mutations
-  const createUserMutation = trpc.users.create.useMutation({
-    onSuccess: () => {
-      toast.success("Usuário criado com sucesso");
-      setCreateModalOpen(false);
-      resetForm();
-      refetch();
-    },
-    onError: (error: any) => {
-      toast.error(error?.message || "Erro ao criar usuário");
-    },
-  });
-
-  const updateUserMutation = trpc.users.update.useMutation({
+  const updateProfileMutation = trpc.users.updateProfile.useMutation({
     onSuccess: () => {
       toast.success("Usuário atualizado com sucesso");
       setEditModalOpen(false);
@@ -90,19 +78,7 @@ export default function AdminPanel() {
       refetch();
     },
     onError: (error: any) => {
-      toast.error(error?.message || "Erro ao criar usuário");
-    },
-  });
-
-  const deleteUserMutation = trpc.users.delete.useMutation({
-    onSuccess: () => {
-      toast.success("Usuário deletado com sucesso");
-      setDeleteDialogOpen(false);
-      setSelectedUser(null);
-      refetch();
-    },
-    onError: (error: any) => {
-      toast.error(error?.message || "Erro ao criar usuário");
+      toast.error(error?.message || "Erro ao atualizar usuário");
     },
   });
 
@@ -146,11 +122,8 @@ export default function AdminPanel() {
   };
 
   const handleCreate = () => {
-    if (!formData.openId.trim()) {
-      toast.error("OpenId é obrigatório");
-      return;
-    }
-    createUserMutation.mutate(formData);
+    toast.info("Criação de usuários não está disponível nesta versão");
+    setCreateModalOpen(false);
   };
 
   const handleEdit = (u: any) => {
@@ -168,12 +141,10 @@ export default function AdminPanel() {
 
   const handleUpdate = () => {
     if (!selectedUser) return;
-    updateUserMutation.mutate({
-      id: selectedUser.id,
+    updateProfileMutation.mutate({
+      userId: selectedUser.id,
       name: formData.name || undefined,
       email: formData.email || undefined,
-      role: formData.role as any,
-      isActive: formData.isActive,
     });
   };
 
@@ -183,9 +154,8 @@ export default function AdminPanel() {
   };
 
   const confirmDelete = () => {
-    if (selectedUser) {
-      deleteUserMutation.mutate({ userId: selectedUser.id });
-    }
+    toast.info("Exclusão de usuários não está disponível nesta versão");
+    setDeleteDialogOpen(false);
   };
 
   return (
@@ -409,8 +379,8 @@ export default function AdminPanel() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setCreateModalOpen(false)}>Cancelar</Button>
-            <Button onClick={handleCreate} disabled={createUserMutation.isPending}>
-              {createUserMutation.isPending ? "Criando..." : "Criar Usuário"}
+            <Button onClick={handleCreate} disabled={false}>
+              Criar Usuário
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -485,8 +455,8 @@ export default function AdminPanel() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setEditModalOpen(false)}>Cancelar</Button>
-            <Button onClick={handleUpdate} disabled={updateUserMutation.isPending}>
-              {updateUserMutation.isPending ? "Salvando..." : "Salvar Alterações"}
+            <Button onClick={handleUpdate} disabled={updateProfileMutation.isPending}>
+              {updateProfileMutation.isPending ? "Atualizando..." : "Atualizar"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -504,9 +474,9 @@ export default function AdminPanel() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete} className="bg-red-600 hover:bg-red-700">
-              {deleteUserMutation.isPending ? "Deletando..." : "Deletar"}
-            </AlertDialogAction>
+            <AlertDialogAction onClick={() => confirmDelete()} disabled={false}>
+          Deletar
+        </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
