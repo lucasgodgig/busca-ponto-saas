@@ -36,6 +36,12 @@ export default function CadastroConfirmacao() {
   }, [setLocation]);
 
   const handleLoginNow = () => {
+    // Transferir registrationMethod do localStorage para cookie
+    const registrationMethod = localStorage.getItem('registrationMethod');
+    if (registrationMethod) {
+      // Salvar em cookie (o servidor vai ler isso no callback OAuth)
+      document.cookie = `registrationMethod=${registrationMethod}; path=/; max-age=3600`;
+    }
     window.location.href = getLoginUrl();
   };
 

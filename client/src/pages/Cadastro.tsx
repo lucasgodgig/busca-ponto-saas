@@ -41,6 +41,9 @@ export default function Cadastro() {
 
       // Salvar email em localStorage para página de confirmação
       localStorage.setItem("cadastroEmail", formData.email);
+      
+      // Rastrear que o usuário veio do formulário de cadastro
+      localStorage.setItem("registrationMethod", "form");
 
       toast.success("Cadastro realizado! Redirecionando...");
 
@@ -60,16 +63,12 @@ export default function Cadastro() {
       {/* Navigation */}
       <nav className="border-b border-gray-200">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/">
-            <a className="flex items-center gap-2 font-bold text-lg text-[#001F5C] hover:opacity-80 transition-opacity">
-              <MapPin className="w-6 h-6" />
-              Busca Ponto
-            </a>
+          <Link href="/" className="flex items-center gap-2 font-bold text-lg text-[#001F5C] hover:opacity-80 transition-opacity">
+            <MapPin className="w-6 h-6" />
+            Busca Ponto
           </Link>
-          <Link href="/">
-            <a className="text-gray-600 hover:text-gray-900 transition-colors text-sm font-medium">
-              ← Voltar
-            </a>
+          <Link href="/" className="text-gray-600 hover:text-gray-900 transition-colors text-sm font-medium">
+            ← Voltar
           </Link>
         </div>
       </nav>

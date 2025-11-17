@@ -78,6 +78,11 @@ export async function upsertUser(user: InsertUser): Promise<void> {
     } else if (user.openId === ENV.ownerOpenId) {
       updateSet.role = 'admin_bp';
     }
+    
+    // Rastrear método de registro (apenas para novos usuários)
+    if (user.registrationMethod !== undefined) {
+      updateSet.registrationMethod = user.registrationMethod;
+    }
 
     if (existingUser.length > 0) {
       // User exists, update only
