@@ -3,7 +3,7 @@ import { memo } from "react";
 import { Users, DollarSign, TrendingUp } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { getConsumptionKey, getConsumptionLabel } from "@/lib/segmentConfig";
-import SegmentConsumptionChart from "./SegmentConsumptionChart";
+// import SegmentConsumptionChart from "./SegmentConsumptionChart";
 import ConsumptionCategoriesChart from "./ConsumptionCategoriesChart";
 import type { SpaceData } from "@/services/spaceClient";
 

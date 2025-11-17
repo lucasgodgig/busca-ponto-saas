@@ -316,7 +316,7 @@ export default function Dashboard() {
           <div className="mt-6 md:mt-8">
             <h2 className="text-xl md:text-2xl font-bold mb-4">Estudos Recentes</h2>
             <div className="grid gap-4">
-              {studies.slice(0, 3).map((study, idx) => (
+              {studies.slice(0, 3).map((study: any, idx) => (
                 <Link key={`study-${study.id}-${idx}`} href={`/estudos/${study.id}`}>
                   <Card className="cursor-pointer hover:shadow-md transition-shadow">
                     <CardHeader>

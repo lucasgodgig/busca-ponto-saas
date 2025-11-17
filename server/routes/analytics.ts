@@ -81,7 +81,13 @@ export const analyticsRouter = router({
         .where(gte(generatedStudies.createdAt, startDate));
 
       if (input.tenantId) {
-        query = query.where(eq(generatedStudies.tenantId, input.tenantId)) as any;
+        query = dbInstance
+          .select({
+            date: sql`DATE(${generatedStudies.createdAt})`,
+            count: count(generatedStudies.id),
+          })
+          .from(generatedStudies)
+          .where(and(gte(generatedStudies.createdAt, startDate), eq(generatedStudies.tenantId, input.tenantId)));
       }
 
       const trends = await query

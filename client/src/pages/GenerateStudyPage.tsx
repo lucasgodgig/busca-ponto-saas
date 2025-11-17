@@ -65,7 +65,7 @@ export default function GenerateStudyPage() {
       {/* Mapa à esquerda */}
       <div className="flex-1">
         <MapShell
-          onLocationSelect={(lat, lng) => {
+          onLocationSelect={(lat: number, lng: number) => {
             setLat(lat);
             setLng(lng);
           }}

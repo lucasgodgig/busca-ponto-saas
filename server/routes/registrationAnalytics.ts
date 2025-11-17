@@ -73,10 +73,10 @@ export const registrationAnalyticsRouter = router({
         const { users } = await import("../../drizzle/schema");
         const { eq, desc } = await import("drizzle-orm");
 
-        let query = dbInstance.select().from(users);
+        let query: any = dbInstance.select().from(users);
 
         if (input.method) {
-          query = query.where(eq(users.loginMethod, input.method));
+          query = dbInstance.select().from(users).where(eq(users.loginMethod, input.method));
         }
 
         const results = await query
@@ -84,7 +84,7 @@ export const registrationAnalyticsRouter = router({
           .limit(input.limit)
           .offset(input.offset);
 
-        return results.map(u => ({
+        return results.map((u: any) => ({
           id: u.id,
           name: u.name,
           email: u.email,

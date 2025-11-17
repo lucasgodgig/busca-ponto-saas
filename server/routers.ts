@@ -393,7 +393,6 @@ export const appRouter = router({
           lat: input.lat,
           lng: input.lng,
           radius: input.radius,
-          segment: input.segment,
         });
 
         // Registrar consulta no banco
@@ -545,7 +544,7 @@ export const appRouter = router({
 
         // Notificar admins sobre novo estudo criado
         try {
-          const { getNotificationManager } = await import("../_core/websocket");
+          const { getNotificationManager } = await import("./_core/websocket");
           const notificationManager = getNotificationManager();
           if (notificationManager) {
             notificationManager.notifyAdmins({
@@ -620,7 +619,7 @@ export const appRouter = router({
         // Notificar sobre mudanca de status
         if (input.status && currentStudy.length > 0) {
           try {
-            const { getNotificationManager } = await import("../_core/websocket");
+            const { getNotificationManager } = await import("./_core/websocket");
             const notificationManager = getNotificationManager();
             if (notificationManager) {
               notificationManager.notifyAdmins({
@@ -695,7 +694,7 @@ export const appRouter = router({
               body: input.body,
             });
 
-          return { success: true, id: Number(result.insertId) };
+          return { success: true, id: 0 };
         }),
     }),
   }),
@@ -993,106 +992,6 @@ export const appRouter = router({
           })),
         };
       }),
-
-    // Users sub-router
-    users: router({
-      // Obter uso mensal de estudos do usuario atual
-      getCurrentUsage: protectedProcedure
-        .query(async ({ ctx }) => {
-          const dbInstance = await db.getDb();
-          if (!dbInstance) {
-            throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database nao disponivel" });
-          }
-
-          const { generatedStudies, tenants } = await import("../drizzle/schema");
-          const { eq, and, count, sql } = await import("drizzle-orm");
-
-          // Obter tenant do usuario
-          const memberships = await db.getUserMemberships(ctx.user.id);
-          if (!memberships.length) {
-            throw new TRPCError({ code: "FORBIDDEN", message: "Usuario nao pertence a nenhum tenant" });
-          }
-
-          const tenantId = memberships[0].membership.tenantId;
-          const tenant = await dbInstance
-            .select()
-            .from(tenants)
-            .where(eq(tenants.id, tenantId))
-            .limit(1);
-
-          if (!tenant.length) {
-            throw new TRPCError({ code: "NOT_FOUND", message: "Tenant nao encontrado" });
-          }
-
-          // Contar estudos do mes atual
-          const now = new Date();
-          const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-          const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-
-          const monthlyStudies = await dbInstance
-            .select({ count: count() })
-            .from(generatedStudies)
-            .where(
-              and(
-                eq(generatedStudies.tenantId, tenantId),
-                sql`DATE(${generatedStudies.createdAt}) >= DATE(${monthStart}) AND DATE(${generatedStudies.createdAt}) <= DATE(${monthEnd})`
-              )
-            );
-
-          const used = monthlyStudies[0]?.count || 0;
-          // Usar limite de estudos do plano, nao de consultas rapidas
-          const limit = tenant[0].limitsJson?.simultaneousStudies || ctx.user.monthlyStudyLimit || 10;
-          const remaining = Math.max(0, limit - used);
-
-          return {
-            used,
-            limit,
-            remaining,
-          };
-        }),
-
-      sendLimitAlertEmail: protectedProcedure
-        .input(z.object({
-          userId: z.number(),
-          email: z.string().email(),
-          userName: z.string(),
-          used: z.number(),
-          limit: z.number(),
-        }))
-        .mutation(async ({ input }) => {
-          const percentage = Math.round((input.used / input.limit) * 100);
-          const html = generateLimitAlertEmail(input.userName, input.used, input.limit, percentage);
-          
-          const success = await sendEmail({
-            to: input.email,
-            subject: `Alerta: Você utilizou ${percentage}% do seu limite mensal`,
-            html,
-          });
-
-          return { success };
-        }),
-
-      list: adminProcedure.query(async ({ ctx }) => {
-        const dbInstance = await db.getDb();
-        if (!dbInstance) {
-          throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Database nao disponivel' });
-        }
-
-        const { users: usersTable } = await import('../drizzle/schema');
-        const allUsers = await dbInstance.select().from(usersTable);
-        
-        return allUsers.map(u => ({
-          id: u.id,
-          openId: u.openId,
-          name: u.name,
-          email: u.email,
-          role: u.role,
-          isActive: u.isActive,
-          createdAt: u.createdAt,
-          lastSignedIn: u.lastSignedIn,
-        }));
-      }),
-    }),
   }),
 
   // Saved Locations (Pontos e Polígonos salvos)
@@ -1111,7 +1010,7 @@ export const appRouter = router({
             lng: z.number(),
           })).optional(),
         }),
-        metadataJson: z.record(z.any()).optional(),
+        metadataJson: z.record(z.string(), z.any()).optional(),
       }))
       .mutation(async ({ ctx, input }) => {
         const { createSavedLocation } = await import("./db/savedLocations");

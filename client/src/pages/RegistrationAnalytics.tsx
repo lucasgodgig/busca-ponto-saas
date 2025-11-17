@@ -55,12 +55,12 @@ export default function RegistrationAnalytics() {
 
   // Preparar dados para gráfico de linha
   const trendData: Record<string, any> = {};
-  trend?.forEach(item => {
-    const date = item.date;
+  registrationTrends?.forEach((item) => {
+    const date = new Date(item.date).toLocaleDateString('pt-BR');
     if (!trendData[date]) {
       trendData[date] = { date };
     }
-    trendData[date][item.method] = item.count;
+    (trendData[date] as any)[item.method] = item.count;
   });
   const chartData = Object.values(trendData);
 
@@ -226,16 +226,16 @@ export default function RegistrationAnalytics() {
                         </tr>
                       </thead>
                       <tbody>
-                        {usersList.map(user => (
+                        {usersList.map((user: any) => (
                           <tr key={user.id} className="border-b hover:bg-gray-50">
                             <td className="py-3 px-4">{user.name || "-"}</td>
                             <td className="py-3 px-4 text-gray-600">{user.email || "-"}</td>
                             <td className="py-3 px-4">
                               <span
                                 className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-white"
-                                style={{ backgroundColor: COLORS[user.registrationMethod as keyof typeof COLORS] }}
+                                style={{ backgroundColor: COLORS[(user.loginMethod || 'oauth') as keyof typeof COLORS] }}
                               >
-                                {user.registrationMethod === "form" ? "Formulário" : user.registrationMethod === "oauth" ? "OAuth" : "Admin"}
+                                {user.loginMethod === "form" ? "Formulário" : user.loginMethod === "oauth" ? "OAuth" : "Admin"}
                               </span>
                             </td>
                             <td className="py-3 px-4 text-gray-600">

@@ -54,7 +54,6 @@ export function registerOAuthRoutes(app: Express) {
         email: userInfo.email ?? null,
         loginMethod: userInfo.loginMethod ?? userInfo.platform ?? null,
         lastSignedIn: new Date(),
-        registrationMethod: registrationMethod as 'form' | 'oauth' | 'admin',
       });
       
       // Limpar cookie de metodo de registro

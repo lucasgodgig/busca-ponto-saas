@@ -596,16 +596,6 @@ export const commercialPointPhotos = mysqlTable("commercialPointPhotos", {
   pointIdIdx: index("pointId_idx").on(table.pointId),
 }));
 
-export type CommercialPointRequest = typeof commercialPointRequests.$inferSelect;
-export type InsertCommercialPointRequest = typeof commercialPointRequests.$inferInsert;
-export type CommercialPoint = typeof commercialPoints.$inferSelect;
-export type InsertCommercialPoint = typeof commercialPoints.$inferInsert;
-export type CommercialPointPhoto = typeof commercialPointPhotos.$inferSelect;
-export type InsertCommercialPointPhoto = typeof commercialPointPhotos.$inferInsert;
-
-
-
-
 // Duplicated tables removed - already defined above
 
 // Relations
@@ -640,11 +630,5 @@ export const commercialPointPhotosRelations = relations(commercialPointPhotos, (
   }),
 }));
 
-// Type exports
-export type CommercialPointRequest = typeof commercialPointRequests.$inferSelect;
-export type InsertCommercialPointRequest = typeof commercialPointRequests.$inferInsert;
-export type CommercialPoint = typeof commercialPoints.$inferSelect;
-export type InsertCommercialPoint = typeof commercialPoints.$inferInsert;
-export type CommercialPointPhoto = typeof commercialPointPhotos.$inferSelect;
-export type InsertCommercialPointPhoto = typeof commercialPointPhotos.$inferInsert;
+
 
