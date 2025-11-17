@@ -6,12 +6,14 @@ import { Card } from "@/components/ui/card";
 import { ArrowLeft, MapPin, Home, Users, DollarSign, Zap, Calendar } from "lucide-react";
 import { useLocation, useRoute } from "wouter";
 import { toast } from "sonner";
+import { PhotoGalleryModal } from "@/components/PhotoGallery";
 
 export default function CommercialPointDetails() {
   const [, navigate] = useLocation();
   const [, params] = useRoute("/commercial-points/:id");
   const { user } = useAuth();
   const requestId = params?.id ? parseInt(params.id) : 0;
+  const [selectedPointId, setSelectedPointId] = useState<number | null>(null);
 
   const { data: request, isLoading, error } = trpc.commercialPoints.getRequest.useQuery(
     { requestId },
@@ -108,6 +110,19 @@ export default function CommercialPointDetails() {
       </div>
 
       <div className="max-w-6xl mx-auto p-6">
+        {/* Header com botão Editar */}
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-3xl font-bold">Solicitação #{requestId}</h1>
+          {request.status === "aberto" && (
+            <Button
+              onClick={() => navigate(`/commercial-points/${requestId}/edit`)}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              Editar Solicitação
+            </Button>
+          )}
+        </div>
+
         {/* Informações Principais */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           <Card className="p-6">
@@ -191,29 +206,38 @@ export default function CommercialPointDetails() {
                   <h3 className="font-bold text-lg mb-4">{point.address}</h3>
 
                   <div className="space-y-3 mb-6 text-sm">
-                    {point.neighborhood && (
+                    {point.totalAreaM2 && (
                       <p>
-                        <strong>Bairro:</strong> {point.neighborhood}
+                        <strong>Área Total:</strong> {point.totalAreaM2} m²
                       </p>
                     )}
-                    {point.area && (
+                    {point.usableAreaM2 && (
                       <p>
-                        <strong>Área:</strong> {point.area} m²
+                        <strong>Área Útil:</strong> {point.usableAreaM2} m²
                       </p>
                     )}
-                    {point.rentValue && (
+                    {point.rentalPrice && (
                       <p>
-                        <strong>Aluguel:</strong> R$ {point.rentValue.toLocaleString("pt-BR")}
+                        <strong>Aluguel:</strong> R$ {(point.rentalPrice / 100).toLocaleString("pt-BR")}
                       </p>
                     )}
-                    {point.notes && (
+                    {point.salePrice && (
                       <p>
-                        <strong>Observações:</strong> {point.notes}
+                        <strong>Preço de Venda:</strong> R$ {(point.salePrice / 100).toLocaleString("pt-BR")}
+                      </p>
+                    )}
+                    {point.description && (
+                      <p>
+                        <strong>Descrição:</strong> {point.description}
                       </p>
                     )}
                   </div>
 
-                  <Button variant="outline" className="w-full">
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => setSelectedPointId(point.id)}
+                  >
                     Ver Fotos
                   </Button>
                 </Card>
@@ -236,6 +260,15 @@ export default function CommercialPointDetails() {
             <MapPin size={48} className="mx-auto text-muted-foreground mb-4" />
             <p className="text-muted-foreground mb-4">Esta solicitação foi cancelada.</p>
           </Card>
+        )}
+
+        {/* Photo Gallery Modal */}
+        {selectedPointId && commercialPoints && (
+          <PhotoGalleryModal
+            photos={commercialPoints.find((p) => p.id === selectedPointId)?.photos || []}
+            isOpen={!!selectedPointId}
+            onClose={() => setSelectedPointId(null)}
+          />
         )}
       </div>
     </div>

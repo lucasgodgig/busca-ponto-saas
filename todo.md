@@ -149,3 +149,31 @@
 - [x] Corrigir nomes das procedures
 - [x] Testar navegacao e validar que pagina carrega corretamente
 
+---
+
+## 🔄 Sessão 13 - Implementar 3 Features de Melhorias
+
+### 1. Galeria de Fotos
+- [x] Criar componente PhotoGallery.tsx com modal/carrossel
+- [x] Adicionar visualização de fotos dos pontos comerciais
+- [x] Implementar navegação entre fotos (anterior/próximo)
+- [x] Adicionar lightbox ao clicar em foto
+- [x] Integrar na página CommercialPointDetails.tsx
+
+### 2. Edição de Solicitações
+- [x] Criar página EditCommercialPointRequest.tsx
+- [x] Permitir edição de campos (segmento, cidade, bairros, requisitos, etc)
+- [x] Validar que solicitação está em status "aberto"
+- [x] Bloquear edição se status for "encontrado" ou "cancelado"
+- [x] Adicionar rota /commercial-points/:id/edit no App.tsx
+- [x] Integrar botão "Editar" na página de detalhes
+
+### 3. Filtros e Busca
+- [x] Adicionar barra de busca na lista de solicitações
+- [x] Implementar filtros por status (aberto, encontrado, cancelado)
+- [x] Implementar filtros por data (últimos 7 dias, 30 dias, todos)
+- [x] Implementar filtros por cidade
+- [x] Implementar filtros por segmento
+- [x] Salvar filtros em localStorage para persistência
+- [x] Adicionar botão "Limpar Filtros"
+
