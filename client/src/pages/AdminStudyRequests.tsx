@@ -63,31 +63,10 @@ export default function AdminStudyRequests() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [detailsModalOpen, setDetailsModalOpen] = useState(false);
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
-  const [attachPointsModalOpen, setAttachPointsModalOpen] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<any>(null);
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [adminNotes, setAdminNotes] = useState("");
-  const [selectedPointId, setSelectedPointId] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  // Query para listar pontos comerciais disponiveis
-  const { data: availablePoints = [] } = trpc.commercialPoints.list.useQuery(
-    selectedRequest?.request.tenantId ? { tenantId: selectedRequest.request.tenantId } : undefined,
-    { enabled: !!selectedRequest?.request.tenantId }
-  );
-
-  // Mutation para anexar ponto ao estudo
-  const attachPointMutation = trpc.studies.attachPoint.useMutation({
-    onSuccess: () => {
-      toast.success("Ponto anexado com sucesso");
-      setAttachPointsModalOpen(false);
-      setSelectedPointId(null);
-      refetch();
-    },
-    onError: (error) => {
-      toast.error("Erro ao anexar ponto", { description: error.message });
-    },
-  });
 
   // Queries
   const { data: requests, isLoading, refetch } = trpc.studyRequests.listAll.useQuery(
@@ -411,37 +390,6 @@ export default function AdminStudyRequests() {
                 </div>
               )}
               <div>
-                <Label className="font-semibold">Usuário que Solicitou</Label>
-                <div className="text-sm">
-                  <p className="font-medium">{selectedRequest.creator?.name || "N/A"}</p>
-                  <p className="text-muted-foreground">{selectedRequest.creator?.email}</p>
-                </div>
-              </div>
-              <div>
-                <Label className="font-semibold">Empresa</Label>
-                <p className="text-sm">{selectedRequest.tenant?.name || "N/A"}</p>
-              </div>
-              <div>
-                <Label className="font-semibold">Pontos Comerciais Anexados</Label>
-                <div className="text-sm border rounded p-3 bg-muted/50 min-h-[100px]">
-                  {selectedRequest.commercialPoints && selectedRequest.commercialPoints.length > 0 ? (
-                    <ul className="space-y-2">
-                      {selectedRequest.commercialPoints.map((point: any) => (
-                        <li key={point.id} className="flex items-start gap-2">
-                          <span className="text-primary font-medium">•</span>
-                          <div>
-                            <p className="font-medium">{point.name}</p>
-                            <p className="text-muted-foreground text-xs">{point.address}</p>
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p className="text-muted-foreground italic">Nenhum ponto comercial anexado ainda</p>
-                  )}
-                </div>
-              </div>
-              <div>
                 <Label className="font-semibold">Notas Internas (Admin)</Label>
                 <Textarea
                   value={adminNotes}
@@ -455,9 +403,6 @@ export default function AdminStudyRequests() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setDetailsModalOpen(false)}>
               Fechar
-            </Button>
-            <Button variant="secondary" onClick={() => setAttachPointsModalOpen(true)}>
-              Anexar Ponto
             </Button>
             <Button onClick={saveAdminNotes}>Salvar Notas</Button>
           </DialogFooter>
@@ -507,60 +452,6 @@ export default function AdminStudyRequests() {
                   <Upload className="w-4 h-4 mr-2" />
                   Enviar PDF
                 </>
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Attach Points Modal */}
-      <Dialog open={attachPointsModalOpen} onOpenChange={setAttachPointsModalOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Anexar Ponto Comercial</DialogTitle>
-            <DialogDescription>
-              Selecione um ponto comercial para anexar a esta solicitacao
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <Label>Ponto Comercial</Label>
-              <Select value={selectedPointId?.toString() || ""} onValueChange={(v) => setSelectedPointId(parseInt(v))}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione um ponto..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {availablePoints.map((point: any) => (
-                    <SelectItem key={point.id} value={point.id.toString()}>
-                      {point.name} - {point.address}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setAttachPointsModalOpen(false)}>
-              Cancelar
-            </Button>
-            <Button
-              onClick={() => {
-                if (selectedRequest && selectedPointId) {
-                  attachPointMutation.mutate({
-                    studyId: selectedRequest.request.id,
-                    pointId: selectedPointId,
-                  });
-                }
-              }}
-              disabled={!selectedPointId || attachPointMutation.isPending}
-            >
-              {attachPointMutation.isPending ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Anexando...
-                </>
-              ) : (
-                "Anexar"
               )}
             </Button>
           </DialogFooter>

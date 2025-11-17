@@ -204,15 +204,3 @@
 - [x] Atualizar tRPC procedures
 - [ ] Testar formulário e salvar checkpoint
 
-
-
-## 🆕 Sessao 7 - Melhorias na Visualizacao de Solicitacoes (17/11/2025)
-
-### Feature: Mostrar Usuario e Anexar Pontos as Solicitacoes
-- [x] Atualizar query para trazer dados do usuario que fez a solicitacao
-- [x] Exibir nome do usuario na coluna "Usuario" da tabela
-- [x] Criar modal/pagina de detalhe da solicitacao
-- [x] Implementar funcionalidade de anexar pontos comerciais
-- [x] Criar router de commercialPoints com procedure list
-- [x] Criar procedure studies.attachPoint
-- [ ] Testar fluxo completo de anexacao de pontos
