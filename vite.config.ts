@@ -40,7 +40,5 @@ export default defineConfig({
       strict: true,
       deny: ["**/.*"],
     },
-    hmr: false, // Desabilitar HMR completamente em produção
-    middlewareMode: true,
   },
 });

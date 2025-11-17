@@ -1,9 +1,0 @@
-{
-  "query": "\n-- Deletar todos os usuários exceto o admin (openId = 'admin')\nDELETE FROM users WHERE openId != 'admin';\n\n-- Deletar memberships órfãs\nDELETE FROM memberships WHERE userId NOT IN (SELECT id FROM users);\n\n-- Deletar estudos órfãos\nDELETE FROM studies WHERE createdBy NOT IN (SELECT id FROM users);\n\n-- Deletar comentários órfãos\nDELETE FROM studyComments WHERE authorId NOT IN (SELECT id FROM users);\n\n-- Deletar arquivos órfãos\nDELETE FROM studyFiles WHERE uploadedBy NOT IN (SELECT id FROM users);\n\n-- Deletar consultas rápidas órfãs\nDELETE FROM quickQueries WHERE userId NOT IN (SELECT id FROM users);\n\n-- Deletar logs de auditoria\nDELETE FROM auditLogs;\n\n-- Listar usuários restantes\nSELECT id, openId, name, email FROM users;\n",
-  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user KpBuSok2NkZmZXX.root --database 7GaR8dGShizifRGBM35LMu --execute \n-- Deletar todos os usuários exceto o admin (openId = 'admin')\nDELETE FROM users WHERE openId != 'admin';\n\n-- Deletar memberships órfãs\nDELETE FROM memberships WHERE userId NOT IN (SELECT id FROM users);\n\n-- Deletar estudos órfãos\nDELETE FROM studies WHERE createdBy NOT IN (SELECT id FROM users);\n\n-- Deletar comentários órfãos\nDELETE FROM studyComments WHERE authorId NOT IN (SELECT id FROM users);\n\n-- Deletar arquivos órfãos\nDELETE FROM studyFiles WHERE uploadedBy NOT IN (SELECT id FROM users);\n\n-- Deletar consultas rápidas órfãs\nDELETE FROM quickQueries WHERE userId NOT IN (SELECT id FROM users);\n\n-- Deletar logs de auditoria\nDELETE FROM auditLogs;\n\n-- Listar usuários restantes\nSELECT id, openId, name, email FROM users;\n",
-  "rows": [],
-  "messages": [],
-  "stdout": "",
-  "stderr": "",
-  "execution_time_ms": 186
-}
