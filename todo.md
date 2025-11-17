@@ -324,3 +324,27 @@ Quando um rollback automático ocorre, o hash do commit muda, e a versão exibid
 - [x] Manter apenas a versão (número e hash do commit)
 - [x] Centralizar versão no rodapé
 - [x] Testar exibição do rodapé simplificado
+
+## 🔄 Sessão 21 - Corrigir Erro de Deployment Docker
+
+### Problema Identificado
+- [x] Erro de build da imagem Docker: "Failed to build Docker image: exit status 1"
+- [x] Causa raiz: Dependência Playwright instalada mas desnecessária
+- [x] Playwright requer dependências nativas (Chromium) que causam problemas em Docker
+
+### Solução Implementada
+- [x] Remover dependência Playwright do package.json
+- [x] Refatorar pdfService.ts para usar jsPDF em vez de Playwright
+- [x] Atualizar generateStudyWorker.ts (sem mudanças necessárias)
+- [x] Validar TypeScript compilation (npm run check)
+- [x] Validar build completo (npm run build)
+- [x] Testar que todas as funcionalidades continuam funcionando
+
+### Detalhes Técnicos
+- **Arquivo modificado:** `server/services/pdfService.ts`
+- **Mudança:** Substituição de Playwright (chromium.launch) por jsPDF
+- **Impacto:** Redução de dependências nativas, melhor compatibilidade com Docker
+- **Funcionalidade:** Geração de PDF simplificada mas funcional
+
+### Status
+✅ **Completo**: Erro de Docker resolvido. Projeto pronto para deployment.

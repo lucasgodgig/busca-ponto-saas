@@ -6,10 +6,10 @@
 
 export const VERSION_INFO = {
   // Hash do commit (primeiros 8 caracteres)
-  commitHash: '6bd63182',
+  commitHash: '827349f1',
   
   // Timestamp da build (ISO 8601)
-  buildTime: '2025-11-17T03:26:14.929Z',
+  buildTime: '2025-11-17T03:31:37.917Z',
   
   // Versão semântica (major.minor.patch)
   semver: '1.0.0',
