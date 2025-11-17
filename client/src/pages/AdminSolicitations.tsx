@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { useAuth } from "@/_core/hooks/useAuth";
+import { useState, useRef, useEffect, useCallback } from "react";
+import { useAuth } from '@/_core/hooks/useAuth';
+
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -129,28 +130,34 @@ export default function AdminSolicitations() {
   const [commercialPoints, setCommercialPoints] = useState<any[]>([]);
   const [pointsLoading, setPointsLoading] = useState(false);
 
-  const refetchPoints = async () => {
+  const refetchPoints = useCallback(async () => {
     setPointsLoading(true);
     try {
-      const response = await fetch('/api/trpc/commercialPoints.getRequestsForAdmin?input={}', {
+      // tRPC queries use GET, not POST
+      const params = new URLSearchParams();
+      params.set('input', JSON.stringify({}));
+      const response = await fetch(`/api/trpc/commercialPoints.getRequestsForAdmin?${params}`, {
         credentials: 'include'
       });
+      const data = await response.json();
       if (response.ok) {
-        const data = await response.json();
-        setCommercialPoints(data.result?.data || []);
-      } else {
-        console.error('Erro na resposta:', response.status);
+        const points = data.result?.data || [];
+        setCommercialPoints(points);
+      } else if (data.error) {
+        console.error('API Error:', data.error.json?.message);
+        setCommercialPoints([]);
       }
     } catch (error) {
-      console.error('Erro ao carregar pontos comerciais:', error);
+      console.error('Fetch error:', error);
+      setCommercialPoints([]);
     } finally {
       setPointsLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     refetchPoints();
-  }, []);
+  }, [refetchPoints]);
 
   // Mutations
   const updateStudyMutation = trpc.studyRequests.update.useMutation({

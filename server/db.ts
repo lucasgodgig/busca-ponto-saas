@@ -576,11 +576,11 @@ export async function linkLeadToUser(email: string, userId: number): Promise<voi
 export async function getCommercialPointRequestsForAdmin(tenantId?: number) {
   const db = await getDb();
   if (!db) {
-    console.warn("[Database] Cannot get requests for admin: database not available");
     return [];
   }
 
   try {
+    // Return all commercial point requests, optionally filtered by tenantId
     let query = db.select().from(commercialPointRequests);
     
     if (tenantId) {

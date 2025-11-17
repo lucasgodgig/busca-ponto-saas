@@ -1,0 +1,28 @@
+{
+  "query": "SELECT \n  'Admin' as type,\n  u.id,\n  u.role,\n  m.tenantId\nFROM users u\nLEFT JOIN memberships m ON u.id = m.userId\nWHERE u.role IN ('admin_bp', 'analyst_bp')\nUNION ALL\nSELECT \n  'Request' as type,\n  cpr.id,\n  cpr.segment,\n  cpr.tenantId\nFROM commercialPointRequests cpr\nLIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user KpBuSok2NkZmZXX.root --database 7GaR8dGShizifRGBM35LMu --execute SELECT \n  'Admin' as type,\n  u.id,\n  u.role,\n  m.tenantId\nFROM users u\nLEFT JOIN memberships m ON u.id = m.userId\nWHERE u.role IN ('admin_bp', 'analyst_bp')\nUNION ALL\nSELECT \n  'Request' as type,\n  cpr.id,\n  cpr.segment,\n  cpr.tenantId\nFROM commercialPointRequests cpr\nLIMIT 10;",
+  "rows": [
+    {
+      "type": "Request",
+      "id": "1",
+      "role": "Igreja",
+      "tenantId": "1"
+    },
+    {
+      "type": "Request",
+      "id": "30001",
+      "role": "academia ",
+      "tenantId": "60001"
+    },
+    {
+      "type": "Admin",
+      "id": "1",
+      "role": "admin_bp",
+      "tenantId": "1"
+    }
+  ],
+  "messages": [],
+  "stdout": "type\tid\trole\ttenantId\nRequest\t1\tIgreja\t1\nRequest\t30001\tacademia \t60001\nAdmin\t1\tadmin_bp\t1\n",
+  "stderr": "",
+  "execution_time_ms": 52
+}

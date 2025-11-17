@@ -217,9 +217,10 @@ export const commercialPointsRouter = router({
         throw new TRPCError({ code: "FORBIDDEN", message: "Apenas admin BP ou analyst BP pode acessar" });
       }
 
-      // Se tenantId não foi passado, buscar o primeiro tenantId do admin
+      // Se o usuário é admin_bp, retornar TODAS as solicitações
+      // Caso contrário, filtrar por tenantId
       let tenantId = input.tenantId;
-      if (!tenantId) {
+      if (!tenantId && ctx.user.role !== 'admin_bp') {
         const memberships = await db.getUserMemberships(ctx.user.id);
         if (memberships.length > 0) {
           tenantId = memberships[0].membership.tenantId;
