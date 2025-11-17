@@ -214,5 +214,108 @@ export const usersRouter = router({
       });
     }
   }),
+
+  // Obter limite de estudos do usuario atual
+  getStudyLimit: protectedProcedure.query(async ({ ctx }) => {
+    const db = await getDb();
+    if (!db) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Database not available",
+      });
+    }
+
+    try {
+      const user = await db
+        .select()
+        .from(users)
+        .where(eq(users.id, ctx.user.id))
+        .limit(1);
+
+      if (!user || user.length === 0) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Usuario nao encontrado",
+        });
+      }
+
+      return {
+        userId: user[0].id,
+        monthlyStudyLimit: user[0].monthlyStudyLimit,
+      };
+    } catch (error) {
+      console.error("Error fetching study limit:", error);
+      if (error instanceof TRPCError) throw error;
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Erro ao buscar limite de estudos",
+      });
+    }
+  }),
+
+  // Atualizar limite de estudos (apenas para admins)
+  updateStudyLimit: protectedProcedure
+    .input(
+      z.object({
+        userId: z.number(),
+        newLimit: z.number().int().min(1, "Limite deve ser no minimo 1"),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      // Apenas admins BP podem atualizar limites
+      if (ctx.user.role !== 'admin_bp') {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Apenas administradores podem alterar limites de estudos",
+        });
+      }
+
+      const db = await getDb();
+      if (!db) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Database not available",
+        });
+      }
+
+      try {
+        // Verificar se o usuario existe
+        const user = await db
+          .select()
+          .from(users)
+          .where(eq(users.id, input.userId))
+          .limit(1);
+
+        if (!user || user.length === 0) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Usuario nao encontrado",
+          });
+        }
+
+        // Atualizar limite
+        await db
+          .update(users)
+          .set({
+            monthlyStudyLimit: input.newLimit,
+            updatedAt: new Date(),
+          })
+          .where(eq(users.id, input.userId));
+
+        return {
+          success: true,
+          message: `Limite de estudos atualizado para ${input.newLimit}`,
+          userId: input.userId,
+          newLimit: input.newLimit,
+        };
+      } catch (error) {
+        console.error("Error updating study limit:", error);
+        if (error instanceof TRPCError) throw error;
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Erro ao atualizar limite de estudos",
+        });
+      }
+    }),
 });
 

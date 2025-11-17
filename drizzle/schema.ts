@@ -12,7 +12,7 @@ export const users = mysqlTable("users", {
   loginMethod: varchar("loginMethod", { length: 64 }),
   role: mysqlEnum("role", ["admin_bp", "tenant_admin", "member", "analyst_bp"]).default("member").notNull(),
   image: text("image"),
-  monthlyStudyLimit: int("monthlyStudyLimit").default(10).notNull(),
+  monthlyStudyLimit: int("monthlyStudyLimit").default(3).notNull(),
   isActive: boolean("isActive").default(true).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),

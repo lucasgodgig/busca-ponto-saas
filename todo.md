@@ -523,3 +523,27 @@ Implementar a aba "Pontos Comerciais" no painel de Solicitações do admin com a
 
 ### Status
 ⏳ **Em Progresso**
+
+
+## 🔄 Sessão 20 - Ajustar Sistema de Limite de Estudos
+
+### Mudanças Solicitadas
+- [ ] Remover opção "Consultas" do sistema
+- [ ] Renomear "Consultas" para "Estudos" em toda a aplicação
+- [ ] Definir 3 como limite padrão para qualquer usuário
+- [ ] Permitir que apenas administradores aumentem o limite dos usuários
+- [ ] Atualizar schema do banco de dados
+- [ ] Implementar procedures tRPC para gerenciar limite de estudos
+- [ ] Atualizar UI do dashboard para remover "Consultas" e mostrar novo limite
+- [ ] Criar painel de administração para gerenciar limites de usuários
+- [ ] Testar e validar as mudanças
+
+
+### Status da Sessao 20
+- [x] Atualizar schema do banco de dados para usar 3 como limite padrao
+- [x] Executar migracao do banco de dados (drizzle migrate)
+- [x] Implementar procedures tRPC para gerenciar limite de estudos
+- [x] Atualizar Dashboard para usar monthlyStudyLimit
+- [x] Remover referencias a "Consultas" e usar apenas "Estudos"
+- [ ] Criar painel de administracao para gerenciar limites de usuarios
+- [ ] Testar e validar as mudancas

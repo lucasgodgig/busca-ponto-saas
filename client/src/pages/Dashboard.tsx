@@ -77,10 +77,11 @@ export default function Dashboard() {
   
   // Notificar quando limite eh atingido
   const hasNotifiedRef = useRef(false);
+  const { data: userStudyLimit } = trpc.users.getStudyLimit.useQuery();
   useEffect(() => {
-    if (usageData && !hasNotifiedRef.current) {
-      const limit = usageData.tenant?.limitsJson?.quickQueriesPerMonth || 10;
-      const used = usageData.usage?.quickQueriesUsed || 0;
+    if (userStudyLimit && !hasNotifiedRef.current) {
+      const limit = userStudyLimit.monthlyStudyLimit || 3;
+      const used = studies?.length || 0;
       const remaining = Math.max(0, limit - used);
       if (remaining <= 0) {
         toast.error("Voce atingiu o limite mensal de estudos!", {
@@ -89,10 +90,10 @@ export default function Dashboard() {
         });
         hasNotifiedRef.current = true;
       }
-    } else if (!usageData) {
+    } else if (!userStudyLimit) {
       hasNotifiedRef.current = false;
     }
-  }, [usageData?.tenant?.id, usageData?.usage?.id]);
+  }, [userStudyLimit?.userId, studies?.length]);
 
   const pendingStudies = studies?.filter((s) => s.study?.status === 'aberto' || s.study?.status === 'em_analise').length || 0;
   const completedStudies = studies?.filter(s => s.study?.status === 'concluido').length || 0;
@@ -197,9 +198,9 @@ export default function Dashboard() {
         </div>
 
         {/* Indicador de Estudos Restantes */}
-        {usageData && user?.role !== 'admin_bp' && (() => {
-          const limit = usageData.tenant?.limitsJson?.quickQueriesPerMonth || 10;
-          const used = usageData.usage?.quickQueriesUsed || 0;
+        {userStudyLimit && user?.role !== 'admin_bp' && (() => {
+          const limit = userStudyLimit.monthlyStudyLimit || 3;
+          const used = studies?.length || 0;
           const remaining = Math.max(0, limit - used);
           return (
           <Card className="mb-6 md:mb-8 border-2 border-primary/20">
@@ -276,8 +277,8 @@ export default function Dashboard() {
         <div className="grid gap-6 md:gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 mb-8 md:mb-12 animate-stagger">
           {actionCards.map((card, index) => {
             const isAdmin = user?.role === 'admin_bp';
-            const remaining = usageData ? Math.max(0, (usageData.tenant?.limitsJson?.quickQueriesPerMonth || 10) - (usageData.usage?.quickQueriesUsed || 0)) : 0;
-            const isLimitReached = !isAdmin && usageData && remaining <= 0 && card.title === 'Solicitar Estudo';
+            const remaining = userStudyLimit ? Math.max(0, (userStudyLimit.monthlyStudyLimit || 3) - (studies?.length || 0)) : 0;
+            const isLimitReached = !isAdmin && remaining <= 0 && card.title === 'Solicitar Estudo';
             const cardContent = (
               <Card className={`group transition-all border-2 ${
                 isLimitReached 

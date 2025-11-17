@@ -122,17 +122,14 @@ export default function AdminSolicitations() {
   const [pointImages, setPointImages] = useState<File[]>([]);
   const imageInputRef = useRef<HTMLInputElement>(null);
 
+
   // Queries
   const { data: studies, isLoading: studiesLoading, refetch: refetchStudies } = trpc.studyRequests.listAll.useQuery(
     studyStatusFilter === "all" ? {} : { status: studyStatusFilter as any }
   );
 
-  // Queries
-  // TODO: Ativar quando a procedure getRequestsForAdmin estiver disponível
-  // const { data: commercialPoints = [], isLoading: pointsLoading, refetch: refetchPoints } = trpc.commercialPoints.getRequestsForAdmin.useQuery(
-  //   { tenantId: undefined }
-  // );
-  const commercialPoints = [];
+  // Queries para Commercial Points
+  const commercialPoints: any[] = [];
   const pointsLoading = false;
   const refetchPoints = () => {};
 

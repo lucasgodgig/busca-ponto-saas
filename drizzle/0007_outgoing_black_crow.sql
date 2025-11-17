@@ -1,0 +1,1 @@
+ALTER TABLE `users` MODIFY COLUMN `monthlyStudyLimit` int NOT NULL DEFAULT 3;
