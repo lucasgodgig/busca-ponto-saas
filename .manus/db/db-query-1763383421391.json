@@ -1,0 +1,21 @@
+{
+  "query": "SELECT \n  cp.id,\n  cp.userId,\n  cp.tenantId,\n  cp.segment,\n  cp.city,\n  cp.status,\n  cp.createdAt,\n  u.email,\n  t.name as tenantName\nFROM commercialPointRequests cp\nLEFT JOIN users u ON cp.userId = u.id\nLEFT JOIN tenants t ON cp.tenantId = t.id\nWHERE u.email = 'davicristianodeandrade4@gmail.com'\nORDER BY cp.createdAt DESC\nLIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user KpBuSok2NkZmZXX.root --database 7GaR8dGShizifRGBM35LMu --execute SELECT \n  cp.id,\n  cp.userId,\n  cp.tenantId,\n  cp.segment,\n  cp.city,\n  cp.status,\n  cp.createdAt,\n  u.email,\n  t.name as tenantName\nFROM commercialPointRequests cp\nLEFT JOIN users u ON cp.userId = u.id\nLEFT JOIN tenants t ON cp.tenantId = t.id\nWHERE u.email = 'davicristianodeandrade4@gmail.com'\nORDER BY cp.createdAt DESC\nLIMIT 10;",
+  "rows": [
+    {
+      "id": "30001",
+      "userId": "60001",
+      "tenantId": "60001",
+      "segment": "academia ",
+      "city": "são paulo ",
+      "status": "aberto",
+      "createdAt": "2025-11-17 12:40:08",
+      "email": "davicristianodeandrade4@gmail.com",
+      "tenantName": "Davi Cristiano de Andrade "
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tuserId\ttenantId\tsegment\tcity\tstatus\tcreatedAt\temail\ttenantName\n30001\t60001\t60001\tacademia \tsão paulo \taberto\t2025-11-17 12:40:08\tdavicristianodeandrade4@gmail.com\tDavi Cristiano de Andrade \n",
+  "stderr": "",
+  "execution_time_ms": 100
+}

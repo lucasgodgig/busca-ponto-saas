@@ -1,0 +1,23 @@
+{
+  "query": "SELECT \n  cp.id,\n  cp.userId,\n  cp.tenantId,\n  cp.segment,\n  cp.city,\n  cp.neighborhoods,\n  cp.status,\n  cp.createdAt,\n  u.email as userEmail,\n  u.id as userId,\n  t.id as tenantId,\n  t.name as tenantName,\n  m.role as userRole\nFROM commercialPointRequests cp\nLEFT JOIN users u ON cp.userId = u.id\nLEFT JOIN tenants t ON cp.tenantId = t.id\nLEFT JOIN memberships m ON u.id = m.userId AND t.id = m.tenantId\nWHERE u.email = 'davicristianodeandrade4@gmail.com'\nLIMIT 1;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user KpBuSok2NkZmZXX.root --database 7GaR8dGShizifRGBM35LMu --execute SELECT \n  cp.id,\n  cp.userId,\n  cp.tenantId,\n  cp.segment,\n  cp.city,\n  cp.neighborhoods,\n  cp.status,\n  cp.createdAt,\n  u.email as userEmail,\n  u.id as userId,\n  t.id as tenantId,\n  t.name as tenantName,\n  m.role as userRole\nFROM commercialPointRequests cp\nLEFT JOIN users u ON cp.userId = u.id\nLEFT JOIN tenants t ON cp.tenantId = t.id\nLEFT JOIN memberships m ON u.id = m.userId AND t.id = m.tenantId\nWHERE u.email = 'davicristianodeandrade4@gmail.com'\nLIMIT 1;",
+  "rows": [
+    {
+      "id": "30001",
+      "userId": "60001",
+      "tenantId": "60001",
+      "segment": "academia ",
+      "city": "são paulo ",
+      "neighborhoods": "vila mariana ",
+      "status": "aberto",
+      "createdAt": "2025-11-17 12:40:08",
+      "userEmail": "davicristianodeandrade4@gmail.com",
+      "tenantName": "Davi Cristiano de Andrade ",
+      "userRole": "tenant_admin"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tuserId\ttenantId\tsegment\tcity\tneighborhoods\tstatus\tcreatedAt\tuserEmail\tuserId\ttenantId\ttenantName\tuserRole\n30001\t60001\t60001\tacademia \tsão paulo \tvila mariana \taberto\t2025-11-17 12:40:08\tdavicristianodeandrade4@gmail.com\t60001\t60001\tDavi Cristiano de Andrade \ttenant_admin\n",
+  "stderr": "",
+  "execution_time_ms": 51
+}

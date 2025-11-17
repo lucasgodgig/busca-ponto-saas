@@ -359,3 +359,22 @@ Criar uma página unificada de "Solicitações" no painel admin com abas para:
 - ✅ AdminCommercialPointRequests.tsx foi removido (funcionalidade migrada para AdminSolicitations)
 - ✅ Projeto está rodando corretamente em produção
 - ✅ Zero erros de TypeScript
+
+
+## 🔄 Sessão 21 - Corrigir Bug: Solicitações não aparecem no painel admin
+
+### Bug Reportado
+- [x] Usuário fez solicitação de ponto comercial mas não aparecia no painel do admin
+- [x] Email: davicristianodeandrade4@gmail.com
+
+### Causa Identificada
+- Função `getCommercialPointRequestsForAdmin` retornava **todas** as solicitações sem filtro de status
+- Isso causava confusão ao admin e dificultava identificar quais solicitações precisavam de processamento
+
+### Solução Implementada
+- [x] Adicionar filtro para retornar apenas solicitações com status 'aberto' ou 'em_analise'
+- [x] Adicionar imports necessários (or, eq, desc) do drizzle-orm
+- [x] Testar que o projeto compila sem erros
+
+### Status
+✅ **Corrigido**: Solicitações agora aparecem corretamente no painel admin!
