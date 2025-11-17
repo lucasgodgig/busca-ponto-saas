@@ -206,4 +206,15 @@
 - [x] Procurar e substituir "Franqueadora" por "Empresa" em schema.ts
 - [x] Procurar e substituir "franqueadora" por "empresa" em seed.ts
 - [x] Atualizar mensagens de erro e labels
-- [x] Testar todas as pu00e1ginas para garantir consistu00eancia
+- [x] Testar todas as páginas para garantir consistência
+
+## 🔄 Sessão 16 - Corrigir Validação de Leads para Admins
+
+### Bug Reportado
+- [x] Usuário admin (Busca Ponto) não conseguia fazer login
+- [x] Validação de leads estava bloqueando admins
+
+### Solução Implementada
+- [x] Atualizar validação em auth.me para excluir role 'admin_bp'
+- [x] Admins agora podem fazer login sem estar registrados como leads
+- [x] Usuários comuns continuam precisando da validação de leads00eancia
