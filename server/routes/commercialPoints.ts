@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { protectedProcedure, router } from "../_core/trpc";
+import { protectedProcedure, router, adminProcedure } from "../_core/trpc";
 import { TRPCError } from "@trpc/server";
 import * as db from "../db";
 import { validateTenantAccess } from "../_core/tenantContext";
@@ -208,5 +208,115 @@ export const commercialPointsRouter = router({
 
       return { success: true, photoId: (result as any).insertId };
     }),
-});
 
+  // Admin procedures para alimentar dados de pontos comerciais
+  adminAddOption: adminProcedure
+    .input(z.object({
+      requestId: z.number(),
+      tenantId: z.number(),
+      address: z.string().min(1),
+      lat: z.string(),
+      lng: z.string(),
+      propertyType: z.string().optional(),
+      totalAreaM2: z.number().int().optional(),
+      usableAreaM2: z.number().int().optional(),
+      rentalPrice: z.number().int().optional(),
+      salePrice: z.number().int().optional(),
+      ownerName: z.string().optional(),
+      ownerPhone: z.string().optional(),
+      brokerName: z.string().optional(),
+      brokerPhone: z.string().optional(),
+      brokerEmail: z.string().email().optional(),
+      description: z.string().optional(),
+      amenitiesJson: z.array(z.string()).optional(),
+      isOption: z.boolean().default(false),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      if (!ctx.user) {
+        throw new TRPCError({ code: "UNAUTHORIZED" });
+      }
+
+      // Verificar que a solicitacao existe
+      const request = await db.getCommercialPointRequestById(input.requestId);
+      if (!request) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Solicitacao nao encontrada" });
+      }
+
+      // Verificar que o tenantId corresponde
+      if (request.tenantId !== input.tenantId) {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Acesso negado" });
+      }
+
+      const result = await db.createCommercialPoint({
+        requestId: input.requestId,
+        tenantId: input.tenantId,
+        address: input.address,
+        lat: input.lat,
+        lng: input.lng,
+        propertyType: input.propertyType,
+        totalAreaM2: input.totalAreaM2,
+        usableAreaM2: input.usableAreaM2,
+        rentalPrice: input.rentalPrice,
+        salePrice: input.salePrice,
+        ownerName: input.ownerName,
+        ownerPhone: input.ownerPhone,
+        brokerName: input.brokerName,
+        brokerPhone: input.brokerPhone,
+        brokerEmail: input.brokerEmail,
+        description: input.description,
+        amenitiesJson: input.amenitiesJson,
+        isOption: input.isOption,
+        status: "pendente",
+      });
+
+      return { success: true, pointId: (result as any).insertId };
+    }),
+
+  adminUpdatePointStatus: adminProcedure
+    .input(z.object({
+      pointId: z.number(),
+      status: z.enum(["pendente", "aprovado", "rejeitado"]),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      if (!ctx.user) {
+        throw new TRPCError({ code: "UNAUTHORIZED" });
+      }
+
+      const point = await db.getCommercialPointById(input.pointId);
+      if (!point) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Ponto comercial nao encontrado" });
+      }
+
+      await db.updateCommercialPointStatus(input.pointId, input.status);
+
+      return { success: true };
+    }),
+
+  adminGetRequestOptions: adminProcedure
+    .input(z.object({ requestId: z.number() }))
+    .query(async ({ ctx, input }) => {
+      if (!ctx.user) {
+        throw new TRPCError({ code: "UNAUTHORIZED" });
+      }
+
+      const request = await db.getCommercialPointRequestById(input.requestId);
+      if (!request) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Solicitacao nao encontrada" });
+      }
+
+      const options = await db.getCommercialPointOptions(input.requestId);
+      
+      // Buscar fotos para cada opcao
+      const optionsWithPhotos = await Promise.all(
+        options.map(async (option: any) => {
+          const photos = await db.getCommercialPointPhotos(option.id);
+          return {
+            ...option,
+            photos,
+          };
+        })
+      );
+
+      return optionsWithPhotos;
+    }),
+});

@@ -10,6 +10,7 @@ import Dashboard from "./pages/Dashboard";
 import MapPage from "./pages/MapPage";
 import InviteCodeValidation from "./pages/InviteCodeValidation";
 import Cadastro from "./pages/Cadastro";
+import CadastroConfirmacao from "./pages/CadastroConfirmacao";
 import AnalysisDashboard from "./pages/AnalysisDashboard";
 import AppLayout from "./components/AppLayout";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -32,6 +33,9 @@ const AdminStudyRequests = lazy(() => import("./pages/AdminStudyRequests"));
 const UsageHistory = lazy(() => import("./pages/UsageHistory"));
 const Analytics = lazy(() => import("./pages/Analytics"));
 const CommercialPoints = lazy(() => import("./pages/CommercialPoints"));
+const CommercialPointDetails = lazy(() => import("./pages/CommercialPointDetails"));
+const EditCommercialPointRequest = lazy(() => import("./pages/EditCommercialPointRequest"));
+const RegistrationAnalytics = lazy(() => import("./pages/RegistrationAnalytics"));
 
 // Loading component
 const PageLoader = () => (
@@ -47,6 +51,7 @@ function Router() {
       <Switch>
       <Route path={"/"} component={Home} />
       <Route path={"/cadastro"} component={Cadastro} />
+      <Route path={"/cadastro-confirmacao"} component={CadastroConfirmacao} />
       <Route path={"/invite"} component={InviteCodeValidation} />
       
       {/* Rotas com Sidebar */}
@@ -161,6 +166,27 @@ function Router() {
         <ProtectedRoute>
           <AppLayout>
             <CommercialPoints />
+          </AppLayout>
+        </ProtectedRoute>
+      </Route>
+      <Route path={"/commercial-points/:id"}>
+        <ProtectedRoute>
+          <AppLayout>
+            <CommercialPointDetails />
+          </AppLayout>
+        </ProtectedRoute>
+      </Route>
+      <Route path={"/commercial-points/:id/edit"}>
+        <ProtectedRoute>
+          <AppLayout>
+            <EditCommercialPointRequest />
+          </AppLayout>
+        </ProtectedRoute>
+      </Route>
+      <Route path={"/admin-bp/analise-registros"}>
+        <ProtectedRoute>
+          <AppLayout>
+            <RegistrationAnalytics />
           </AppLayout>
         </ProtectedRoute>
       </Route>

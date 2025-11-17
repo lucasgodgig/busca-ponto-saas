@@ -44,6 +44,10 @@ export function registerOAuthRoutes(app: Express) {
 
       console.log("[OAuth] [UpsertUser] Starting at", new Date().toISOString());
       const startUpsert = Date.now();
+      
+      // Verificar se o usuario veio do formulario de cadastro
+      const registrationMethod = req.cookies?.registrationMethod || 'oauth';
+      
       await db.upsertUser({
         openId: userInfo.openId,
         name: userInfo.name || null,
@@ -51,6 +55,9 @@ export function registerOAuthRoutes(app: Express) {
         loginMethod: userInfo.loginMethod ?? userInfo.platform ?? null,
         lastSignedIn: new Date(),
       });
+      
+      // Limpar cookie de metodo de registro
+      res.clearCookie('registrationMethod');
       const upsertTime = Date.now() - startUpsert;
       console.log(`[OAuth] [UpsertUser] Completed in ${upsertTime}ms for openId: ${userInfo.openId}`);
 

@@ -3,7 +3,7 @@ import { memo } from "react";
 import { Users, DollarSign, TrendingUp } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { getConsumptionKey, getConsumptionLabel } from "@/lib/segmentConfig";
-import SegmentConsumptionChart from "./SegmentConsumptionChart";
+// import SegmentConsumptionChart from "./SegmentConsumptionChart";
 import ConsumptionCategoriesChart from "./ConsumptionCategoriesChart";
 import type { SpaceData } from "@/services/spaceClient";
 
@@ -211,7 +211,7 @@ function DataPanel({ data, loading, segment }: DataPanelProps) {
                   align="right" 
                   verticalAlign="middle"
                   formatter={(value, entry) => {
-                    const pct = ((entry.payload.value / classData.reduce((sum, d) => sum + d.value, 0)) * 100).toFixed(1);
+                    const pct = ((entry.payload?.value || 0 / classData.reduce((sum, d) => sum + d.value, 0)) * 100).toFixed(1);
                     return `${value} ${pct}%`;
                   }}
                 />

@@ -50,8 +50,8 @@ export default function CommandPalette({ open, onOpenChange }: CommandPalettePro
   // Filtrar estudos pela busca
   const filteredStudies = studies?.filter((study) => {
     const searchLower = search.toLowerCase();
-    const titleMatch = study.title?.toLowerCase().includes(searchLower);
-    const addressMatch = study.address?.toLowerCase().includes(searchLower);
+    const titleMatch = study.study?.title?.toLowerCase().includes(searchLower);
+    const addressMatch = study.study?.address?.toLowerCase().includes(searchLower);
     return titleMatch || addressMatch;
   }).slice(0, 5);
 
@@ -117,21 +117,21 @@ export default function CommandPalette({ open, onOpenChange }: CommandPalettePro
               <Command.Group heading="Estudos" className="mb-2">
                 {filteredStudies.map((study) => (
                   <Command.Item
-                    key={study.id}
-                    onSelect={() => handleSelect(() => setLocation(`/estudos/${study.id}`))}
+                    key={study.study?.id}
+                    onSelect={() => handleSelect(() => setLocation(`/estudos/${study.study?.id}`))}
                     className="flex items-center gap-2 rounded-md px-2 py-2 cursor-pointer hover:bg-accent"
                   >
                     <FileText className="h-4 w-4" />
                     <div className="flex-1">
-                      <div className="font-medium">{study.title}</div>
-                      {study.address && (
-                        <div className="text-xs text-muted-foreground">{study.address}</div>
+                      <div className="font-medium">{study.study?.title}</div>
+                      {study.study?.address && (
+                        <div className="text-xs text-muted-foreground">{study.study?.address}</div>
                       )}
                     </div>
                     <span className="text-xs text-muted-foreground">
-                      {study.status === "aberto" && "Aberto"}
-                      {study.status === "em_analise" && "Em Análise"}
-                      {study.status === "concluido" && "Concluído"}
+                      {study.study?.status === "aberto" && "Aberto"}
+                      {study.study?.status === "em_analise" && "Em Análise"}
+                      {study.study?.status === "concluido" && "Concluído"}
                     </span>
                   </Command.Item>
                 ))}

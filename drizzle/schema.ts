@@ -574,11 +574,14 @@ export const commercialPoints = mysqlTable("commercialPoints", {
   brokerEmail: varchar("brokerEmail", { length: 320 }),
   description: text("description"),
   amenitiesJson: json("amenitiesJson").$type<string[]>(), // ["estacionamento", "elevador", etc]
+  isOption: boolean("isOption").default(false).notNull(), // true = opção alternativa, false = opção principal
+  status: mysqlEnum("status", ["pendente", "aprovado", "rejeitado"]).default("pendente").notNull(), // Status de aprovação pelo usuário
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 }, (table) => ({
   requestIdIdx: index("requestId_idx").on(table.requestId),
   tenantIdIdx: index("tenantId_idx").on(table.tenantId),
+  statusIdx: index("status_idx").on(table.status),
 }));
 
 /**
@@ -595,16 +598,6 @@ export const commercialPointPhotos = mysqlTable("commercialPointPhotos", {
 }, (table) => ({
   pointIdIdx: index("pointId_idx").on(table.pointId),
 }));
-
-export type CommercialPointRequest = typeof commercialPointRequests.$inferSelect;
-export type InsertCommercialPointRequest = typeof commercialPointRequests.$inferInsert;
-export type CommercialPoint = typeof commercialPoints.$inferSelect;
-export type InsertCommercialPoint = typeof commercialPoints.$inferInsert;
-export type CommercialPointPhoto = typeof commercialPointPhotos.$inferSelect;
-export type InsertCommercialPointPhoto = typeof commercialPointPhotos.$inferInsert;
-
-
-
 
 // Duplicated tables removed - already defined above
 
@@ -640,11 +633,5 @@ export const commercialPointPhotosRelations = relations(commercialPointPhotos, (
   }),
 }));
 
-// Type exports
-export type CommercialPointRequest = typeof commercialPointRequests.$inferSelect;
-export type InsertCommercialPointRequest = typeof commercialPointRequests.$inferInsert;
-export type CommercialPoint = typeof commercialPoints.$inferSelect;
-export type InsertCommercialPoint = typeof commercialPoints.$inferInsert;
-export type CommercialPointPhoto = typeof commercialPointPhotos.$inferSelect;
-export type InsertCommercialPointPhoto = typeof commercialPointPhotos.$inferInsert;
+
 

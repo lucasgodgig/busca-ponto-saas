@@ -1,0 +1,9 @@
+{
+  "query": "ALTER TABLE users ADD COLUMN registrationMethod ENUM('form', 'oauth', 'admin') NOT NULL DEFAULT 'oauth' AFTER image;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user KpBuSok2NkZmZXX.root --database 7GaR8dGShizifRGBM35LMu --execute ALTER TABLE users ADD COLUMN registrationMethod ENUM('form', 'oauth', 'admin') NOT NULL DEFAULT 'oauth' AFTER image;",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 442
+}

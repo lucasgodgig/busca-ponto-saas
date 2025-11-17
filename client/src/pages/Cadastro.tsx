@@ -2,11 +2,10 @@ import { useState } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, Building2, User, Mail, Phone, Briefcase } from "lucide-react";
+import { Loader2, MapPin, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 import { trpc } from "@/lib/trpc";
-import { getLoginUrl } from "@/const";
+import { Link } from "wouter";
 
 export default function Cadastro() {
   const [, setLocation] = useLocation();
@@ -40,15 +39,18 @@ export default function Cadastro() {
     try {
       await createLeadMutation.mutateAsync(formData);
 
-      // Salvar email em cookie para vincular depois do login
-      document.cookie = `leadEmail=${encodeURIComponent(formData.email)}; path=/; max-age=3600`;
+      // Salvar email em localStorage para página de confirmação
+      localStorage.setItem("cadastroEmail", formData.email);
+      
+      // Rastrear que o usuário veio do formulário de cadastro
+      localStorage.setItem("registrationMethod", "form");
 
-      toast.success("Cadastro realizado! Redirecionando para login...");
+      toast.success("Cadastro realizado! Redirecionando...");
 
-      // Redirecionar para OAuth
+      // Redirecionar para página de confirmação
       setTimeout(() => {
-        window.location.href = getLoginUrl();
-      }, 1000);
+        setLocation("/cadastro-confirmacao");
+      }, 500);
     } catch (error) {
       toast.error("Erro ao realizar cadastro");
       console.error(error);
@@ -57,33 +59,42 @@ export default function Cadastro() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-2xl">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-            Comece seu teste gratuito
-          </h1>
-          <p className="text-lg text-gray-600">
-            Preencha os dados abaixo e tenha acesso imediato à plataforma
-          </p>
+    <div className="min-h-screen bg-white flex flex-col">
+      {/* Navigation */}
+      <nav className="border-b border-gray-200">
+        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2 font-bold text-lg text-[#001F5C] hover:opacity-80 transition-opacity">
+            <MapPin className="w-6 h-6" />
+            Busca Ponto
+          </Link>
+          <Link href="/" className="text-gray-600 hover:text-gray-900 transition-colors text-sm font-medium">
+            ← Voltar
+          </Link>
         </div>
+      </nav>
 
-        {/* Card do formulário */}
-        <Card className="border-2 shadow-xl">
-          <CardHeader className="space-y-2">
-            <CardTitle className="text-2xl">Dados de Cadastro</CardTitle>
-            <CardDescription>
-              Todos os campos são importantes para personalizar sua experiência
-            </CardDescription>
-          </CardHeader>
+      {/* Main Content */}
+      <div className="flex-1 flex items-center justify-center px-4 py-12">
+        <div className="w-full max-w-md">
+          {/* Header */}
+          <div className="mb-8 text-center">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
+              <MapPin className="w-8 h-8 text-[#001F5C]" />
+            </div>
+            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
+              Comece seu teste
+            </h1>
+            <p className="text-gray-600">
+              Preencha os dados abaixo e tenha acesso imediato à plataforma
+            </p>
+          </div>
 
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-5">
+          {/* Form Card */}
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-8 mb-6">
+            <form onSubmit={handleSubmit} className="space-y-4">
               {/* Nome */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                  <User className="w-4 h-4" />
+              <div className="space-y-1.5">
+                <label className="text-sm font-semibold text-gray-900">
                   Nome completo *
                 </label>
                 <Input
@@ -93,14 +104,13 @@ export default function Cadastro() {
                   onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
                   disabled={isSubmitting}
                   required
-                  className="h-12"
+                  className="h-11 border-gray-300 focus:border-[#001F5C] focus:ring-[#001F5C]"
                 />
               </div>
 
               {/* Email */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                  <Mail className="w-4 h-4" />
+              <div className="space-y-1.5">
+                <label className="text-sm font-semibold text-gray-900">
                   E-mail profissional *
                 </label>
                 <Input
@@ -110,14 +120,13 @@ export default function Cadastro() {
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   disabled={isSubmitting}
                   required
-                  className="h-12"
+                  className="h-11 border-gray-300 focus:border-[#001F5C] focus:ring-[#001F5C]"
                 />
               </div>
 
               {/* Telefone */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                  <Phone className="w-4 h-4" />
+              <div className="space-y-1.5">
+                <label className="text-sm font-semibold text-gray-900">
                   Telefone
                 </label>
                 <Input
@@ -126,14 +135,13 @@ export default function Cadastro() {
                   value={formData.telefone}
                   onChange={(e) => setFormData({ ...formData, telefone: e.target.value })}
                   disabled={isSubmitting}
-                  className="h-12"
+                  className="h-11 border-gray-300 focus:border-[#001F5C] focus:ring-[#001F5C]"
                 />
               </div>
 
               {/* Empresa */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                  <Building2 className="w-4 h-4" />
+              <div className="space-y-1.5">
+                <label className="text-sm font-semibold text-gray-900">
                   Empresa
                 </label>
                 <Input
@@ -142,14 +150,13 @@ export default function Cadastro() {
                   value={formData.empresa}
                   onChange={(e) => setFormData({ ...formData, empresa: e.target.value })}
                   disabled={isSubmitting}
-                  className="h-12"
+                  className="h-11 border-gray-300 focus:border-[#001F5C] focus:ring-[#001F5C]"
                 />
               </div>
 
               {/* Cargo */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                  <Briefcase className="w-4 h-4" />
+              <div className="space-y-1.5">
+                <label className="text-sm font-semibold text-gray-900">
                   Cargo
                 </label>
                 <Input
@@ -158,54 +165,44 @@ export default function Cadastro() {
                   value={formData.cargo}
                   onChange={(e) => setFormData({ ...formData, cargo: e.target.value })}
                   disabled={isSubmitting}
-                  className="h-12"
+                  className="h-11 border-gray-300 focus:border-[#001F5C] focus:ring-[#001F5C]"
                 />
               </div>
 
-              {/* Botão de envio */}
+              {/* Submit Button */}
               <Button
                 type="submit"
                 disabled={isSubmitting || !formData.nome || !formData.email}
-                className="w-full h-12 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold text-lg rounded-lg transition-all shadow-lg hover:shadow-xl"
+                className="w-full h-11 bg-yellow-400 hover:bg-yellow-500 text-[#001F5C] font-bold text-base rounded-lg transition-all shadow-md hover:shadow-lg disabled:opacity-50 mt-6"
               >
                 {isSubmitting ? (
                   <>
-                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                     Processando...
                   </>
                 ) : (
-                  "Começar teste gratuito →"
+                  <>
+                    Começar teste gratuito
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </>
                 )}
               </Button>
 
-              {/* Aviso */}
+              {/* Terms */}
               <p className="text-xs text-gray-500 text-center mt-4">
                 Ao continuar, você concorda com nossos Termos de Uso e Política de Privacidade
               </p>
             </form>
-          </CardContent>
-        </Card>
+          </div>
 
-        {/* Benefícios */}
-        <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-          <div className="p-4 bg-white rounded-lg shadow">
-            <div className="text-3xl mb-2">✅</div>
-            <p className="font-semibold text-gray-900">Teste Gratuito</p>
-            <p className="text-sm text-gray-600">Acesso completo à plataforma</p>
-          </div>
-          <div className="p-4 bg-white rounded-lg shadow">
-            <div className="text-3xl mb-2">📊</div>
-            <p className="font-semibold text-gray-900">Análises Precisas</p>
-            <p className="text-sm text-gray-600">Dados demográficos reais</p>
-          </div>
-          <div className="p-4 bg-white rounded-lg shadow">
-            <div className="text-3xl mb-2">🚀</div>
-            <p className="font-semibold text-gray-900">Rápido e Fácil</p>
-            <p className="text-sm text-gray-600">Comece em minutos</p>
+          {/* Info Box */}
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center">
+            <p className="text-sm text-gray-700">
+              <span className="font-semibold text-[#001F5C]">Teste gratuito:</span> 3 dias de acesso completo. Sem cartão de crédito.
+            </p>
           </div>
         </div>
       </div>
     </div>
   );
 }
-
