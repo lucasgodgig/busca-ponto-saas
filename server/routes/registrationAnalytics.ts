@@ -21,12 +21,12 @@ export const registrationAnalyticsRouter = router({
       // Obter contagem por método de registro
       const stats = await dbInstance
         .select({
-          method: users.registrationMethod,
+          method: users.loginMethod,
           count: sql<number>`COUNT(*) as count`,
           percentage: sql<string>`ROUND(COUNT(*) * 100 / (SELECT COUNT(*) FROM users), 2) as percentage`,
         })
         .from(users)
-        .groupBy(users.registrationMethod);
+        .groupBy(users.loginMethod);
 
       // Obter total de usuários
       const totalResult = await dbInstance
@@ -76,7 +76,7 @@ export const registrationAnalyticsRouter = router({
         let query = dbInstance.select().from(users);
 
         if (input.method) {
-          query = query.where(eq(users.registrationMethod, input.method));
+          query = query.where(eq(users.loginMethod, input.method));
         }
 
         const results = await query
@@ -88,7 +88,7 @@ export const registrationAnalyticsRouter = router({
           id: u.id,
           name: u.name,
           email: u.email,
-          registrationMethod: u.registrationMethod,
+          loginMethod: u.loginMethod,
           createdAt: u.createdAt,
           lastSignedIn: u.lastSignedIn,
         }));
@@ -124,12 +124,12 @@ export const registrationAnalyticsRouter = router({
         const trend = await dbInstance
           .select({
             date: drizzleSql<string>`DATE(${users.createdAt}) as date`,
-            method: users.registrationMethod,
+            method: users.loginMethod,
             count: drizzleSql<number>`COUNT(*) as count`,
           })
           .from(users)
           .where(drizzleSql`${users.createdAt} >= ${daysAgo}`)
-          .groupBy(drizzleSql`DATE(${users.createdAt})`, users.registrationMethod);
+          .groupBy(drizzleSql`DATE(${users.createdAt})`, users.loginMethod);
 
         return trend;
       } catch (error) {

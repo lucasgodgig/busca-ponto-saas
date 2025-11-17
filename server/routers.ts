@@ -313,11 +313,11 @@ export const appRouter = router({
           ["C", "class_c"],
           ["D", "class_d"],
           ["E", "class_e"],
-        ].map(([sigla, key]: any) => ({ sigla, domicilios: pick(raw, [key], 0) }));
+        ].map(([sigla, key]: any) => ({ sigla, domicilios: pick(raw, [key], 0), pct: 0 }));
         const totalDom = classes.reduce((s, c) => s + c.domicilios, 0);
         classes.forEach(
           (c: any) =>
-            (c["pct"] = totalDom > 0 ? (c.domicilios / totalDom) * 100 : 0)
+            (c.pct = totalDom > 0 ? (c.domicilios / totalDom) * 100 : 0)
         );
 
         const categorias = [

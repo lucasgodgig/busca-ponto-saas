@@ -14,4 +14,5 @@ export const ENV = {
   googlePlacesApiKey: process.env.GOOGLE_PLACES_API_KEY ?? "",
   stripeSecretKey: process.env.STRIPE_SECRET_KEY ?? "",
   stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET ?? "",
+  resendApiKey: process.env.RESEND_API_KEY ?? "",
 };
