@@ -152,7 +152,7 @@ export function clearExpiredCache(): number {
   let cleared = 0;
 
   // Limpar memória
-  for (const [key, entry] of memoryCache.entries()) {
+  for (const [key, entry] of Array.from(memoryCache.entries())) {
     if (!isValid(entry)) {
       memoryCache.delete(key);
       cleared++;

@@ -1,0 +1,28 @@
+{
+  "query": "SELECT \n  cpr.id, \n  cpr.segment, \n  cpr.city, \n  cpr.status, \n  cpr.tenantId,\n  u.name as userName,\n  u.email as userEmail\nFROM commercialPointRequests cpr\nLEFT JOIN users u ON cpr.userId = u.id;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user KpBuSok2NkZmZXX.root --database 7GaR8dGShizifRGBM35LMu --execute SELECT \n  cpr.id, \n  cpr.segment, \n  cpr.city, \n  cpr.status, \n  cpr.tenantId,\n  u.name as userName,\n  u.email as userEmail\nFROM commercialPointRequests cpr\nLEFT JOIN users u ON cpr.userId = u.id;",
+  "rows": [
+    {
+      "id": "1",
+      "segment": "Igreja",
+      "city": "Belém",
+      "status": "aberto",
+      "tenantId": "1",
+      "userName": "Busca Ponto",
+      "userEmail": "buscapontoficial@gmail.com"
+    },
+    {
+      "id": "30001",
+      "segment": "academia ",
+      "city": "são paulo ",
+      "status": "aberto",
+      "tenantId": "60001",
+      "userName": "Davi Cristiano de Andrade",
+      "userEmail": "davicristianodeandrade4@gmail.com"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tsegment\tcity\tstatus\ttenantId\tuserName\tuserEmail\n1\tIgreja\tBelém\taberto\t1\tBusca Ponto\tbuscapontoficial@gmail.com\n30001\tacademia \tsão paulo \taberto\t60001\tDavi Cristiano de Andrade\tdavicristianodeandrade4@gmail.com\n",
+  "stderr": "",
+  "execution_time_ms": 58
+}

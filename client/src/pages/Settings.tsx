@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
@@ -15,16 +15,19 @@ export default function Settings() {
   const { user, loading: authLoading } = useAuth();
   const [selectedTenant, setSelectedTenant] = useState<number | null>(null);
 
-  // Selecionar tenant automaticamente
-  if (!authLoading && user && user.memberships && user.memberships.length > 0 && !selectedTenant) {
-    setSelectedTenant(user.memberships[0].tenant?.id || null);
-  }
+  // Selecionar tenant automaticamente com useEffect
+  useEffect(() => {
+    if (!authLoading && user && user.memberships && user.memberships.length > 0) {
+      const tenantId = user.memberships[0].tenant?.id;
+      if (tenantId && tenantId !== selectedTenant) {
+        setSelectedTenant(tenantId);
+      }
+    }
+  }, [authLoading, user]);
 
   // Buscar dados do tenant
-  const { data: tenant, isLoading: tenantLoading } = trpc.tenants.getById.useQuery(
-    { tenantId: selectedTenant! },
-    { enabled: !!selectedTenant }
-  );
+  const { data: tenant, isLoading: tenantLoading } = trpc.tenants.list.useQuery();
+  const currentTenant = tenant?.find(t => t.id === selectedTenant);
 
   // Estados do formulário - Empresa
   const [name, setName] = useState("");
@@ -39,10 +42,10 @@ export default function Settings() {
   const [confirmPassword, setConfirmPassword] = useState("");
 
   // Preencher formulário quando tenant carregar
-  if (tenant && !name) {
-    setName(tenant.name);
-    setLogoUrl(tenant.logoUrl || "");
-    setColorPrimary(tenant.colorPrimary || "#0F172A");
+  if (currentTenant && !name) {
+    setName(currentTenant.name);
+    setLogoUrl(currentTenant.logoUrl || "");
+    setColorPrimary(currentTenant.colorPrimary || "#0F172A");
   }
 
   // Mutation para atualizar tenant
@@ -136,14 +139,24 @@ export default function Settings() {
     return null;
   }
 
-  if (!selectedTenant || !tenant) {
+  // Aguardar carregamento de auth
+  if (authLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  // Verificar se usuário tem memberships
+  if (!user || !user.memberships || user.memberships.length === 0) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <Card className="w-full max-w-md">
           <CardHeader>
-            <CardTitle>Nenhuma franqueadora encontrada</CardTitle>
+            <CardTitle>Nenhuma empresa encontrada</CardTitle>
             <CardDescription>
-              Você precisa estar associado a uma franqueadora para acessar as configurações.
+              Você precisa estar associado a uma empresa para acessar as configurações.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -152,6 +165,15 @@ export default function Settings() {
             </Button>
           </CardContent>
         </Card>
+      </div>
+    );
+  }
+
+  // Aguardar carregamento de dados do tenant
+  if (tenantLoading || !selectedTenant || !currentTenant) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -404,19 +426,19 @@ export default function Settings() {
             <CardContent className="space-y-3">
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Plano:</span>
-                <span className="font-medium capitalize">{tenant.plan}</span>
+                <span className="font-medium capitalize">{currentTenant?.plan}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Consultas mensais:</span>
-                <span className="font-medium">{tenant.limitsJson.quickQueriesPerMonth}</span>
+                <span className="font-medium">{currentTenant?.limitsJson?.quickQueriesPerMonth}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Estudos simultâneos:</span>
-                <span className="font-medium">{tenant.limitsJson.simultaneousStudies}</span>
+                <span className="font-medium">{currentTenant?.limitsJson?.simultaneousStudies}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Tamanho máximo de anexos:</span>
-                <span className="font-medium">{tenant.limitsJson.maxAttachmentSizeMB}MB</span>
+                <span className="font-medium">{currentTenant?.limitsJson?.maxAttachmentSizeMB}MB</span>
               </div>
             </CardContent>
           </Card>
@@ -432,15 +454,15 @@ export default function Settings() {
             <CardContent className="space-y-3 text-sm">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">ID:</span>
-                <span className="font-mono">{tenant.id}</span>
+                <span className="font-mono">{currentTenant?.id}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Slug:</span>
-                <span className="font-mono">{tenant.slug}</span>
+                <span className="font-mono">{currentTenant?.slug}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Criado em:</span>
-                <span>{new Date(tenant.createdAt).toLocaleDateString('pt-BR')}</span>
+                <span>{currentTenant?.createdAt ? new Date(currentTenant.createdAt).toLocaleDateString('pt-BR') : '-'}</span>
               </div>
             </CardContent>
           </Card>

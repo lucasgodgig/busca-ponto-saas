@@ -1,4 +1,4 @@
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, or } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { 
   InsertUser, 
@@ -16,7 +16,8 @@ import {
   commercialPointPhotos,
   InsertCommercialPointRequest,
   InsertCommercialPoint,
-  InsertCommercialPointPhoto
+  InsertCommercialPointPhoto,
+  leads
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -78,6 +79,8 @@ export async function upsertUser(user: InsertUser): Promise<void> {
     } else if (user.openId === ENV.ownerOpenId) {
       updateSet.role = 'admin_bp';
     }
+    
+
 
     if (existingUser.length > 0) {
       // User exists, update only
@@ -534,3 +537,108 @@ export async function updateCommercialPointRequestStatus(requestId: number, stat
   }
 }
 
+
+// Verificar se usuário é um lead válido (fez cadastro prévio)
+export async function isValidLead(email: string): Promise<boolean> {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot check lead: database not available");
+    return false;
+  }
+
+  try {
+    const result = await db.select().from(leads).where(eq(leads.email, email)).limit(1);
+    return result.length > 0;
+  } catch (error) {
+    console.error("[Database] Failed to check lead:", error);
+    return false;
+  }
+}
+
+// Vincular lead ao usuário após login
+export async function linkLeadToUser(email: string, userId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot link lead: database not available");
+    return;
+  }
+
+  try {
+    await db.update(leads).set({ userId }).where(eq(leads.email, email));
+    console.log("[Database] Lead linked to user:", userId);
+  } catch (error) {
+    console.error("[Database] Failed to link lead:", error);
+  }
+}
+
+// Novas funções para o fluxo de admin
+
+export async function getCommercialPointRequestsForAdmin(tenantId?: number) {
+  const db = await getDb();
+  if (!db) {
+    return [];
+  }
+
+  try {
+    // Return all commercial point requests, optionally filtered by tenantId
+    let query = db.select().from(commercialPointRequests);
+    
+    if (tenantId) {
+      query = query.where(eq(commercialPointRequests.tenantId, tenantId)) as any;
+    }
+    
+    const result = await query.orderBy(desc(commercialPointRequests.createdAt));
+    return result;
+  } catch (error) {
+    console.error("[Database] Failed to get requests for admin:", error);
+    throw error;
+  }
+}
+
+export async function updateCommercialPointData(pointId: number, data: Partial<InsertCommercialPoint>) {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot update commercial point: database not available");
+    return null;
+  }
+
+  try {
+    const result = await db
+      .update(commercialPoints)
+      .set(data)
+      .where(eq(commercialPoints.id, pointId));
+    
+    console.log("[Database] Commercial point updated successfully");
+    return result;
+  } catch (error) {
+    console.error("[Database] Failed to update commercial point:", error);
+    throw error;
+  }
+}
+
+export async function getCommercialPointsInValidation(userId: number, tenantId: number) {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot get points in validation: database not available");
+    return [];
+  }
+
+  try {
+    const result = await db
+      .select()
+      .from(commercialPointRequests)
+      .where(
+        and(
+          eq(commercialPointRequests.userId, userId),
+          eq(commercialPointRequests.tenantId, tenantId),
+          eq(commercialPointRequests.status, "validacao")
+        )
+      )
+      .orderBy(desc(commercialPointRequests.updatedAt));
+    
+    return result;
+  } catch (error) {
+    console.error("[Database] Failed to get points in validation:", error);
+    throw error;
+  }
+}

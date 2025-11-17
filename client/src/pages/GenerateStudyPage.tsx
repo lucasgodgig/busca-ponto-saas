@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
 import { trpc } from "@/lib/trpc";
+import { useAuth } from "@/_core/hooks/useAuth";
 import MapShell from "@/components/MapShell";
 
 const SEGMENTS = [
@@ -23,6 +24,8 @@ const SEGMENTS = [
 
 export default function GenerateStudyPage() {
   const [, setLocation] = useLocation();
+  const { user } = useAuth();
+  const tenantId = user?.memberships?.[0]?.tenant?.id;
   const [title, setTitle] = useState("");
   const [segment, setSegment] = useState("");
   const [lat, setLat] = useState(-23.55);
@@ -64,12 +67,11 @@ export default function GenerateStudyPage() {
     <div className="flex h-screen gap-4 p-4">
       {/* Mapa à esquerda */}
       <div className="flex-1">
-        <MapShell
-          onLocationSelect={(lat, lng) => {
-            setLat(lat);
-            setLng(lng);
-          }}
-        />
+        {tenantId && (
+          <MapShell
+            tenantId={tenantId}
+          />
+        )}
       </div>
 
       {/* Formulário à direita */}

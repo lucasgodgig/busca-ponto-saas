@@ -92,7 +92,7 @@ export default function Dashboard() {
           <CardHeader>
             <CardTitle>Bem-vindo!</CardTitle>
             <CardDescription>
-              Você ainda não faz parte de nenhuma franqueadora
+              Você ainda não faz parte de nenhuma empresa
             </CardDescription>
           </CardHeader>
           <CardContent>

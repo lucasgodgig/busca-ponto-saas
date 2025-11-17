@@ -20,7 +20,7 @@ export const users = mysqlTable("users", {
 });
 
 /**
- * Tenant (Franqueadora) - cada franqueadora é um tenant isolado
+ * Tenant (Empresa) - cada empresa é um tenant isolado
  */
 export const tenants = mysqlTable("tenants", {
   id: int("id").autoincrement().primaryKey(),
@@ -56,7 +56,7 @@ export const memberships = mysqlTable("memberships", {
 }));
 
 /**
- * Study - estudos de mercado solicitados pelas franqueadoras
+ * Study - estudos de mercado solicitados pelas empresas
  */
 export const studies = mysqlTable("studies", {
   id: int("id").autoincrement().primaryKey(),
@@ -542,7 +542,7 @@ export const commercialPointRequests = mysqlTable("commercialPointRequests", {
   propertySize: int("propertySize"), // Tamanho do imóvel em m²
   maxRent: int("maxRent"), // Valor máximo de aluguel em reais
   requirements: text("requirements").notNull(), // Requisitos adicionais (OBRIGATÓRIO)
-  status: mysqlEnum("status", ["aberto", "em_busca", "encontrado", "cancelado"]).default("aberto").notNull(),
+  status: mysqlEnum("status", ["aberto", "em_busca", "em_analise", "validacao", "encontrado", "cancelado"]).default("aberto").notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 }, (table) => ({
@@ -574,6 +574,7 @@ export const commercialPoints = mysqlTable("commercialPoints", {
   brokerEmail: varchar("brokerEmail", { length: 320 }),
   description: text("description"),
   amenitiesJson: json("amenitiesJson").$type<string[]>(), // ["estacionamento", "elevador", etc]
+  adminNotes: text("adminNotes"), // Observações do admin durante análise
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 }, (table) => ({
@@ -595,16 +596,6 @@ export const commercialPointPhotos = mysqlTable("commercialPointPhotos", {
 }, (table) => ({
   pointIdIdx: index("pointId_idx").on(table.pointId),
 }));
-
-export type CommercialPointRequest = typeof commercialPointRequests.$inferSelect;
-export type InsertCommercialPointRequest = typeof commercialPointRequests.$inferInsert;
-export type CommercialPoint = typeof commercialPoints.$inferSelect;
-export type InsertCommercialPoint = typeof commercialPoints.$inferInsert;
-export type CommercialPointPhoto = typeof commercialPointPhotos.$inferSelect;
-export type InsertCommercialPointPhoto = typeof commercialPointPhotos.$inferInsert;
-
-
-
 
 // Duplicated tables removed - already defined above
 
@@ -640,11 +631,5 @@ export const commercialPointPhotosRelations = relations(commercialPointPhotos, (
   }),
 }));
 
-// Type exports
-export type CommercialPointRequest = typeof commercialPointRequests.$inferSelect;
-export type InsertCommercialPointRequest = typeof commercialPointRequests.$inferInsert;
-export type CommercialPoint = typeof commercialPoints.$inferSelect;
-export type InsertCommercialPoint = typeof commercialPoints.$inferInsert;
-export type CommercialPointPhoto = typeof commercialPointPhotos.$inferSelect;
-export type InsertCommercialPointPhoto = typeof commercialPointPhotos.$inferInsert;
+
 

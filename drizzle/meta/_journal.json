@@ -1,110 +1,33 @@
 {
-  "version": "7",
+  "version": "5",
   "dialect": "mysql",
   "entries": [
     {
       "idx": 0,
       "version": "5",
-      "when": 1761571942027,
-      "tag": "0000_wonderful_leech",
+      "when": 1763346357891,
+      "tag": "0000_parched_nocturne",
       "breakpoints": true
     },
     {
       "idx": 1,
       "version": "5",
-      "when": 1761572134639,
-      "tag": "0001_spotty_rhodey",
+      "when": 1763348685827,
+      "tag": "0001_short_purple_man",
       "breakpoints": true
     },
     {
       "idx": 2,
       "version": "5",
-      "when": 1761656108285,
-      "tag": "0002_melodic_iron_lad",
+      "when": 1763350621258,
+      "tag": "0002_whole_lady_bullseye",
       "breakpoints": true
     },
     {
       "idx": 3,
       "version": "5",
-      "when": 1761677106654,
-      "tag": "0003_demonic_marvel_zombies",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "5",
-      "when": 1761678221304,
-      "tag": "0004_melodic_jimmy_woo",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "5",
-      "when": 1761831809777,
-      "tag": "0005_cloudy_deathbird",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "5",
-      "when": 1762189813201,
-      "tag": "0006_living_bulldozer",
-      "breakpoints": true
-    },
-    {
-      "idx": 7,
-      "version": "5",
-      "when": 1762189839347,
-      "tag": "0007_pale_frog_thor",
-      "breakpoints": true
-    },
-    {
-      "idx": 8,
-      "version": "5",
-      "when": 1762863633586,
-      "tag": "0008_sweet_power_man",
-      "breakpoints": true
-    },
-    {
-      "idx": 9,
-      "version": "5",
-      "when": 1762864145924,
-      "tag": "0009_busy_microchip",
-      "breakpoints": true
-    },
-    {
-      "idx": 10,
-      "version": "5",
-      "when": 1762896538852,
-      "tag": "0010_busy_mystique",
-      "breakpoints": true
-    },
-    {
-      "idx": 11,
-      "version": "5",
-      "when": 1762897504876,
-      "tag": "0011_blue_psynapse",
-      "breakpoints": true
-    },
-    {
-      "idx": 12,
-      "version": "5",
-      "when": 1762899324966,
-      "tag": "0012_colossal_supreme_intelligence",
-      "breakpoints": true
-    },
-    {
-      "idx": 13,
-      "version": "5",
-      "when": 1762980590427,
-      "tag": "0013_wooden_tag",
-      "breakpoints": true
-    },
-    {
-      "idx": 14,
-      "version": "5",
-      "when": 1763070276942,
-      "tag": "0014_wise_marvel_apes",
+      "when": 1763351568415,
+      "tag": "0003_parched_blade",
       "breakpoints": true
     }
   ]
