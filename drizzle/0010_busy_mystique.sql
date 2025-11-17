@@ -1,0 +1,1 @@
+ALTER TABLE `tenants` ADD `segment` varchar(100);

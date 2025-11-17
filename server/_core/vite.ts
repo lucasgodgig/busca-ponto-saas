@@ -38,6 +38,14 @@ export async function setupVite(app: Express, server: Server) {
         `src="/src/main.tsx"`,
         `src="/src/main.tsx?v=${nanoid()}"`
       );
+      
+      // Injetar API key do Google Maps no HTML
+      const googleApiKey = process.env.VITE_GOOGLE_MAPS_API_KEY || process.env.GOOGLE_PLACES_API_KEY || "";
+      template = template.replace(
+        "</head>",
+        `<script>window.GOOGLE_MAPS_API_KEY = "${googleApiKey}";</script></head>`
+      );
+      
       const page = await vite.transformIndexHtml(url, template);
       res.status(200).set({ "Content-Type": "text/html" }).end(page);
     } catch (e) {
@@ -62,6 +70,22 @@ export function serveStatic(app: Express) {
 
   // fall through to index.html if the file doesn't exist
   app.use("*", (_req, res) => {
-    res.sendFile(path.resolve(distPath, "index.html"));
+    const htmlPath = path.resolve(distPath, "index.html");
+    
+    // Ler HTML e injetar API key
+    fs.readFile(htmlPath, "utf-8", (err, html) => {
+      if (err) {
+        return res.status(500).send("Error loading page");
+      }
+      
+      // Injetar API key do Google Maps no HTML
+      const googleApiKey = process.env.VITE_GOOGLE_MAPS_API_KEY || process.env.GOOGLE_PLACES_API_KEY || "";
+      const modifiedHtml = html.replace(
+        "</head>",
+        `<script>window.GOOGLE_MAPS_API_KEY = "${googleApiKey}";</script></head>`
+      );
+      
+      res.status(200).set({ "Content-Type": "text/html" }).send(modifiedHtml);
+    });
   });
 }
